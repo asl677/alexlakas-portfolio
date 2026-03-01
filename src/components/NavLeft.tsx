@@ -44,6 +44,7 @@ function NavLink({
     return (
       <span className="link disabled">
         <p className="base">{label}</p>
+        <div className="link-strip" />
       </span>
     );
   }

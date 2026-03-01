@@ -22,7 +22,7 @@ export default function Home() {
     gsap.set(".nav-left, .nav-right", { opacity: 1 });
     gsap.set(".nav-left .base, .nav-right .base", { x: -30, opacity: 0 });
     gsap.set(".nav-life", { y: 0, opacity: 0 });
-    gsap.set(".link.enabled .link-strip", { xPercent: -110 });
+    gsap.set(".link .link-strip", { xPercent: -110 });
     gsap.set(".slider-wrap", { opacity:0, clipPath: "inset(50% 50% 50% 0%)" });
 
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -30,7 +30,7 @@ export default function Home() {
     tl.to(".upper-wrap", { opacity: 1, duration: 0.6 }, 0);
 
     // Strip sweeps left→right
-    tl.to(".link.enabled .link-strip", {
+    tl.to(".link .link-strip", {
       xPercent: 110,
       duration: 1,
       ease: "power3.out",
@@ -58,7 +58,7 @@ export default function Home() {
 
     // Park strips off-screen right after intro
     tl.call(() => {
-      gsap.set(".link.enabled .link-strip", { xPercent: 110 });
+      gsap.set(".link .link-strip", { xPercent: 110 });
     }, [], ">");
 
     // Hook up hover — enters from LEFT, exits to RIGHT
@@ -85,7 +85,7 @@ export default function Home() {
     const tween = gsap.fromTo(".press-features", 
       { y: "-10vw" },
       {
-        y: "25vw",
+        y: "30vw",
         ease: "none",
         scrollTrigger: {
           trigger: ".press-section",
