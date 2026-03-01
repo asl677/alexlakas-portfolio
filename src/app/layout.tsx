@@ -1,45 +1,24 @@
 import type { Metadata } from "next";
-import {
-  Inconsolata,
-  Inter,
-  Space_Grotesk,
-  Space_Mono,
-} from "next/font/google";
+import { Inconsolata } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
+// Inconsolata: used for bio text (.base.white) and marquee
 const inconsolata = Inconsolata({
   subsets: ["latin"],
   variable: "--font-inconsolata",
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
-
-const spaceMono = Space_Mono({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-space-mono",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "Alex Lakas — Product Designer",
-  description:
-    "Product Designer based in Los Angeles. Art Direction, Product Design, Prototyping, Systems Design, Identity, Gen AI.",
+  title: "Alex Lakas (Designer)",
+  description: "Art Direction, Product Design, Mentorship",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
-    title: "Alex Lakas — Product Designer",
-    description:
-      "Product Designer based in Los Angeles. Art Direction, Product Design, Prototyping, Systems Design, Identity, Gen AI.",
+    title: "Alex Lakas (Designer)",
+    description: "Art Direction, Product Design, Mentorship",
     url: "https://alexlakas.com",
     siteName: "Alex Lakas",
     locale: "en_US",
@@ -57,10 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body
-        className={`${inter.variable} ${inconsolata.variable} ${spaceGrotesk.variable} ${spaceMono.variable} bg-black text-white antialiased`}
-      >
+    <html lang="en">
+      <body className={`${inconsolata.variable}`}>
         {children}
       </body>
     </html>

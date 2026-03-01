@@ -41,7 +41,6 @@ html {
   -ms-overflow-style: none;
   scrollbar-width: none !important;
   height: auto;
-  cursor: default !important;
 }
 
 html::-webkit-scrollbar {
@@ -52,13 +51,13 @@ body {
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
   font-weight: 400;
-  font-family: 'PP Neue Montreal', sans-serif;
-  letter-spacing: var(--t-xsmall);
+  font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+  text-rendering: geometricPrecision;
   background-color: var(--grey-100);
   color: var(--white-100);
   overflow-x: hidden;
+  cursor: default !important;
 }
 
 ::selection {
@@ -73,7 +72,8 @@ p {
   letter-spacing: var(--t-xsmall);
 }
 
-a {  cursor: default !important;}
+a {  cursor: default !important;
+}
 
 /* ============================================
    LENIS
@@ -84,35 +84,9 @@ html.lenis { height: auto; }
 
 /* ============================================
    FONTS
-   PP Neue Montreal — from Webflow CDN (single family, all weights)
    ============================================ */
 @font-face {
-  font-family: 'PP Neue Montreal';
-  src: url('https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/66fca63395527313c6d5eaa2_PPNeueMontreal-Book.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Neue Montreal';
-  src: url('https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/66fca6335ed17ac19de9c604_PPNeueMontreal-Medium.otf') format('opentype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Neue Montreal';
-  src: url('https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/66fca6336b5b384e972207ef_PPNeueMontreal-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
   font-family: 'Wagon';
-  src: url('https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/63bce9e077c37c4ab36de928_Wagon-ExtraLightItalic.otf') format('opentype');
-  font-weight: 300;
-  font-style: normal;
   font-display: swap;
 }
 
@@ -133,7 +107,7 @@ html.lenis { height: auto; }
 
 /* ============================================
    BASE TEXT
-   Inherits font from body (PP Neue Montreal 400).
+   Inherits font from body (Space Grotesk 400).
    Matches original: z-index:1; color; font-size:
    var(--t-small); line-height:var(--t-medium)
    At desktop the original uses 1vw / 1.3 sizing.
@@ -158,13 +132,11 @@ html.lenis { height: auto; }
 
 /* Press headlines */
 .base.wagon {
-  font-family: 'Wagon', Georgia, serif !important;
-  font-size: var(--g-medium) !important;
-  line-height: var(--g-medium) !important;
-  font-weight: 600 !important;
-  font-style: italic !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
+  font-family: 'Wagon', Georgia, 'Times New Roman', serif;
+  font-size: var(--g-medium);
+  line-height: var(--g-medium);
+  font-weight: 400;
+  font-style: normal;
 }
 
 /* ============================================
@@ -178,7 +150,7 @@ html.lenis { height: auto; }
   transform-origin: 0% 50%;
   flex-flow: column;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   display: flex;
   position: relative;
 }
@@ -187,20 +159,15 @@ html.lenis { height: auto; }
    UPPER WRAP
    transform-origin left edge for door rotation
    ============================================ */
-/* Webflow source: .section-a.main.swipe — z-index:0, height:100vh */
 .upper-wrap {
   background-color: var(--grey-100);
   width: 100vw;
-  height: 100vh;
+  height: 100svh;
   display: flex;
-  position: sticky;
-  top: 0;
-  z-index: 0;
+  position: relative;
   overflow: hidden;
   opacity: 0;
   transform-origin: 0% 50%;
-  perspective-origin: 0%;
-  transform-style: preserve-3d;
 }
 
 /* ============================================
@@ -214,7 +181,7 @@ html.lenis { height: auto; }
   align-items: flex-start;
   height: 100svh;
   display: flex;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
@@ -235,7 +202,7 @@ html.lenis { height: auto; }
   display: flex;
   flex-direction: column;
   gap: var(--g-small);
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   opacity: 0;
@@ -248,7 +215,7 @@ html.lenis { height: auto; }
   z-index: 13;
   padding: var(--g-small);
   display: flex;
-  position: absolute;
+  position: fixed;
   bottom: 0;
   right: 0;
   opacity: 0;
@@ -269,6 +236,7 @@ html.lenis { height: auto; }
 
 .link.enabled {
   background-color: var(--grey-100);
+  cursor: pointer;
 }
 
 /* Life pill variant — same base as .link.enabled but pill-shaped */
@@ -313,7 +281,7 @@ overflow: hidden;
   position: absolute;
   inset: 0;
   width: 100%;
-  /* No CSS transform — GSAP controls all strip movement */
+  /* No transition — GSAP handles all movement */
 }
 
 /* Text always above red strip */
@@ -328,7 +296,7 @@ overflow: hidden;
    Direction: -50% → 0% (original).
    ============================================ */
 .marquee-fixed {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -357,7 +325,7 @@ overflow: hidden;
   animation: marqueeRun 5s linear infinite;
   font-size: 1vw;
   color: var(--white-100);
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--font-inconsolata), Inconsolata, monospace;
   font-weight: 400;
   letter-spacing: var(--t-xsmall);
 }
@@ -386,6 +354,7 @@ overflow: hidden;
 .slider-wrap {
   filter: grayscale(1) contrast(0.8);
   transition: filter 0.6s cubic-bezier(0.596, 0.096, 0.25, 1);
+  cursor: pointer;
 }
 
 .slider-wrap:hover {
@@ -394,14 +363,10 @@ overflow: hidden;
 
 .slider-inner {
   width: 25vw;
-  height: auto;
+  height: 17vw;
   overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  align-self: flex-start;
-  align-items: center;
-  overflow: hidden;
 }
 
 .slider-track {
@@ -422,31 +387,25 @@ overflow: hidden;
 /* ============================================
    PRESS SECTION
    ============================================ */
-/* Webflow source: .section-a.main.swipe.black — z-index:-4 */
 .press-section {
   z-index: -4;
   background-color: var(--black-100);
   flex: 1;
   width: 100%;
-  height: auto;
+  min-height: 100svh;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--g-medium);
-  position: relative;
-  overflow: hidden;
 }
 
 .press-features {
-  z-index: -8;
   display: flex;
   flex-flow: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 4vw;
-  position: relative;
-  opacity: 1;
+  padding: 2vw;
 }
 
 /* ============================================
@@ -512,7 +471,7 @@ overflow: hidden;
    BIO SHEET
    ============================================ */
 .sheet-inner {
-  z-index: 0;
+  z-index: 9998;
   background-color: var(--black-100);
   opacity: 0;
   pointer-events: none;

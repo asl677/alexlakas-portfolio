@@ -1,99 +1,117 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+
 const pressItems = [
   {
-    headline: "514 raises $17M",
-    outlet: "TechCrunch",
-    year: "2024",
-    href: "https://fiveonefour.com",
+    text: "514 raises $17M",
+    href: "https://www.phocuswire.com/insured-nomads-buys-travel-shopping-chrome-app-peanut",
   },
   {
-    headline: "Insured Nomads acquires Peanut",
-    outlet: "Insured Nomads",
-    year: "2023",
-    href: "#",
+    text: "Insured Nomads acquires Peanut",
+    href: "https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension",
   },
   {
-    headline: "Do I need a covid test to travel",
-    outlet: "Forbes",
-    year: "2021",
-    href: "#",
+    text: "Do I need a covid test to travel on Forbes",
+    href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/",
   },
   {
-    headline: "LinkedIn adds polls and live video",
-    outlet: "TechCrunch",
-    year: "2020",
-    href: "#",
+    text: "LinkedIn adds polls and live video",
+    href: "https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/",
   },
   {
-    headline: "Live Popular Times — The Tonight Show",
-    outlet: "NBC",
-    year: "2018",
-    href: "#",
+    text: "Live Popular Times on The Tonight Show",
+    href: "https://www.youtube.com/watch?v=QIbPZgH1zRY",
   },
   {
-    headline: "Google can tell you how busy places are",
-    outlet: "The Verge",
-    year: "2017",
-    href: "#",
+    text: "Google can tell you how busy places are",
+    href: "https://techcrunch.com/2016/11/21/google-can-now-tell-you-how-busy-a-place-is-before-you-arrive-in-real-time/",
   },
   {
-    headline: "Google to add restaurant wait times",
-    outlet: "Bloomberg",
-    year: "2016",
-    href: "#",
+    text: "Google to add restaurant wait times",
+    href: "https://techcrunch.com/2017/11/07/google-to-add-restaurant-wait-times-to-google-search-and-maps-followed-by-grocery-stores/",
   },
   {
-    headline: "Google adds bookings and salons to Maps",
-    outlet: "Wired",
-    year: "2015",
-    href: "#",
+    text: "Google adds bookings and salons to maps",
+    href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/",
   },
 ];
 
+function SplitLink({ text, href }: { text: string; href: string }) {
+  const linkRef = useRef<HTMLAnchorElement>(null);
+  const charsRef = useRef<(HTMLSpanElement | null)[]>([]);
+
+  useEffect(() => {
+    // Scope chars to this specific link's ref array
+    const chars = charsRef.current.filter((c): c is HTMLSpanElement => c !== null);
+    if (!chars.length) return;
+
+    gsap.set(chars, { willChange: "transform" });
+
+    const el = linkRef.current;
+    if (!el) return;
+
+    const onEnter = () => {
+      gsap.to(chars, {
+        y: "-1.2em",
+        duration: 0.7,
+        stagger: 0.005,
+        ease: "power3.out",
+        overwrite: "auto",
+      });
+    };
+
+    const onLeave = () => {
+      gsap.to(chars, {
+        y: 0,
+        duration: 0.5,
+        stagger: 0.006,
+        ease: "power3.out",
+        overwrite: "auto",
+      });
+    };
+
+    el.addEventListener("mouseenter", onEnter);
+    el.addEventListener("mouseleave", onLeave);
+    return () => {
+      el.removeEventListener("mouseenter", onEnter);
+      el.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  return (
+    // Original: .link.enabled.clean  — NO .link-strip inside
+    <a
+      ref={linkRef}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="link enabled clean"
+      style={{ textShadow: "0 2.5vw currentColor" }}
+    >
+      <p className="base wagon">
+        {text.split("").map((char, i) => (
+          <span
+            key={i}
+            ref={(el) => { charsRef.current[i] = el; }}
+            style={{ display: "inline-block", willChange: "transform" }}
+          >
+            {char === " " ? "\u00A0" : char}
+          </span>
+        ))}
+      </p>
+      {/* No .link-strip here — original press items don't have it */}
+    </a>
+  );
+}
+
 export default function Press() {
   return (
-    <section id="press" className="px-6 py-24 max-w-5xl mx-auto">
-      {/* Section label */}
-      <div className="flex items-center gap-4 mb-16">
-        <span className="text-xs font-space-mono text-white/30 uppercase tracking-widest">
-          003
-        </span>
-        <span className="block flex-1 h-px bg-white/10" />
-        <span className="text-xs font-space-mono text-white/30 uppercase tracking-widest">
-          Press
-        </span>
-      </div>
-
-      <div className="space-y-0 border-t border-white/[0.06]">
-        {pressItems.map((item, i) => (
-          <a
-            key={i}
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center justify-between py-5 border-b border-white/[0.06] hover:border-[#ff1111]/30 transition-colors duration-200"
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-xs font-space-mono text-white/20 w-8 shrink-0">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="text-base font-inter text-white/70 group-hover:text-white transition-colors duration-200">
-                {item.headline}
-              </span>
-            </div>
-            <div className="flex items-center gap-4 shrink-0">
-              <span className="text-xs font-space-mono text-white/30 hidden sm:block">
-                {item.outlet}
-              </span>
-              <span className="text-xs font-space-mono text-white/20">
-                {item.year}
-              </span>
-              <span className="text-white/20 group-hover:text-[#ff1111] transition-colors duration-200">
-                ↗
-              </span>
-            </div>
-          </a>
+    <section className="press-section">
+      <div className="press-features">
+        {pressItems.map((item) => (
+          <SplitLink key={item.text} text={item.text} href={item.href} />
         ))}
       </div>
     </section>
