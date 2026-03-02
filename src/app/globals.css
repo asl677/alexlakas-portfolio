@@ -451,6 +451,7 @@ overflow: hidden;
   flex-flow: column;
   align-items: center;
   justify-content: center;
+  gap: 0;
   width: 100%;
   padding: 4vw;
   position: relative;

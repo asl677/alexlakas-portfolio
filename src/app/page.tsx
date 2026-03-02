@@ -112,19 +112,19 @@ export default function Home() {
     let resizeTimeout: ReturnType<typeof setTimeout>;
 
     const createParallax = () => {
-      // Kill existing tween and ScrollTrigger before creating new one
       if (tween) tween.scrollTrigger?.kill();
       
       tween = gsap.fromTo(".press-features", 
-        { y: "0vw" },
+        { y: "-10vw" },
         {
-          y: "20vw",
+          y: "25vw",
           ease: "none",
           scrollTrigger: {
             trigger: ".press-section",
             start: "top bottom",
             end: "bottom top",
             scrub: 0,
+            invalidateOnRefresh: true,
           },
         }
       );
@@ -133,7 +133,7 @@ export default function Home() {
     // Create initial parallax
     createParallax();
     
-    // Recreate on resize to preserve text breaks
+    // On resize: kill and recreate tween with fresh calculations
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
