@@ -116,9 +116,9 @@ export default function Home() {
       if (tween) tween.scrollTrigger?.kill();
       
       tween = gsap.fromTo(".press-features", 
-        { y: "-10vw" },
+        { y: "0vw" },
         {
-          y: "25vw",
+          y: "20vw",
           ease: "none",
           scrollTrigger: {
             trigger: ".press-section",

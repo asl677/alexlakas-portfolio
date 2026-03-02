@@ -587,6 +587,10 @@ overflow: hidden;
   .sheet-inner {
     padding: 3vw;
   }
+
+  .press-section {
+    display: none !important;
+  }
 }
 
 @media (max-width: 480px) {
