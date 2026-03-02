@@ -129,3 +129,115 @@ tl.to(".slider-section", { rotationY: -0.25, duration: 2, ease: "power3.out" }, 
 - Black fade happens at start when opening, at end when closing (automatic via reverse)
 - All animations perfectly synchronized via single timeline
 - Bio text animates in after 0.5s delay with reduced rotation (-5°)
+---
+
+## Viewport Resize Best Practices (GSAP ScrollTrigger)
+
+**IMPORTANT**: When viewport resizes, text can break unpredictably if ScrollTrigger animations aren't properly recreated.
+
+### The Problem:
+Simply calling `ScrollTrigger.refresh()` is insufficient. Old animation calculations remain stale, causing text to reflow and break in odd places during resize.
+
+### The Solution:
+```javascript
+// Create initial tween
+let tween = gsap.fromTo(".element", { y: "0vw" }, {
+  y: "30vw",
+  ease: "none",
+  scrollTrigger: { trigger, start, end, scrub: 0 },
+});
+
+// On resize: KILL old tween and recreate fresh
+const handleResize = () => {
+  if (tween) tween.scrollTrigger?.kill();
+  tween = gsap.fromTo(".element", { y: "0vw" }, {
+    y: "30vw",
+    ease: "none",
+    scrollTrigger: { trigger, start, end, scrub: 0 },
+  });
+};
+
+window.addEventListener("resize", debounce(handleResize, 250));
+```
+
+### Key Points:
+- **KILL before recreating**: `tween.scrollTrigger?.kill()` removes old ScrollTrigger
+- **Debounce**: 250ms prevents excessive recreation during rapid resizing
+- **Fresh calculations**: New tween recalculates trigger points, distances, DOM measurements
+- This preserves text breaks because layout is recalculated from scratch
+- Reference: https://gsap.com/community/forums/topic/45016-unexpected-line-breaks-when-using-split-text/
+
+---
+
+## GSAP SplitText for Responsive Line Animations (Bio Sheet)
+
+**CRITICAL**: Never manually split text into hardcoded arrays. Use GSAP's SplitText plugin to properly handle responsive text that preserves line breaks on resize.
+
+### The Problem with Manual Splitting:
+```javascript
+// ❌ WRONG - Hardcoded lines don't adapt to viewport
+const bioLines = ["Line 1", "Line 2", "Line 3"];
+bioLines.map((line, i) => <span key={i}>{line}</span>)
+// When viewport resizes, text reflows unpredictably
+```
+
+### The Correct Solution with SplitText:
+```javascript
+import { SplitText } from "gsap/SplitText";
+gsap.registerPlugin(SplitText);
+
+// Single string — SplitText handles line splitting
+const bioText = "long text here...";
+
+// Create fresh SplitText to preserve line breaks
+if (splitRef.current) splitRef.current.revert();
+splitRef.current = new SplitText(textRef.current, { type: "lines" });
+
+// Animate the actual DOM lines
+gsap.fromTo(
+  splitRef.current.lines,
+  { y: "5vw", opacity: 0 },
+  {
+    y: 0,
+    opacity: 1,
+    duration: 1,
+    stagger: { each: 0.15, from: "end" },
+    ease: "power3.out",
+  }
+);
+```
+
+### Resize Handling (Most Important):
+```javascript
+// On resize: REVERT old split, create fresh SplitText
+const handleResize = () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (splitRef.current) {
+      splitRef.current.revert();  // ← CRITICAL: Remove old DOM changes
+      splitRef.current = new SplitText(textRef.current, { type: "lines" });  // ← Fresh split
+      
+      // Re-animate with updated line DOM
+      gsap.fromTo(splitRef.current.lines, {...});
+    }
+  }, 250);
+};
+
+window.addEventListener("resize", handleResize);
+```
+
+### Essential Pattern:
+1. **Register plugin**: `gsap.registerPlugin(SplitText)`
+2. **Store ref**: `const splitRef = useRef<any>(null)`
+3. **On activation**: `splitRef.current = new SplitText(el, { type: "lines" })`
+4. **On resize**: `splitRef.current.revert()` → `new SplitText(el, { type: "lines" })`
+5. **On unmount**: `splitRef.current.revert()` in cleanup
+
+### Key Points:
+- **ALWAYS revert before recreating** - `splitRef.revert()` removes SplitText's DOM modifications
+- **Never hardcode text splits** - Let SplitText calculate actual rendered lines
+- **Resize requires full recreation** - Not just `refresh()`, but complete `revert()` + `new SplitText()`
+- **Debounce resize** - 250ms prevents excessive recreation
+- **Use `type: "lines"`** - Splits by actual rendered lines (respects text wrapping)
+- Bio lines naturally stagger with `from: "end"` for reverse reveal
+- Reference: https://gsap.com/community/forums/topic/45016-unexpected-line-breaks-when-using-split-text/

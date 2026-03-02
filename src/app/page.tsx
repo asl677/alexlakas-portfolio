@@ -82,22 +82,45 @@ export default function Home() {
 
   // Press features: Parallax on the text while container flows naturally
   useEffect(() => {
-    const tween = gsap.fromTo(".press-features", 
-      { y: "-10vw" },
-      {
-        y: "30vw",
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".press-section",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0,
-        },
-      }
-    );
+    let tween: gsap.core.Tween | null = null;
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+
+    const createParallax = () => {
+      // Kill existing tween and ScrollTrigger before creating new one
+      if (tween) tween.scrollTrigger?.kill();
+      
+      tween = gsap.fromTo(".press-features", 
+        { y: "-10vw" },
+        {
+          y: "25vw",
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".press-section",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0,
+          },
+        }
+      );
+    };
+
+    // Create initial parallax
+    createParallax();
+    
+    // Recreate on resize to preserve text breaks
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        createParallax();
+      }, 250);
+    };
+    
+    window.addEventListener("resize", handleResize);
     
     return () => {
-      tween.scrollTrigger?.kill();
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimeout);
+      if (tween) tween.scrollTrigger?.kill();
       gsap.set(".press-features", { y: "0vw" });
     };
   }, []);
