@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inconsolata } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 // Inconsolata: used for bio text (.base.white) and marquee
@@ -39,6 +40,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inconsolata.variable}`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
