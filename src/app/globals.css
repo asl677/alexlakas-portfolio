@@ -191,7 +191,7 @@ html.lenis { height: auto; }
 .upper-wrap {
   background-color: var(--grey-100);
   width: 100vw;
-  height: 100vh;
+  height: 100svh;
   display: flex;
   position: sticky;
   top: 0;
@@ -590,6 +590,13 @@ overflow: hidden;
 }
 
 @media (max-width: 480px) {
+  html, body {
+    overflow: hidden;
+    height: 100svh;
+    position: fixed;
+    width: 100%;
+  }
+
   .base {
     font-size: 4vw;
   }
