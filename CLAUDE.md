@@ -241,3 +241,278 @@ window.addEventListener("resize", handleResize);
 - **Use `type: "lines"`** - Splits by actual rendered lines (respects text wrapping)
 - Bio lines naturally stagger with `from: "end"` for reverse reveal
 - Reference: https://gsap.com/community/forums/topic/45016-unexpected-line-breaks-when-using-split-text/
+
+---
+
+## Design System: Universal Guidelines for Claude Web Projects
+
+> **Note**: These principles are extracted from editorial, high-performance design patterns. The portfolio is a reference implementation. Apply these rules to all new web projects.
+
+### VISUAL DESIGN RULES
+
+**Color Philosophy:**
+- **Restricted palette**: 3-5 colors maximum (primary, secondary, neutral, accent, border)
+- **High contrast** for accessibility (WCAG AA minimum)
+- **Single accent color** for interactive states (hover, focus, selection)
+- **Neutral foundation** (black, white, grey) — Accent only highlights actions
+- **Reference**: Portfolio uses black/white/grey + red accent exclusively
+  - CSS variables: `--black-100: #000`, `--white-100: white`, `--grey-100: #888`, `--red-100: red`
+
+**Typography System:**
+- **1 primary font family** (geometric sans-serif preferred: PP Neue Montreal, Inter, etc.)
+  - 2-3 weights max (400, 500/600, 700)
+  - Single letter-spacing value applied globally (0.05rem recommended for tightness)
+- **Optional secondary font** for editorial/display purposes (serif, italic, or distinctive)
+  - Use sparingly (headlines, sections, not body copy)
+- **Text sizing approach:**
+  - **Desktop-first scalable**: Use `vw` units for fluid typography (1vw = 1% viewport width)
+  - Fallback to `rem` for mobile to prevent oversizing
+  - Example: `.base { font-size: 1vw }` at desktop, `3vw` at tablet, `4vw` at mobile
+  - Avoid fixed `px` sizes (breaks responsiveness)
+- **Line heights:**
+  - Body copy: `1.3` to `1.6` (readability)
+  - Headlines: `1.2` to `1.3` (tight)
+  - Display: `1.0` to `1.2` (compressed for impact)
+
+**Spacing System:**
+- **Define a base unit and scale it** (recommend vw-based for fluidity)
+  - `--base: 1vw` → then `--xsmall: 0.5vw`, `--small: 1vw`, `--medium: 2vw`, `--large: 5vw`, `--xlarge: 10vw`
+  - **Or use rem**: `--base: 1rem` → scale accordingly
+- **Consistent application**: Use variables everywhere (padding, margin, gap, border-radius)
+- **Responsive scaling**: Adjust base unit in media queries, variables cascade automatically
+
+**Layout Patterns:**
+- **Full-viewport sections** (hero, sticky regions): `100vw × 100svh`
+- **Scrollable content**: Standard `width: 100%`, `height: auto`, `position: relative`
+- **Centering**: Use flexbox or grid (not absolute positioning unless fixed/sticky)
+- **Sticky elements**: Common for navigation, headlines, CTAs
+  - Apply `position: sticky; top: 0; z-index: X` to keep in viewport during scroll
+- **Grid usage**: Multi-column layouts for dense information (nav columns, bio sheets)
+  - Example: `grid-template-columns: 1fr 2fr 1fr` for balanced 3-column
+
+**Cursor & Interaction Signals:**
+- **Default cursor** on navigation elements (no "hand" pointer)
+- **Cursor changes only for form inputs** (text fields, buttons with visible state change)
+- **Visual feedback via color/filter** instead of cursor change
+  - Hover state = color change, underline, or background shift
+
+---
+
+### MOTION DESIGN RULES
+
+**GSAP Easing Library (Universal Easings):**
+- `power3.out` — **Default reveal easing** (rich, natural deceleration)
+  - Use for: Initial reveals, entry animations, section fades, timeline plays
+  - Feels: Confident, premium, natural
+- `power3.inOut` — **Symmetric animations** (same speed in and out)
+  - Use for: Animations that reverse (doors, toggles, clipPath expands)
+  - Feels: Balanced, controlled
+- `power2.out` — **Snappy interactions** (faster recovery)
+  - Use for: Hover states, quick micro-interactions
+  - Feels: Responsive, lightweight
+- `power2.in` — **Accelerating** (builds momentum)
+  - Use for: Exit animations, hover leaves, dismissals
+  - Feels: Quick, purposeful
+- `none` — **Linear easing** (constant speed)
+  - Use for: Scroll-driven animations (`scrub` tweens), infinite loops, marquees
+  - Feels: Mechanical, tied to user action
+- **Portfolio example**: `power3.out` for intro, `none` for scroll parallax
+
+**Animation Duration Framework:**
+- **0-0.2s**: Instant responses (state changes, opacity flips)
+- **0.3-0.5s**: Quick interactions (hover, focus, micro-interactions)
+- **0.6-1.2s**: Standard reveals (nav entry, text slides, section fades)
+- **1.5-2s**: Substantial animations (modals, major transitions, door swings)
+- **3s+**: Slow reveals, cinematic effects (use sparingly)
+- **CSS loops**: 5-8s for marquees/spinners (feels eternal without being instant)
+- **Portfolio examples**: 0.35s (hover), 1s (link sweep), 2s (door), 5s (marquee)
+
+**Stagger Patterns (Sequential Reveals):**
+- **Fast cascade**: `0.08s` between elements (snappy, premium feel)
+- **Medium cascade**: `0.12-0.15s` between elements (balanced)
+- **Slow cascade**: `0.2s+` between elements (cinematic, methodical)
+- **Formula**: `stagger: { each: VALUE, from: "start" | "end" | "center" }`
+- **Portfolio example**: `0.08s` stagger creates rapid-fire nav reveal
+
+**Reveal Patterns:**
+- **Opacity fade**: Simple, universal. `fromTo(el, { opacity: 0 }, { opacity: 1 })`
+- **Slide + fade**: Directional entry. `fromTo(el, { x: -30, opacity: 0 }, { x: 0, opacity: 1 })`
+- **Clip-path expand**: Content-first, grows inward. `inset(50% 50% 50% 0%)` → `inset(0%)`
+- **Scale up**: Growth from center. `fromTo(el, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1 })`
+- **Combo approach**: Clip-path + opacity for richest effect
+
+**ScrollTrigger Scroll-Driven Animation Pattern:**
+- **Key concept**: `scrub: N` ties animation speed to scroll speed
+  - `scrub: 0` — Immediate coupling, feels mechanical (use for tight effects)
+  - `scrub: 1` — 1-second lag, smoothed feel (use for parallax depth)
+- **Basic template**:
+  ```javascript
+  gsap.fromTo(el, { y: "0" }, {
+    y: "30vw",
+    ease: "none",  // ← REQUIRED for scrub
+    scrollTrigger: {
+      trigger: ".section",
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 0,  // Adjust 0 vs 1 for feel
+    },
+  });
+  ```
+- **Use cases**: Parallax depth, section reveals on scroll, lazy loads
+- **Portfolio example**: Press section parallax with `scrub: 0` (immediate, tight)
+
+**Infinite Loop Pattern:**
+- **GSAP loop**: `gsap.to(track, { x: -halfWidth, ease: "none", repeat: -1, duration: 50 })`
+- **Key**: `repeat: -1` (infinite), `ease: "none"` (linear), measure `halfWidth` at runtime
+- **Array doubling**: Double content array to hide seam on wrap (15 items → 30)
+- **Portfolio example**: Seamless image slider loop
+
+---
+
+### INTERACTION DESIGN RULES
+
+**Hover State Framework:**
+- **Color/filter change** (preferred):
+  - Example: `grayscale(1)` → `grayscale(0)` on hover (desaturate by default, full color on interact)
+  - Example: `opacity: 0.6` → `opacity: 1` (subtle to prominent)
+  - Duration: 0.3-0.6s with `power2.out` easing
+- **Background reveal** (sliding bar/stripe):
+  - Common for text links, buttons, nav items
+  - Pattern: Colored div positioned off-screen, slides into view on hover
+  - Duration: 0.35s, with text on top (higher z-index)
+  - Technique: Measure element width at runtime, position stripe from left, return to right on exit
+- **Transform (scale/translate)**:
+  - Example: Scale 1 → 1.05 on hover (button grow)
+  - Example: TranslateY -2px on hover (lift effect)
+  - Duration: 0.3s with `power2.out`
+
+**Navigation Interaction Patterns:**
+- **Persistent nav** (always visible):
+  - Use sticky positioning (`position: sticky; top: 0`)
+  - Fade in on page load (opacity 0 → 1)
+  - Each item: slide + fade entry with stagger (0.08s recommended)
+- **Modal/Overlay nav**:
+  - Fade background (30-50% opacity dark), slide in nav from edge
+  - Close on backdrop click or explicit close button
+  - Timeline: Background fade + nav slide synchronized
+- **Vertical stack nav** (left/right columns):
+  - Use flexbox `flex-direction: column`
+  - Gap between items: `var(--g-small)` or similar
+  - Entry: All items slide from left with cascading stagger
+- **Portfolio example**: Left nav 3-column + right top nav, shared 0.08s stagger
+
+**State Toggle Patterns:**
+- **Modal open/close**:
+  - Store timeline in ref, use `tl.play()` to open
+  - Use `tl.reverse()` to close (automatic easing reversal)
+  - Structure: Background fade + content slide in sync
+  - Portfolio example: Bio sheet toggle (door animation with timeline reverse)
+- **Accordion expand/collapse**:
+  - Animate `height: 0` → `height: auto` (or max-height if height: auto unreliable)
+  - Fade content opacity simultaneously
+  - Use GSAP `autoAlpha` for opacity + visibility combo
+- **Menu open/close**:
+  - Common: Nav slides from off-screen, backdrop fades
+  - Reverse pattern: Same timeline, opposite direction
+
+**Button & CTA Interactions:**
+- **Primary button hover**:
+  - Background color shift (accent color)
+  - Text color invert if needed for contrast
+  - Duration: 0.3s
+  - Optional: Slight scale (1 → 1.02)
+- **Ghost button hover** (outlined, no fill):
+  - Border color brighten or text color intensify
+  - Fill background with subtle accent
+  - Duration: 0.3s
+- **Icon button hover**:
+  - Rotate, scale, or color shift
+  - Portfolio example: Life pill uses background color shift on hover
+
+---
+
+### EDITORIAL & UX DESIGN PRINCIPLES
+
+**Color Strategy:**
+- **Restricted palette** (3-5 colors max):
+  - Primary: Black or dark grey (backgrounds, dominant text)
+  - Secondary: White or light grey (contrast text, secondary elements)
+  - Neutral: Mid-tone grey (borders, subtle elements)
+  - Accent: Single color (interactions, highlights, CTAs) — Use sparingly
+  - Optional: One secondary accent for error/success/warning states
+- **High contrast enforcement**: Text > 4.5:1 WCAG AA compliance minimum
+- **Accent usage**: Interactive states ONLY (hover, focus, active, selected)
+- **Example**: Portfolio uses black/white/grey + red accent exclusively
+
+**Typography as Visual Hierarchy:**
+- **Single primary typeface** (1-2 weights for most projects)
+  - Geometric sans-serif preferred (Inter, PP Neue Montreal, Montserrat)
+  - Weights: 400 (body), 600-700 (headings)
+- **Optional secondary typeface** for editorial/display only
+  - Serif or distinctive style used sparingly (10-20% of content)
+  - Never for body copy
+- **Size hierarchy**: Use scale relationships (1:1.2, 1:1.5, golden ratio)
+  - Example: Body 16px, heading 20px, display 28px
+- **Letter spacing**: Consistent tight tracking (0.03-0.05rem) creates premium feel
+- **Line height**: Body 1.5-1.6, headlines 1.2-1.3 (readability vs. impact)
+
+**Whitespace & Density:**
+- **Generous margins** between major sections (3-5% of viewport height)
+- **Breathing room around images** — Don't crop or crowd
+- **Minimal visual chrome** — No borders unless functional (input fields, separators)
+- **Rule**: If it's not functional, remove it (no decorative elements)
+- **Content density**: ~60-70% visual weight, 30-40% whitespace (luxury feel)
+
+**Visual Design Philosophy:**
+- **Content-first approach**: Images, text, interaction. Minimal decoration.
+- **Images as primary**: Use photography/illustration at hero scale, high impact
+- **Desaturate by default, saturate on interact**:
+  - Example: Grayscale (1) with contrast (0.8) at rest, full color on hover
+  - Creates perception of "awakening" content on interaction
+- **Subtle depth cues**:
+  - Text shadows (no hard drop shadows)
+  - Parallax on scroll (tight, purposeful)
+  - Layering via z-index (hero sticky over content)
+
+**Motion Design Philosophy:**
+- **Every animation must serve purpose**: No pure decoration
+  - Reveals content (expand, slide, fade, clipPath)
+  - Signals interaction (hover feedback, loading states)
+  - Guides visual flow (staggered reveals, parallax)
+- **Motion duration tied to importance**:
+  - Quick (0.3s) = micro-interactions, hover
+  - Standard (0.6-1.2s) = section reveals, nav entry
+  - Slow (1.5-2s+) = major transitions, modals
+- **Easing matches content**: `power3.out` for reveals (natural), `none` for scroll-driven (mechanical)
+- **Stagger creates visual rhythm**: Fast cascades feel premium, slow cascades feel cinematic
+
+**Responsive & Accessibility:**
+- **Mobile-first typography**: Use `rem` or `vw` with viewport-relative scaling
+  - Desktop: 1vw base / Tablet: 2vw / Mobile: 3-4vw
+- **Ensure touch targets**: Minimum 44x44px for buttons (mobile)
+- **Content reflows gracefully**: No horizontal scrolling
+- **Animation respects `prefers-reduced-motion`**:
+  ```css
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; }
+  }
+  ```
+- **Color not sole information carrier**: Add icons, text labels, patterns
+
+**UX Patterns to Adopt:**
+- **Sticky nav**: Persistent, always accessible for navigation
+- **Hero section**: Full viewport, immediate impact, establishes brand/intent
+- **Scroll-driven parallax**: Adds perceived depth without heavy animation
+- **Progressive disclosure**: Hide complex content until needed (modals, accordions)
+- **Clear CTAs**: High contrast, obvious interactive states, unambiguous purpose
+- **Loading states**: Spinner or skeleton screen during async operations
+- **Feedback loops**: Button press → visual change → action confirm
+
+**Design Checklist Before Launch:**
+- [ ] Color contrast: 4.5:1 minimum for body text
+- [ ] Typography: Consistent hierarchy, 1-2 primary weights max
+- [ ] Motion: All animations serve purpose, <2s standard duration
+- [ ] Whitespace: 30-40% empty space, breathing room
+- [ ] Mobile: Responsive fonts, touch-friendly buttons, no horizontal scroll
+- [ ] Accessibility: Works with keyboard, respects `prefers-reduced-motion`
+- [ ] Performance: Critical animations 60fps (no layout thrashing)
