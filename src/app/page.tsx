@@ -20,22 +20,42 @@ export default function Home() {
   // Called by Loader once it fades out
   const revealAll = useCallback(() => {
     gsap.set(".nav-left, .nav-right", { opacity: 1 });
+    gsap.set(".slider-wrap", { opacity:0, clipPath: "inset(50% 50% 50% 0%)" });
+
+    // Measure link widths BEFORE applying transforms - strips will inherit these widths
+    const links = document.querySelectorAll<HTMLElement>(".link");
+    const stripData: Array<{ strip: HTMLElement, width: number }> = [];
+    
+    console.log("=== MEASURING LINK WIDTHS ===");
+    links.forEach((link, i) => {
+      const strip = link.querySelector<HTMLElement>(".link-strip");
+      if (strip) {
+        // Link is inline-block so it sizes to its text content
+        const linkWidth = link.getBoundingClientRect().width;
+        console.log(`[${i}] "${link.textContent?.trim()}" = ${linkWidth.toFixed(2)}px`);
+        // Strip inherits width from link via CSS width: 100%
+        stripData.push({ strip, width: linkWidth });
+        gsap.set(strip, { x: -linkWidth });
+      }
+    });
+    console.log("=== TOTAL LINKS: " + stripData.length + " ===");
+
+    // NOW apply text transforms
     gsap.set(".nav-left .base, .nav-right .base", { x: -30, opacity: 0 });
     gsap.set(".nav-life", { y: 0, opacity: 0 });
-    gsap.set(".link .link-strip", { xPercent: -110 });
-    gsap.set(".slider-wrap", { opacity:0, clipPath: "inset(50% 50% 50% 0%)" });
 
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     tl.to(".upper-wrap", { opacity: 1, duration: 0.6 }, 0);
 
-    // Strip sweeps left→right
-    tl.to(".link .link-strip", {
-      xPercent: 110,
-      duration: 1,
-      ease: "power3.out",
-      stagger: 0.08,
-    }, 0.5);
+    // Strip sweeps left→right using stored widths
+    stripData.forEach((data, i) => {
+      tl.to(data.strip, {
+        x: data.width,
+        duration: 1,
+        ease: "power3.out",
+      }, 0.5 + (i * 0.08));
+    });
 
     // Nav text slides in from left
     tl.to(".nav-left .base, .nav-right .base", {
@@ -56,25 +76,31 @@ export default function Home() {
       ease: "power3.inOut",
     }, 0.8);
 
-    // Park strips off-screen right after intro
+    // Park strips off-screen right after intro using stored widths
     tl.call(() => {
-      gsap.set(".link .link-strip", { xPercent: 110 });
+      stripData.forEach((data) => {
+        gsap.set(data.strip, { x: data.width });
+      });
     }, [], ">");
 
     // Hook up hover — enters from LEFT, exits to RIGHT
     tl.call(() => {
       const links = document.querySelectorAll<HTMLElement>(".link.enabled");
       links.forEach((link) => {
-        const strip = link.querySelector(".link-strip");
+        const strip = link.querySelector<HTMLElement>(".link-strip");
         if (!strip) return;
+        
+        // Get link width (strip inherits this via CSS)
+        const linkWidth = link.getBoundingClientRect().width;
+        
         link.addEventListener("mouseenter", () => {
           gsap.fromTo(strip,
-            { xPercent: -110 },
-            { xPercent: 0, duration: 0.35, ease: "power2.out" }
+            { x: -linkWidth },
+            { x: 0, duration: 0.35, ease: "power2.out" }
           );
         });
         link.addEventListener("mouseleave", () => {
-          gsap.to(strip, { xPercent: 110, duration: 0.35, ease: "power2.in" });
+          gsap.to(strip, { x: linkWidth, duration: 0.35, ease: "power2.in" });
         });
       });
     }, [], ">");
@@ -92,7 +118,7 @@ export default function Home() {
       tween = gsap.fromTo(".press-features", 
         { y: "-10vw" },
         {
-          y: "25vw",
+          y: "20vw",
           ease: "none",
           scrollTrigger: {
             trigger: ".press-section",
