@@ -51,7 +51,7 @@ export default function Home() {
     // Strip sweeps left→right using stored widths
     stripData.forEach((data, i) => {
       tl.to(data.strip, {
-        x: data.width,
+        x: data.width + 5, // Add 5px buffer to fully hide
         duration: 1,
         ease: "power3.out",
       }, 0.5 + (i * 0.08));
@@ -79,7 +79,7 @@ export default function Home() {
     // Park strips off-screen right after intro using stored widths
     tl.call(() => {
       stripData.forEach((data) => {
-        gsap.set(data.strip, { x: data.width });
+        gsap.set(data.strip, { x: data.width + 5 }); // Add 5px buffer to fully hide
       });
     }, [], ">");
 
@@ -100,7 +100,7 @@ export default function Home() {
           );
         });
         link.addEventListener("mouseleave", () => {
-          gsap.to(strip, { x: linkWidth, duration: 0.35, ease: "power2.in" });
+          gsap.to(strip, { x: linkWidth + 5, duration: 0.35, ease: "power2.in" }); // Add 5px buffer
         });
       });
     }, [], ">");
