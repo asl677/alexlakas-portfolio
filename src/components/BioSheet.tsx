@@ -41,12 +41,13 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
     const tl = gsap.timeline({ paused: true });
     tl.fromTo(
       splitRef.current.lines,
-      { y: "5vw", opacity: 0 },
+      { y: "3vw", opacity: 0 },
       {
         y: 0,
         opacity: 1,
         duration: 1,
-        stagger: { each: 0.15, from: "end" },
+        delay: 0.3,
+        stagger: { each: 0.02, from: "end" },
         ease: "power3.out",
       },
       0.8
@@ -94,13 +95,13 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
           const tl = gsap.timeline({ paused: true });
           tl.fromTo(
             splitRef.current.lines,
-            { y: "5vw", opacity: 0 },
+            { y: "3vw", opacity: 0 },
             {
               y: 0,
               opacity: 1,
-              duration: 1,
-              delay: 0.8,
-              stagger: { each: 0.15, from: "end" },
+              duration: 0.6,
+              delay: 0.5,
+              stagger: { each: 0.03, from: "end" },
               ease: "power3.out",
             },
             0
