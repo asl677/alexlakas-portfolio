@@ -1,8 +1,19 @@
-# Alex Lakas Portfolio - Claude Code & Design Guidelines
+# Alex Lakas Portfolio — Claude Code & Design Guidelines
 
 **Stack**: Next.js 15, TypeScript, Tailwind CSS, GSAP 3, Lenis 1.1.20
 **Deployed**: https://vercel.com/asl677s-projects/alexlakas-portfolio
 **Webflow Reference**: https://hello-alex-portfolio.webflow.io
+
+## Documentation Navigation
+
+| Document | Purpose |
+|----------|---------|
+| **[GSAP Best Practices](../GSAP-BEST-PRACTICES.md)** | **REQUIRED reading** — ScrollTrigger, SplitText, Lenis patterns |
+| **[Base CLAUDE.md](../CLAUDE.md)** | General Claude Code settings & workflow |
+| **[Alfa Design System](../alfa-design-system/)** | Color, typography, spacing, motion reference |
+| **README.md** | Quick start & project overview |
+
+> **⚠️ CRITICAL**: All GSAP animations in this project MUST follow the patterns in `GSAP-BEST-PRACTICES.md`. Inconsistencies stem from deviating from these rules (especially resize handling, ScrollTrigger recreation, SplitText revert).
 
 ---
 
