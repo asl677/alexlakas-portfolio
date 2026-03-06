@@ -3,7 +3,7 @@
 High-performance, premium portfolio website built with Next.js 15, TypeScript, Tailwind CSS, GSAP 3, and Lenis smooth scrolling.
 
 **Live**: https://alexlakas.vercel.app
-**Reference**: https://hello-alex-portfolio.webflow.io
+**Prod**: https://alexlakas.com
 
 ## Quick Start
 
