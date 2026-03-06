@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     creator: "@axlakas",
-    image: "/og-image.png",
+    images: ["/og-image.png"],
     title: "Alex Lakas (Designer)",
     description: "Art Direction, Product Design, Mentorship",
   },
