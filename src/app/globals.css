@@ -335,7 +335,7 @@ overflow: hidden;
    ============================================ */
 .marquee-fixed {
   position: absolute;
-  top: -3px;
+  top: 0vw;
   left: 0;
   right: 0;
   z-index: 5;
@@ -361,13 +361,12 @@ overflow: hidden;
   display: inline-block;
   white-space: nowrap;
   animation: marqueeRun 5s linear infinite;
-  font-size: 1vw;
+  /* font-size: 1vw; */
   color: var(--white-100);
   font-family: 'PP Neue Montreal', sans-serif;
   font-weight: 400;
   letter-spacing: var(--t-xsmall);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
 }
 
 @keyframes marqueeRun {
@@ -543,6 +542,8 @@ overflow: hidden;
 @media (max-width: 768px) {
   .base {
     font-size: 3vw;
+    font-weight: 400;
+    font-family: 'PP Neue Montreal', sans-serif;
   }
 
   .base.white {
@@ -551,6 +552,14 @@ overflow: hidden;
 
   .marquee-track {
     font-size: 3vw;
+  }
+
+  .marquee-fixed {
+    top: var(--g-small);
+  }
+
+  .marquee-clip {
+    width: 50vw;
   }
 
   .slider-inner {
@@ -562,27 +571,37 @@ overflow: hidden;
   }
 
   .link {
-    font-size: 2.5vw;
+    font-size: 3vw;
+    font-weight: 400;
+    font-family: 'PP Neue Montreal', sans-serif;
   }
 
   .inner-nav {
   }
 
-  .nav-left, .nav-right {
+  .nav-left {
     padding: var(--g-small);
     gap: 2vw;
+    left: var(--g-small);
   }
 
   .nav-right {
+    padding: var(--g-small);
+    gap: 2vw;
     right: var(--g-small);
+    top: var(--g-small);
+    align-items: flex-end;
   }
 
   .nav-life {
     right: var(--g-small);
+    bottom: var(--g-small);
   }
 
   .upper-wrap {
-    padding: var(--g-small);
+    width: 100vw;
+    margin: 0;
+    padding: 0;
   }
 
   .sheet-inner {
@@ -604,6 +623,8 @@ overflow: hidden;
 
   .base {
     font-size: 4vw;
+    font-weight: 400;
+    font-family: 'PP Neue Montreal', sans-serif;
   }
 
   .base.white {
@@ -612,6 +633,14 @@ overflow: hidden;
 
   .marquee-track {
     font-size: 4vw;
+  }
+
+  .marquee-fixed {
+    display: none;
+  }
+
+  .marquee-clip {
+    width: 50vw;
   }
 
   .slider-inner {
@@ -623,56 +652,50 @@ overflow: hidden;
   }
 
   .link {
-    font-size: 3.5vw;
+    font-size: 4vw;
+    font-weight: 400;
+    font-family: 'PP Neue Montreal', sans-serif;
   }
 
   .inner-nav {
   }
 
-  .nav-left, .nav-right {
+  .nav-left {
     padding: var(--g-small);
     gap: 2.5vw;
   }
 
   .nav-right {
-    right: 2vw;
-    top: 1.5vw;
+    padding: var(--g-small);
+    gap: 2.5vw;
+    right: var(--g-small);
+    top: var(--g-small);
+    align-items: flex-end;
   }
 
   .nav-life {
-    right: 2vw;
-    bottom: 1.5vw;
+    right: var(--g-small);
+    bottom: var(--g-small);
   }
 
-  .marquee-clip {
-    width: 90vw;
+  .slider-section {
+    left: var(--g-small);
+    right: var(--g-small);
+    width: auto;
   }
 
   .upper-wrap {
-    padding: var(--g-small);
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    padding-bottom: var(--g-small);
+
   }
 
   .sheet-inner {
     padding: 4vw;
   }
 
-  .body-wrapper {
-    padding: 0 var(--g-medium);
-  }
-
-  .nav-right {
-    right: 2vw;
-    top: 1.5vw;
-  }
-
-  .nav-life {
-    right: 2vw;
-    bottom: 1.5vw;
-  }
-
-  .marquee-clip {
-    width: 50vw;
-  }
 
   .press-section {
     display: none !important;
