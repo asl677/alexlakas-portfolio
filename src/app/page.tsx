@@ -16,6 +16,7 @@ import BioSheet from "@/components/BioSheet";
 export default function Home() {
   const [bioOpen, setBioOpen] = useState(false);
   const doorTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const stripDataRef = useRef<Array<{ strip: HTMLElement, width: number }>>([]);
 
   // Called by Loader once it fades out
   const revealAll = useCallback(() => {
@@ -38,6 +39,7 @@ export default function Home() {
         gsap.set(strip, { x: -linkWidth });
       }
     });
+    stripDataRef.current = stripData;
     console.log("=== TOTAL LINKS: " + stripData.length + " ===");
 
     // NOW apply text transforms
@@ -133,10 +135,19 @@ export default function Home() {
     // Create initial parallax
     createParallax();
     
-    // On resize: kill and recreate tween with fresh calculations
+    // On resize: kill and recreate tween with fresh calculations + recalc link widths
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
+        // Recalculate link widths and reset strip positions
+        const links = document.querySelectorAll<HTMLElement>(".link");
+        links.forEach((link) => {
+          const strip = link.querySelector<HTMLElement>(".link-strip");
+          if (strip) {
+            const newWidth = link.getBoundingClientRect().width;
+            gsap.set(strip, { x: newWidth + 5 }); // Park off-screen right
+          }
+        });
         createParallax();
       }, 250);
     };

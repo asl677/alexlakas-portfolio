@@ -361,7 +361,7 @@ overflow: hidden;
   display: inline-block;
   white-space: nowrap;
   animation: marqueeRun 5s linear infinite;
-  /* font-size: 1vw; */
+  font-size: 1vw;
   color: var(--white-100);
   font-family: 'PP Neue Montreal', sans-serif;
   font-weight: 400;
@@ -455,6 +455,7 @@ overflow: hidden;
   padding: 4vw;
   position: relative;
   opacity: 1;
+  top: calc(10vh - 7rem);
 }
 
 /* ============================================
