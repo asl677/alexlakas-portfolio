@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -16,10 +16,11 @@ const bioText = "Starting in illustration, animation, web dev, and interactive d
 export default function BioSheet({ active, onClose }: BioSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const textWrapRef = useRef<HTMLDivElement>(null);
+  const textScrollRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const splitRef = useRef<any>(null);
   const bioTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const scrollTweenRef = useRef<gsap.core.Tween | null>(null);
+  const [footerVisible, setFooterVisible] = useState(false);
 
   // Create/update SplitText and timeline on mount or text changes
   useEffect(() => {
@@ -72,30 +73,26 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
   }, [active]);
 
   useEffect(() => {
-    if (!textWrapRef.current) return;
+    let frame = 0;
 
-    scrollTweenRef.current?.kill();
+    const updateBioScroll = () => {
+      frame = 0;
+      const viewportHeight = window.innerHeight || 1;
+      setFooterVisible(window.scrollY > viewportHeight * 0.08);
+    };
 
-    scrollTweenRef.current = gsap.fromTo(
-      textWrapRef.current,
-      { y: 0, opacity: 1 },
-      {
-        y: "-10vw",
-        opacity: 0.4,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".press-section",
-          start: "top bottom",
-          end: "top 30%",
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      }
-    );
+    const requestUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(updateBioScroll);
+    };
 
+    updateBioScroll();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
     return () => {
-      scrollTweenRef.current?.kill();
-      scrollTweenRef.current = null;
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+      if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -162,11 +159,17 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
   }, []);
 
   return (
-    <div ref={sheetRef} className="sheet-inner" onClick={onClose}>
+    <div
+      ref={sheetRef}
+      className={`sheet-inner${footerVisible ? " footer-visible" : ""}`}
+      onClick={onClose}
+    >
       <div ref={textWrapRef} className="bio-text-wrap">
-        <p ref={textRef} className="base white">
-          {bioText}
-        </p>
+        <div ref={textScrollRef} className="bio-text-scroll">
+          <p ref={textRef} className="base white">
+            {bioText}
+          </p>
+        </div>
       </div>
     </div>
   );

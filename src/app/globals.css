@@ -544,6 +544,18 @@ overflow: hidden;
   transform: translateY(-50%);
   width: min(42vw, 34rem);
   max-width: 100%;
+  opacity: 1;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  will-change: transform, opacity;
+}
+
+.sheet-inner.footer-visible .bio-text-wrap {
+  opacity: 0.4;
+  transform: translateY(calc(-50% - 12vw));
+}
+
+.bio-text-scroll {
+  width: 100%;
 }
 
 .sheet-inner .base.white {
@@ -633,6 +645,10 @@ overflow: hidden;
     width: min(100%, 27rem);
     max-width: 100%;
     justify-self: center;
+  }
+
+  .sheet-inner.footer-visible .bio-text-wrap {
+    transform: translateY(-10vw);
   }
 
   .sheet-inner .base.white {
