@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-gsap.registerPlugin(SplitText);
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(SplitText, ScrollTrigger);
 
 interface BioSheetProps {
   active: boolean;
@@ -17,6 +18,7 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
   const textRef = useRef<HTMLParagraphElement>(null);
   const splitRef = useRef<any>(null);
   const bioTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const scrollTweenRef = useRef<gsap.core.Tween | null>(null);
 
   // Create/update SplitText and timeline on mount or text changes
   useEffect(() => {
@@ -62,10 +64,35 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
     
     if (active) {
       bioTimelineRef.current.play();
+      ScrollTrigger.refresh();
     } else {
       bioTimelineRef.current.reverse();
     }
   }, [active]);
+
+  useEffect(() => {
+    if (!textRef.current) return;
+
+    scrollTweenRef.current?.kill();
+
+    scrollTweenRef.current = gsap.to(textRef.current, {
+      y: "-10vw",
+      opacity: 0.4,
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".press-section",
+        start: "top bottom",
+        end: "top 30%",
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    return () => {
+      scrollTweenRef.current?.kill();
+      scrollTweenRef.current = null;
+    };
+  }, []);
 
   // Handle resize: recreate SplitText to preserve line breaks
   useEffect(() => {
