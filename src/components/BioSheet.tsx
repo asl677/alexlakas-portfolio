@@ -15,6 +15,7 @@ const bioText = "Starting in illustration, animation, web dev, and interactive d
 
 export default function BioSheet({ active, onClose }: BioSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const textWrapRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const splitRef = useRef<any>(null);
   const bioTimelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -71,22 +72,26 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
   }, [active]);
 
   useEffect(() => {
-    if (!textRef.current) return;
+    if (!textWrapRef.current) return;
 
     scrollTweenRef.current?.kill();
 
-    scrollTweenRef.current = gsap.to(textRef.current, {
-      y: "-10vw",
-      opacity: 0.4,
-      ease: "none",
-      scrollTrigger: {
-        trigger: ".press-section",
-        start: "top bottom",
-        end: "top 30%",
-        scrub: true,
-        invalidateOnRefresh: true,
-      },
-    });
+    scrollTweenRef.current = gsap.fromTo(
+      textWrapRef.current,
+      { y: 0, opacity: 1 },
+      {
+        y: "-10vw",
+        opacity: 0.4,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".press-section",
+          start: "top bottom",
+          end: "top 30%",
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
+      }
+    );
 
     return () => {
       scrollTweenRef.current?.kill();
@@ -158,9 +163,11 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
 
   return (
     <div ref={sheetRef} className="sheet-inner" onClick={onClose}>
-      <p ref={textRef} className="base white" style={{ gridColumn: "2" }}>
-        {bioText}
-      </p>
+      <div ref={textWrapRef} className="bio-text-wrap">
+        <p ref={textRef} className="base white">
+          {bioText}
+        </p>
+      </div>
     </div>
   );
 }

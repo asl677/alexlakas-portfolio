@@ -537,13 +537,17 @@ overflow: hidden;
   /* opacity + pointer-events driven by GSAP in BioSheet.tsx */
 }
 
-.sheet-inner .base.white {
-  grid-column: 1 / -1 !important;
+.bio-text-wrap {
   position: absolute;
   top: 50%;
   left: calc(8vw + ((100vw - 8vw - min(42vw, 34rem)) / 2));
   transform: translateY(-50%);
   width: min(42vw, 34rem);
+  max-width: 100%;
+}
+
+.sheet-inner .base.white {
+  width: 100%;
   max-width: 100%;
   text-align: left;
 }
@@ -622,13 +626,18 @@ overflow: hidden;
     place-items: center stretch;
   }
 
-  .sheet-inner .base.white {
+  .bio-text-wrap {
     grid-column: 2 !important;
     position: static;
     transform: none;
     width: min(100%, 27rem);
     max-width: 100%;
     justify-self: center;
+  }
+
+  .sheet-inner .base.white {
+    width: 100%;
+    max-width: 100%;
     text-align: left;
     font-size: clamp(0.66rem, 2.35vw, 0.78rem);
     line-height: 1.25;
@@ -723,9 +732,12 @@ overflow: hidden;
     grid-template-columns: minmax(6.5rem, 28vw) minmax(0, 1fr) minmax(0.75rem, 5vw);
   }
 
-  .sheet-inner .base.white {
+  .bio-text-wrap {
     width: min(100%, 23rem);
     max-width: 100%;
+  }
+
+  .sheet-inner .base.white {
     font-size: clamp(0.6rem, 2.45vw, 0.7rem);
     line-height: 1.22;
   }
