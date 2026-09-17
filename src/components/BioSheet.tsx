@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -20,7 +20,6 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
   const textRef = useRef<HTMLParagraphElement>(null);
   const splitRef = useRef<any>(null);
   const bioTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const [footerVisible, setFooterVisible] = useState(false);
 
   // Create/update SplitText and timeline on mount or text changes
   useEffect(() => {
@@ -73,12 +72,18 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
   }, [active]);
 
   useEffect(() => {
+    const textWrap = textWrapRef.current;
+    if (!textWrap) return;
+
     let frame = 0;
 
     const updateBioScroll = () => {
       frame = 0;
       const viewportHeight = window.innerHeight || 1;
-      setFooterVisible(window.scrollY > viewportHeight * 0.08);
+      const progress = gsap.utils.clamp(0, 1, window.scrollY / (viewportHeight * 0.28));
+
+      textWrap.style.setProperty("--bio-scroll-y", `${progress * -12}vw`);
+      textWrap.style.setProperty("--bio-scroll-opacity", `${1 - progress * 0.6}`);
     };
 
     const requestUpdate = () => {
@@ -89,7 +94,9 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
     updateBioScroll();
     window.addEventListener("scroll", requestUpdate, { passive: true });
     window.addEventListener("resize", requestUpdate);
+    gsap.ticker.add(updateBioScroll);
     return () => {
+      gsap.ticker.remove(updateBioScroll);
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestUpdate);
       if (frame) window.cancelAnimationFrame(frame);
@@ -159,11 +166,7 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
   }, []);
 
   return (
-    <div
-      ref={sheetRef}
-      className={`sheet-inner${footerVisible ? " footer-visible" : ""}`}
-      onClick={onClose}
-    >
+    <div ref={sheetRef} className="sheet-inner" onClick={onClose}>
       <div ref={textWrapRef} className="bio-text-wrap">
         <div ref={textScrollRef} className="bio-text-scroll">
           <p ref={textRef} className="base white">

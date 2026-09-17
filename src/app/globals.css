@@ -538,20 +538,16 @@ overflow: hidden;
 }
 
 .bio-text-wrap {
+  --bio-scroll-y: 0vw;
+  --bio-scroll-opacity: 1;
   position: absolute;
   top: 50%;
   left: calc(8vw + ((100vw - 8vw - min(42vw, 34rem)) / 2));
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% + var(--bio-scroll-y)));
   width: min(42vw, 34rem);
   max-width: 100%;
-  opacity: 1;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: var(--bio-scroll-opacity);
   will-change: transform, opacity;
-}
-
-.sheet-inner.footer-visible .bio-text-wrap {
-  opacity: 0.4;
-  transform: translateY(calc(-50% - 12vw));
 }
 
 .bio-text-scroll {
@@ -641,14 +637,10 @@ overflow: hidden;
   .bio-text-wrap {
     grid-column: 2 !important;
     position: static;
-    transform: none;
+    transform: translateY(var(--bio-scroll-y));
     width: min(100%, 27rem);
     max-width: 100%;
     justify-self: center;
-  }
-
-  .sheet-inner.footer-visible .bio-text-wrap {
-    transform: translateY(-10vw);
   }
 
   .sheet-inner .base.white {
