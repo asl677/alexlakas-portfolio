@@ -516,13 +516,20 @@ export function IntroSequence() {
     const updateSearchVisibility = () => {
       // Match the visual handoff to the article header becoming sticky.
       const stickyTop = Number.parseFloat(window.getComputedStyle(articleHeader).top) || 0;
-      const isScrolled = articleHeader.getBoundingClientRect().top <= stickyTop + 1;
+      // Hysteresis: smooth scrolling hovers around the threshold, so require a few pixels
+      // of movement before un-sticking; otherwise the search fade restarts every frame.
+      const headerTop = articleHeader.getBoundingClientRect().top;
+      const wasScrolled = articleHeader.classList.contains("is-scrolled");
+      const isScrolled = wasScrolled ? headerTop <= stickyTop + 8 : headerTop <= stickyTop + 1;
       const scrollProgress = Math.min(window.scrollY / 96, 1);
       const easedProgress = scrollProgress * scrollProgress * (3 - (2 * scrollProgress));
       topbar.classList.toggle("is-scrolled", isScrolled);
       articleHeader.classList.toggle("is-scrolled", isScrolled);
       contents.classList.toggle("is-scrolled", isScrolled);
       articleHeader.style.setProperty("--wiki-language-opacity", String(1 - easedProgress));
+      // Top bar contents fade to exactly 0 by the time the bar has scrolled out of view.
+      const topbarFade = Math.max(0, 1 - window.scrollY / Math.max(1, topbar.offsetHeight));
+      topbar.style.setProperty("--wiki-topbar-fade", topbarFade.toFixed(3));
     };
 
     updateSearchVisibility();
@@ -564,18 +571,54 @@ export function IntroSequence() {
     alignCounter();
     window.addEventListener("resize", alignCounter);
     document.fonts.addEventListener("loadingdone", alignCounter);
-    const progress = { value: 0 };
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const loaderDuration = reducedMotion ? 0 : 1.2;
-    const loaderTween = gsap.to(progress, {
-      value: 100,
-      duration: loaderDuration,
-      ease: "none",
-      onUpdate: () => {
-        if (counter) counter.textContent = String(Math.round(progress.value));
-      }
-    });
-    const loaderDelay = window.setTimeout(() => shell?.classList.remove("is-loading"), loaderDuration * 1000 + 100);
+    // The counter reports real loading: fonts, every image and video, then window load.
+    const LOADER_FADE_MS = 300;
+    const REVEAL_BUFFER_MS = 300;
+    const LOADER_FAILSAFE_MS = 8000;
+    const assets: Promise<unknown>[] = [
+      document.fonts.ready,
+      document.readyState === "complete" ? Promise.resolve() : new Promise(resolve => window.addEventListener("load", resolve, { once: true })),
+      ...Array.from(document.images).map(image => image.complete ? Promise.resolve() : new Promise(resolve => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+      })),
+      ...Array.from(document.querySelectorAll("video")).map(video => video.readyState >= 2 ? Promise.resolve() : new Promise(resolve => {
+        video.addEventListener("loadeddata", resolve, { once: true });
+        video.addEventListener("error", resolve, { once: true });
+      }))
+    ];
+    let loadedCount = 0;
+    assets.forEach(asset => asset.then(() => { loadedCount += 1; }));
+    let failsafeHit = false;
+    const failsafe = window.setTimeout(() => { failsafeHit = true; }, LOADER_FAILSAFE_MS);
+    // Continue from the inline pre-hydration counter instead of restarting at 0.
+    const inlineWindow = window as Window & { __wikiProgress?: number; __wikiShown?: number; __wikiCounterOwned?: boolean };
+    inlineWindow.__wikiCounterOwned = true;
+    const display = { value: inlineWindow.__wikiShown ?? 0 };
+    let resolveLoader: () => void = () => {};
+    const loaderDone = new Promise<void>(resolve => { resolveLoader = resolve; });
+    let finishTimer = 0;
+    const finishLoader = () => {
+      gsap.ticker.remove(tickCounter);
+      if (counter) counter.textContent = "100";
+      shell?.classList.remove("is-loading");
+      // Loader fades out, then a short pause before the page starts revealing.
+      finishTimer = window.setTimeout(resolveLoader, reducedMotion ? 0 : LOADER_FADE_MS + REVEAL_BUFFER_MS);
+    };
+    const tickCounter = () => {
+      const target = failsafeHit ? 100 : Math.min((loadedCount / assets.length) * 100, Math.max(inlineWindow.__wikiProgress ?? 0, display.value));
+      // Ease toward real progress; keep moving at least slightly so it never stalls visually.
+      const step = Math.max((target - display.value) * 0.08, target > display.value ? 0.35 : 0);
+      display.value = Math.min(target, display.value + step);
+      if (counter) counter.textContent = String(Math.floor(display.value));
+      if (display.value >= 100) finishLoader();
+    };
+    if (reducedMotion) {
+      Promise.all(assets).then(finishLoader);
+    } else {
+      gsap.ticker.add(tickCounter);
+    }
     const targets = Array.from(document.querySelectorAll<HTMLElement>([
       ".wiki-topbar > .wiki-wordmark",
       ".wiki-topbar > .wiki-brand",
@@ -617,7 +660,9 @@ export function IntroSequence() {
         if (text) {
           let current = "Wikipidia";
           gsap.set(text, { textContent: current });
-          const typing = gsap.timeline({ delay: 2.3 });
+          // Typing starts from the real loader finishing, not a fixed timer.
+          const typing = gsap.timeline({ paused: true });
+          loaderDone.then(() => gsap.delayedCall(0.4, () => typing.play()));
           const typingRhythm = [0.095, 0.075, 0.115, 0.085, 0.105, 0.08];
           const deletingRhythm = [0.055, 0.04, 0.045, 0.035];
           let time = 0;
@@ -636,7 +681,7 @@ export function IntroSequence() {
           }
         }
       }
-      const fade = { duration: 1.2, stagger: 0.012, ease: "sine.out" };
+      const fade = { duration: 1.4, stagger: 0.012, ease: "sine.out" };
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
         const second = b.getBoundingClientRect();
@@ -734,7 +779,8 @@ export function IntroSequence() {
         fadeIn([...initiallyVisible, ...initiallyVisibleLines]);
         revealReady = true;
       };
-      const initialRevealDelay = window.setTimeout(startInitialReveal, loaderDuration * 1000 + 700);
+      let revealCancelled = false;
+      loaderDone.then(() => { if (!revealCancelled) startInitialReveal(); });
       const reveal = () => {
         const visibleTargets = targets.filter(target => !revealedTargets.has(target) && isInRevealArea(target));
         const visibleLines = textLines.filter(line => !revealedLines.has(line) && isInRevealArea(line));
@@ -755,7 +801,7 @@ export function IntroSequence() {
       window.addEventListener("resize", onScroll);
       return () => {
         queueReveal = () => {};
-        window.clearTimeout(initialRevealDelay);
+        revealCancelled = true;
         cancelAnimationFrame(frame);
         window.removeEventListener("scroll", onScroll);
         window.removeEventListener("resize", onScroll);
@@ -768,8 +814,9 @@ export function IntroSequence() {
     return () => {
       window.removeEventListener("resize", alignCounter);
       document.fonts.removeEventListener("loadingdone", alignCounter);
-      window.clearTimeout(loaderDelay);
-      loaderTween.kill();
+      window.clearTimeout(failsafe);
+      window.clearTimeout(finishTimer);
+      gsap.ticker.remove(tickCounter);
       context.revert();
     };
   }, []);

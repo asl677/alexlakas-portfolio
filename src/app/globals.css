@@ -2481,15 +2481,6 @@ ul {
   .wiki-topbar .wiki-search {
     transition: flex-basis 180ms ease, opacity 160ms ease, width 180ms ease;
   }
-
-  .wiki-topbar.is-scrolled .wiki-search {
-    flex-basis: 0;
-    width: 0;
-    min-width: 0 !important;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
 }
 @media (min-width: 561px) {
   .wiki-article-header {
@@ -2529,17 +2520,8 @@ ul {
     display: grid !important;
     transition: opacity 160ms ease;
   }
-
-  .wiki-topbar.is-scrolled .wiki-search {
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
 }
 @media (min-width: 561px) {
-  .wiki-topbar.is-scrolled nav .theme-toggle {
-    display: none !important;
-  }
 
   .wiki-scroll-actions {
     display: flex;
@@ -2966,24 +2948,6 @@ mark.wiki-search-match {
   .wiki-topbar .wiki-search {
     transition: opacity 380ms ease !important;
   }
-
-  .wiki-topbar.is-scrolled .wiki-search {
-    opacity: 0 !important;
-    pointer-events: none;
-  }
-}
-
-@media (min-width: 1100px) and (max-width: 1279px) {
-  .wiki-topbar.is-scrolled {
-    grid-template-columns: 164px 475px minmax(0, 1fr) !important;
-  }
-
-  .wiki-topbar.is-scrolled .wiki-search {
-    width: 475px !important;
-    min-width: 475px !important;
-    max-width: 475px !important;
-    flex-basis: 475px !important;
-  }
 }
 
 @media (min-width: 561px) and (max-width: 1099px) {
@@ -3008,24 +2972,6 @@ mark.wiki-search-match {
   .wiki-topbar nav {
     justify-self: stretch;
     min-width: 0;
-  }
-}
-@media (min-width: 561px) and (max-width: 1099px) {
-  .wiki-topbar.is-scrolled .wiki-search {
-    flex: 1 1 260px !important;
-    width: auto !important;
-    min-width: 150px !important;
-  }
-}
-
-@media (min-width: 1280px) {
-  .wiki-topbar.is-scrolled {
-    grid-template-columns: minmax(150px, 176px) minmax(260px, 475px) minmax(0, 1fr) !important;
-  }
-
-  .wiki-topbar.is-scrolled .wiki-search {
-    width: auto !important;
-    min-width: 260px !important;
   }
 }
 
@@ -3056,11 +3002,6 @@ mark.wiki-search-match {
 
   .wiki-topbar nav > a {
     white-space: nowrap;
-  }
-
-  .wiki-topbar.is-scrolled .wiki-search {
-    opacity: 1 !important;
-    pointer-events: auto;
   }
 
   .wiki-article-header {
@@ -3116,8 +3057,7 @@ mark.wiki-search-match {
     min-width: 0;
   }
 
-  .wiki-topbar .wiki-search,
-  .wiki-topbar.is-scrolled .wiki-search {
+  .wiki-topbar .wiki-search {
     grid-area: search;
     min-width: 0 !important;
     width: 100% !important;
@@ -3133,10 +3073,6 @@ mark.wiki-search-match {
 
   .wiki-topbar nav > a {
     white-space: nowrap;
-  }
-
-  .wiki-topbar.is-scrolled nav .theme-toggle {
-    display: inline-grid !important;
   }
 }
 
@@ -3367,19 +3303,13 @@ header.wiki-topbar {
   border-top: 0 !important;
 }
 @media (min-width: 561px) {
-  .wiki-topbar .wiki-search,
-  .wiki-topbar.is-scrolled .wiki-search {
+  .wiki-topbar .wiki-search {
     flex-basis: auto !important;
     width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
     overflow: visible !important;
     transition: opacity 220ms ease !important;
-  }
-
-  .wiki-topbar.is-scrolled .wiki-search {
-    opacity: 0 !important;
-    pointer-events: none;
   }
 }
 @media (max-width: 560px) {
@@ -3794,8 +3724,7 @@ html body .wiki-shell a:visited:focus-visible {
   }
 }
 @media (max-width: 56.25rem) {
-  header.wiki-topbar,
-  header.wiki-topbar.is-scrolled {
+  header.wiki-topbar {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
     grid-template-areas: "brand nav" !important;
@@ -3809,8 +3738,7 @@ html body .wiki-shell a:visited:focus-visible {
     min-width: 0;
   }
 
-  .wiki-topbar > .wiki-search,
-  .wiki-topbar.is-scrolled > .wiki-search {
+  .wiki-topbar > .wiki-search {
     display: none !important;
   }
 
@@ -3863,8 +3791,7 @@ html body .wiki-shell a:visited:focus-visible {
 .wiki-topbar nav > a svg {
   transform: translateY(-0.5px);
 }
-header.wiki-topbar,
-header.wiki-topbar.is-scrolled {
+header.wiki-topbar {
   height: 3.25rem !important;
   min-height: 3.25rem !important;
   padding-block: 0.5625rem !important;
@@ -4179,7 +4106,6 @@ html body .wiki-shell .wiki-sticky-actions > a:visited {
 }
 
 header.wiki-topbar,
-header.wiki-topbar.is-scrolled,
 .wiki-layout {
   width: 100% !important;
   max-width: none !important;
@@ -4219,8 +4145,7 @@ header.wiki-topbar.is-scrolled,
   }
 }
 
-header.wiki-topbar,
-header.wiki-topbar.is-scrolled {
+header.wiki-topbar {
   background: var(--wiki-page) !important;
 }
 
@@ -4231,8 +4156,7 @@ header.wiki-topbar.is-scrolled {
   background: var(--wiki-page) !important;
 }
 @media (max-width: 68.6875rem) {
-  header.wiki-topbar,
-  header.wiki-topbar.is-scrolled {
+  header.wiki-topbar {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
     grid-template-areas: "brand nav" !important;
@@ -4250,8 +4174,7 @@ header.wiki-topbar.is-scrolled {
     min-width: 0;
   }
 
-  .wiki-topbar > .wiki-search,
-  .wiki-topbar.is-scrolled > .wiki-search {
+  .wiki-topbar > .wiki-search {
     display: none !important;
   }
 
@@ -4325,8 +4248,7 @@ header.wiki-topbar.is-scrolled {
   --wiki-global-header-height: 0px;
 }
 
-header.wiki-topbar,
-header.wiki-topbar.is-scrolled {
+header.wiki-topbar {
   position: relative !important;
   top: auto !important;
   right: auto !important;
@@ -4459,8 +4381,7 @@ header.wiki-topbar.is-scrolled {
 }
 
 @media (min-width: 68.75rem) {
-  header.wiki-topbar,
-  header.wiki-topbar.is-scrolled {
+  header.wiki-topbar {
     display: grid !important;
     grid-template-columns: 13.5rem minmax(0, 1fr) auto !important;
     grid-template-areas: none !important;
@@ -4522,4 +4443,80 @@ html.theme-switching *,
 html.theme-switching *::before,
 html.theme-switching *::after {
   transition: none !important;
+}
+
+/* "So many languages" shares the title's text baseline at every size. */
+.wiki-article-header .wiki-title-row > .wiki-article-title,
+.wiki-article-header .wiki-title-row > .wiki-talk-title,
+.wiki-article-header .wiki-title-row > .wiki-title-action,
+.wiki-article-header.is-scrolled .wiki-title-row > .wiki-title-action {
+  align-self: last baseline !important;
+}
+
+.wiki-article-header .wiki-title-row > .wiki-title-action,
+.wiki-article-header.is-scrolled .wiki-title-row > .wiki-title-action {
+  height: auto !important;
+  margin-bottom: 0 !important;
+}
+
+/* Sticky icons center on the title box (row bottom minus the title's 0.5rem margin). */
+.wiki-article-header .wiki-title-row > .wiki-title-action {
+  position: static !important;
+}
+
+.wiki-article-header .wiki-title-row .wiki-sticky-actions,
+.wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+  top: auto !important;
+  bottom: 0.5rem !important;
+  right: 0 !important;
+  transform: none !important;
+}
+
+/* Scroll-linked top bar fade. filter: opacity() multiplies with the intro animation's
+   inline opacity instead of fighting it, so both always resolve fully. */
+/* Never filter <nav> itself: a filter makes it the containing block for the fixed
+   mobile search sheet inside it, which pulls the sheet onto the page. */
+html body header.wiki-topbar > .wiki-search,
+html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) {
+  filter: opacity(var(--wiki-topbar-fade, 1));
+}
+
+@media (max-width: 68.6875rem) {
+  html body header.wiki-topbar > .wiki-brand {
+    filter: opacity(var(--wiki-topbar-fade, 1));
+  }
+}
+
+/* Leaving the sticky state: the sticky search disappears instantly in place. Fading it
+   out while the title row re-lays out made it flash across the header. */
+.wiki-article-header:not(.is-scrolled) .wiki-scroll-actions,
+.wiki-article-header:not(.is-scrolled) .wiki-scroll-search,
+.wiki-article-header:not(.is-scrolled) .wiki-sticky-actions {
+  transition: none !important;
+}
+
+/* Tablet (900–1100px): the top bar carries the full search, matching the sticky header,
+   so search is present both at the top and when scrolled. */
+@media (min-width: 56.3125rem) and (max-width: 68.6875rem) {
+  header.wiki-topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    grid-template-areas: "brand search nav" !important;
+  }
+
+  html body header.wiki-topbar > .wiki-search {
+    grid-area: search;
+    display: grid !important;
+    width: 100% !important;
+    max-width: 30rem;
+    justify-self: center;
+  }
+
+  .wiki-topbar nav > .wiki-nav-search {
+    display: none !important;
+  }
+
+  .wiki-topbar nav {
+    width: 4.75rem !important;
+    min-width: 4.75rem !important;
+  }
 }
