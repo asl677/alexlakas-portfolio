@@ -15,6 +15,7 @@ export default function Loader({ onHide }: LoaderProps) {
     if (!el) return;
 
     const hide = () => {
+      onHide?.();
       gsap.to(el, {
         opacity: 0,
         duration: 0.7,
@@ -22,7 +23,6 @@ export default function Loader({ onHide }: LoaderProps) {
         ease: "power2.inOut",
         onComplete: () => {
           el.style.display = "none";
-          onHide?.();
         },
       });
     };
@@ -43,6 +43,7 @@ export default function Loader({ onHide }: LoaderProps) {
       triggered = true; // prevent any pending call
       clearTimeout(timer);
       window.removeEventListener("load", trigger);
+      gsap.killTweensOf(el);
     };
   }, [onHide]);
 

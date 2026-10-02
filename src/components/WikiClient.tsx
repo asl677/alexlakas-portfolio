@@ -1,0 +1,958 @@
+"use client";
+
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { BookMarked, BriefcaseBusiness, ChevronDown, Code2, FileText, GraduationCap, Link, MoreVertical, Newspaper, Palette, Quote, Search, X } from "lucide-react";
+import { gsap, SplitText } from "gsap/all";
+import Lenis from "lenis";
+
+gsap.registerPlugin(SplitText);
+
+const hoverPortraitFrames = [
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/67bb5c12c57a2790a896d2fe_man-red.avif",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/692926ba1daaa6bd1d904499_shot3.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/66aed54564c490241089592d_hand.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/665554b2f2ee046740dbbd4f_syd-cover.jpeg",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/67700bb77f4bfa58786b7569_02%202.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/65c99f3f74651f26dc44e777_0225.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/691d4a10a400d63fe056ed9f_220.avif",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/681309f43c2b0e7da6163320_logo.png",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/6813096813d071d057e17cab_man-stars.jpg",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/651d9b32904012a586063cc3_polls577_4x.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/665565a0acb1cccd12cf8ab0_macbook-book.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/691d4816ea87196a56f06bd6_01.webp",
+];
+
+type SearchResult = {
+  id: string;
+  title: string;
+  excerpt: string;
+  thumbnail: string | undefined;
+  video: string | undefined;
+};
+
+function SearchResultIcon({ id }: { id: string }) {
+  const Icon = {
+    "early-life": GraduationCap,
+    career: BriefcaseBusiness,
+    style: Palette,
+    media: Newspaper,
+    publications: FileText,
+    stack: Code2,
+    references: Quote,
+    "external-links": Link,
+  }[id] || BookMarked;
+
+  return <Icon size={22} />;
+}
+
+export function PageSearch({ inputId = "page-search", autoFocus = false }: { inputId?: string; autoFocus?: boolean }) {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const searchRef = useRef<HTMLFormElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const resultsContentRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    const wrapper = resultsRef.current;
+    const content = resultsContentRef.current;
+    if (!wrapper || !content || results.length === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const lenis = new Lenis({ wrapper, content, lerp: 0.12, smoothWheel: true, wheelMultiplier: 0.85, touchMultiplier: 1 });
+    let frame: number | null = null;
+    const tick = (time: number) => {
+      lenis.raf(time);
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      lenis.destroy();
+    };
+  }, [results.length]);
+
+  useEffect(() => {
+    if (!results.length) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!searchRef.current?.contains(event.target as Node)) setResults([]);
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, [results.length]);
+
+  const updateResults = (value: string) => {
+    const term = value.trim();
+    if (!term) {
+      setResults([]);
+      setStatus("");
+      return;
+    }
+
+    if (term.length < 2) {
+      setResults([]);
+      setStatus("Keep typing to search.");
+      return;
+    }
+
+    const normalizedTerm = term.toLocaleLowerCase();
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const wordMatch = term.length <= 3 ? new RegExp(`\\b${escapedTerm}\\b`, "i") : null;
+    const matches = Array.from(document.querySelectorAll<HTMLElement>(".article-list-item, .career-feature, .wiki-section"))
+      .map((item) => {
+        const isPublication = item.classList.contains("article-list-item");
+        const title = isPublication
+          ? item.querySelector("h3")?.textContent?.trim() || "Publication"
+          : item.classList.contains("career-feature")
+            ? item.querySelector("h3")?.textContent?.trim() || "Career feature"
+            : item.querySelector("h2")?.textContent?.trim() || "Section";
+        const text = item.innerText.replace(/\s+/g, " ").trim();
+        const matchingBlock = Array.from(item.querySelectorAll<HTMLElement>("p, li"))
+          .map((block) => block.innerText.replace(/\s+/g, " ").trim())
+          .find((block) => wordMatch ? wordMatch.test(block) : block.toLocaleLowerCase().includes(normalizedTerm));
+        const resultText = matchingBlock || text;
+        const matchIndex = wordMatch ? resultText.search(wordMatch) : resultText.toLocaleLowerCase().indexOf(normalizedTerm);
+        if (matchIndex < 0 || !item.id) return null;
+        if (item.classList.contains("wiki-section")) {
+          const hasDirectMatch = Array.from(item.querySelectorAll<HTMLElement>(".article-list-item, .career-feature"))
+            .some((child) => {
+              const childText = child.textContent?.toLocaleLowerCase() || "";
+              return wordMatch ? wordMatch.test(childText) : childText.includes(normalizedTerm);
+            });
+          if (hasDirectMatch) return null;
+        }
+        const video = item.querySelector<HTMLVideoElement>("video");
+        return {
+          id: item.id,
+          title,
+          excerpt: resultText,
+          thumbnail: (isPublication || item.classList.contains("career-feature"))
+            ? item.querySelector<HTMLImageElement>("img")?.currentSrc
+              || video?.poster
+              || undefined
+            : undefined,
+          video: video?.currentSrc || video?.querySelector("source")?.src || undefined,
+        };
+      })
+      .filter((result): result is SearchResult => result !== null);
+
+    const rankedMatches = matches
+      .sort((a, b) => Number(b.title.toLocaleLowerCase().includes(normalizedTerm)) - Number(a.title.toLocaleLowerCase().includes(normalizedTerm)))
+      .slice(0, 8);
+    setResults(rankedMatches);
+    setStatus(rankedMatches.length ? `${rankedMatches.length} result${rankedMatches.length === 1 ? "" : "s"} for ${term}.` : `No matches found for ${term}.`);
+  };
+
+  const searchPage = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    updateResults(query);
+  };
+
+  const selectResult = (result: SearchResult) => {
+    const target = document.getElementById(result.id);
+    const section = target?.closest<HTMLElement>(".wiki-section") || target;
+    const toggle = section?.querySelector<HTMLButtonElement>(".wiki-section-toggle");
+    if (toggle?.getAttribute("aria-expanded") === "false") toggle.click();
+    window.history.replaceState(null, "", `#${result.id}`);
+    const scrollTarget = target?.querySelector<HTMLElement>("h2, h3") || target;
+    window.setTimeout(() => {
+      if (!scrollTarget) return;
+      const stickyElements = Array.from(document.querySelectorAll<HTMLElement>(".wiki-topbar, .wiki-article-header"));
+      const stickyOffset = stickyElements.reduce((offset, element) => {
+        const style = window.getComputedStyle(element);
+        return style.position === "sticky" || style.position === "fixed" ? offset + element.getBoundingClientRect().height : offset;
+      }, 0);
+      const top = window.scrollY + scrollTarget.getBoundingClientRect().top - stickyOffset - 12;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }, 0);
+    setResults([]);
+  };
+
+  const highlightMatch = (text: string) => {
+    const term = query.trim();
+    if (!term) return text;
+    const parts = text.split(new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig"));
+    return parts.map((part, index) =>
+      part.toLocaleLowerCase() === term.toLocaleLowerCase()
+        ? <mark className="wiki-search-match" key={index}>{part}</mark>
+        : part,
+    );
+  };
+
+  return (
+    <form ref={searchRef} className="wiki-search" onSubmit={searchPage} role="search">
+      <label className="sr-only" htmlFor={inputId}>Search this page</label>
+      <span className="search-decoration" aria-hidden="true"><Search size={20} strokeWidth={2} /></span>
+      <div className="wiki-search-input">
+        <input
+          id={inputId}
+          autoFocus={autoFocus}
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            updateResults(event.target.value);
+          }}
+          placeholder="Search"
+        />
+        {query && (
+          <button
+            type="button"
+            className="search-clear"
+            aria-label="Clear search"
+            onClick={() => {
+              setQuery("");
+              setResults([]);
+              setStatus("");
+            }}
+          >
+            <X size={16} />
+          </button>
+        )}
+        {results.length > 0 && (
+          <div ref={resultsRef} className="wiki-search-results" data-lenis-prevent>
+          <ul ref={resultsContentRef} aria-label="Search results">
+            {results.map((result) => (
+              <li key={result.id}>
+                <button type="button" onClick={() => selectResult(result)}>
+                  {result.video ? (
+                    <video className="wiki-search-result-video" src={result.video} poster={result.thumbnail} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
+                  ) : result.thumbnail ? <img src={result.thumbnail} alt="" /> : <span className="wiki-search-result-icon" aria-hidden="true"><SearchResultIcon id={result.id} /></span>}
+                  <span className="wiki-search-result-copy">
+                    <strong>{highlightMatch(result.title)}</strong>
+                    <span>{highlightMatch(result.excerpt)}</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          </div>
+        )}
+      </div>
+      <button type="submit" className="search-submit">Search</button>
+      <span className="sr-only" aria-live="polite">{status}</span>
+    </form>
+  );
+}
+
+export function MobileSearchSheet() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [isOpen]);
+
+  return (
+    <>
+      <button type="button" className="wiki-icon-button wiki-nav-search" aria-label="Search" title="Search" aria-expanded={isOpen} onClick={() => setIsOpen((open) => !open)}><Search size={20} strokeWidth={2} /></button>
+      <div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} onPointerDown={() => setIsOpen(false)}>
+        <section className="wiki-mobile-search-sheet-panel" role="dialog" aria-modal="true" aria-label="Search this page" onPointerDown={(event) => event.stopPropagation()}>
+          <div className="wiki-mobile-search-sheet-header">
+            <span>Search</span>
+            <button
+              type="button"
+              aria-label="Close search"
+              title="Close search"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={() => setIsOpen(false)}
+            >
+              <X size={20} strokeWidth={2} />
+            </button>
+          </div>
+          <PageSearch inputId="mobile-sheet-search" />
+        </section>
+      </div>
+    </>
+  );
+}
+
+export function SeamlessVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const restartBeforeEnd = () => {
+      if (!video.duration || video.currentTime < video.duration - 0.18) return;
+      video.currentTime = 0;
+      void video.play();
+    };
+
+    const restartAfterEnd = () => {
+      video.currentTime = 0;
+      void video.play();
+    };
+
+    video.addEventListener("timeupdate", restartBeforeEnd);
+    video.addEventListener("ended", restartAfterEnd);
+    return () => {
+      video.removeEventListener("timeupdate", restartBeforeEnd);
+      video.removeEventListener("ended", restartAfterEnd);
+    };
+  }, []);
+
+  return (
+    <video ref={videoRef} className="agents-video" poster="/agents.mp4.png" autoPlay muted playsInline preload="auto" controlsList="nodownload noplaybackrate noremoteplayback" disableRemotePlayback aria-label="AI agents data workflow animation" tabIndex={-1}>
+      <source src="/agents.mp4" type="video/mp4" />
+    </video>
+  );
+}
+
+export function HoverPortrait() {
+  const [isHovering, setIsHovering] = useState(false);
+  const [frame, setFrame] = useState(0);
+  const frameRef = useRef(0);
+  const loadedFramesRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    hoverPortraitFrames.forEach(src => {
+      const image = new window.Image();
+      const markAvailable = () => {
+        loadedFramesRef.current.add(src);
+      };
+
+      image.onload = markAvailable;
+      image.onerror = () => undefined;
+      image.src = src;
+      void image.decode().then(markAvailable).catch(() => undefined);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isHovering) {
+      frameRef.current = 0;
+      setFrame(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      const frames = hoverPortraitFrames.filter(src => loadedFramesRef.current.has(src));
+      if (frames.length > 0) {
+        frameRef.current = (frameRef.current + 1) % frames.length;
+        setFrame(frameRef.current);
+      }
+    }, 450);
+
+    return () => window.clearInterval(interval);
+  }, [isHovering]);
+
+  const activeFrames = hoverPortraitFrames.filter(src => loadedFramesRef.current.has(src));
+  const activeFrame = activeFrames[frame];
+  const portraitSrc = "/me.png?v=yearbook-20261001";
+
+  return (
+    <div
+      className="infobox-portrait"
+      onPointerEnter={() => {
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+          setIsHovering(true);
+        }
+      }}
+      onPointerLeave={() => setIsHovering(false)}
+    >
+      {/* The frame changes in place; the rail never moves or reflows. */}
+      <img src={isHovering && activeFrame ? activeFrame : portraitSrc} alt="Alex" width={1254} height={1254} />
+    </div>
+  );
+}
+
+export function WikiSection({
+  id,
+  title,
+  className = "",
+  children,
+}: {
+  id: string;
+  title: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const contentId = useId();
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const wasOpenRef = useRef(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 560px)");
+    const sync = () => {
+      setIsMobile(media.matches);
+      setOpen(!media.matches);
+    };
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => {
+      media.removeEventListener("change", sync);
+    };
+  }, []);
+
+  useEffect(() => {
+    const closeForAnotherSection = (event: Event) => {
+      const { detail } = event as CustomEvent<string>;
+      if (detail !== id) setOpen(false);
+    };
+
+    window.addEventListener("alexpedia-accordion-open", closeForAnotherSection);
+    return () => window.removeEventListener("alexpedia-accordion-open", closeForAnotherSection);
+  }, [id]);
+
+  useLayoutEffect(() => {
+    const body = bodyRef.current;
+    if (!body) return;
+    const wasOpen = wasOpenRef.current;
+    wasOpenRef.current = open;
+
+    const setSectionHeight = (value: string) => {
+      body.style.setProperty("--wiki-section-height", value);
+    };
+    const setSectionTransition = (value: string) => {
+      if (value) {
+        body.style.setProperty("--wiki-section-transition", value);
+      } else {
+        body.style.removeProperty("--wiki-section-transition");
+      }
+    };
+
+    if (!isMobile) {
+      setSectionHeight("auto");
+      setSectionTransition("");
+      body.style.height = "";
+      body.style.overflow = "";
+      return;
+    }
+
+    let frame = 0;
+    const finish = (event: TransitionEvent) => {
+      if (event.target !== body || event.propertyName !== "height") return;
+      if (open) {
+        setSectionHeight("auto");
+      }
+    };
+
+    body.addEventListener("transitionend", finish);
+    body.style.overflow = "hidden";
+    setSectionTransition("");
+
+    if (open) {
+      setSectionHeight("0px");
+      frame = window.requestAnimationFrame(() => {
+        setSectionHeight(`${body.scrollHeight}px`);
+      });
+    } else {
+      if (!wasOpen) {
+        setSectionTransition("none");
+        setSectionHeight("0px");
+        void body.offsetHeight;
+        frame = window.requestAnimationFrame(() => {
+          setSectionTransition("");
+        });
+        return () => {
+          window.cancelAnimationFrame(frame);
+          body.removeEventListener("transitionend", finish);
+        };
+      }
+
+      const startHeight = body.getBoundingClientRect().height || body.scrollHeight;
+      setSectionHeight(`${startHeight}px`);
+      void body.offsetHeight;
+      frame = window.requestAnimationFrame(() => {
+        setSectionHeight("0px");
+      });
+    }
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      body.removeEventListener("transitionend", finish);
+    };
+  }, [isMobile, open]);
+
+  return (
+    <section id={id} className={("wiki-section " + (open ? "is-open " : "") + className).trim()}>
+      <button
+        type="button"
+        className="wiki-section-toggle"
+        aria-expanded={open}
+        aria-controls={contentId}
+        onClick={() => {
+          if (isMobile) {
+            setOpen((value) => {
+              const next = !value;
+              if (next) window.dispatchEvent(new CustomEvent("alexpedia-accordion-open", { detail: id }));
+              return next;
+            });
+          }
+        }}
+      >
+        <span className="wiki-section-chevron" aria-hidden="true"><ChevronDown size={24} strokeWidth={2} /></span>
+        <h2>{title}</h2>
+      </button>
+      <div id={contentId} ref={bodyRef} className="wiki-section-body" aria-hidden={!open}>
+        <div className="wiki-section-content">
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function IntroSequence() {
+  useEffect(() => {
+    const topbar = document.querySelector<HTMLElement>(".wiki-topbar");
+    const articleHeader = document.querySelector<HTMLElement>(".wiki-article-header");
+    const contents = document.querySelector<HTMLElement>(".wiki-contents");
+    if (!topbar || !articleHeader || !contents) return;
+
+    const updateSearchVisibility = () => {
+      // Match the visual handoff to the article header becoming sticky.
+      const stickyTop = Number.parseFloat(window.getComputedStyle(articleHeader).top) || 0;
+      const isScrolled = articleHeader.getBoundingClientRect().top <= stickyTop + 1;
+      const scrollProgress = Math.min(window.scrollY / 96, 1);
+      const easedProgress = scrollProgress * scrollProgress * (3 - (2 * scrollProgress));
+      topbar.classList.toggle("is-scrolled", isScrolled);
+      articleHeader.classList.toggle("is-scrolled", isScrolled);
+      contents.classList.toggle("is-scrolled", isScrolled);
+      articleHeader.style.setProperty("--wiki-language-opacity", String(1 - easedProgress));
+    };
+
+    updateSearchVisibility();
+    window.addEventListener("scroll", updateSearchVisibility, { passive: true });
+    window.addEventListener("resize", updateSearchVisibility);
+    return () => {
+      window.removeEventListener("scroll", updateSearchVisibility);
+      window.removeEventListener("resize", updateSearchVisibility);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const shell = document.querySelector(".wiki-shell");
+    const counter = document.querySelector<HTMLElement>(".wiki-loader-counter");
+    const wordmark = document.querySelector<HTMLElement>(".wiki-wordmark-text");
+    const alignCounter = () => {
+      if (!counter || !wordmark) return;
+      const typography = window.getComputedStyle(wordmark);
+      const bounds = wordmark.getBoundingClientRect();
+      const loaderBounds = counter.parentElement!.getBoundingClientRect();
+      counter.style.font = typography.font;
+      counter.style.fontFamily = typography.fontFamily;
+      counter.style.fontSize = typography.fontSize;
+      counter.style.fontWeight = typography.fontWeight;
+      counter.style.fontStyle = typography.fontStyle;
+      counter.style.fontVariant = typography.fontVariant;
+      counter.style.letterSpacing = typography.letterSpacing;
+      counter.style.lineHeight = typography.lineHeight;
+      counter.style.color = typography.color;
+      counter.style.fontFeatureSettings = typography.fontFeatureSettings;
+      counter.style.fontVariationSettings = typography.fontVariationSettings;
+      counter.style.fontKerning = typography.fontKerning;
+      counter.style.textTransform = typography.textTransform;
+      counter.style.left = `${bounds.left - loaderBounds.left}px`;
+      counter.style.top = `${bounds.top - loaderBounds.top}px`;
+      counter.style.height = `${bounds.height}px`;
+      counter.style.visibility = "visible";
+    };
+    alignCounter();
+    window.addEventListener("resize", alignCounter);
+    document.fonts.addEventListener("loadingdone", alignCounter);
+    const progress = { value: 0 };
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const loaderDuration = reducedMotion ? 0 : 1.2;
+    const loaderTween = gsap.to(progress, {
+      value: 100,
+      duration: loaderDuration,
+      ease: "none",
+      onUpdate: () => {
+        if (counter) counter.textContent = String(Math.round(progress.value));
+      }
+    });
+    const loaderDelay = window.setTimeout(() => shell?.classList.remove("is-loading"), loaderDuration * 1000 + 100);
+    const targets = Array.from(document.querySelectorAll<HTMLElement>([
+      ".wiki-topbar > .wiki-wordmark",
+      ".wiki-topbar > .wiki-brand",
+      ".wiki-topbar > .wiki-search",
+      ".wiki-topbar > .wiki-mobile-actions > *",
+      ".wiki-contents summary",
+      ".wiki-contents nav > a",
+      ".wiki-title-row > *",
+      ".wiki-tab-primary > *",
+      ".wiki-tab-actions > *",
+      ".wiki-mobile-tools > *",
+      ".infobox h2",
+      ".infobox-portrait",
+      ".infobox .caption",
+      ".infobox dt",
+      ".infobox dd",
+      ".article-toc > h2",
+      ".article-toc > ol > li",
+      ".wiki-section-toggle",
+      ".wiki-section-content > ul > li",
+      ".wiki-section-content > ol > li",
+      ".wiki-section-content .article-list-item",
+      ".wiki-section-content .references > li",
+      ".wiki-section-content .wiki-link-list > li",
+      ".wiki-section-content .work-links > li",
+      ".wiki-section-content .medium-card",
+      ".wiki-section-content .career-feature > figure",
+      ".wiki-categories > *",
+      ".wiki-talk-page > *"
+    ].join(", ")))
+      .sort((a, b) => {
+        const aRect = a.getBoundingClientRect();
+        const bRect = b.getBoundingClientRect();
+        return aRect.top - bRect.top || aRect.left - bRect.left;
+      });
+    const context = gsap.context(() => {
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const text = document.querySelector<HTMLElement>(".wiki-wordmark-text");
+        if (text) {
+          let current = "Wikipidia";
+          gsap.set(text, { textContent: current });
+          const typing = gsap.timeline({ delay: 2.3 });
+          const typingRhythm = [0.095, 0.075, 0.115, 0.085, 0.105, 0.08];
+          const deletingRhythm = [0.055, 0.04, 0.045, 0.035];
+          let time = 0;
+          for (const next of ["Alexipidia", "Nah", "Designer"]) {
+            for (let length = current.length - 1; length >= 0; length--) {
+              time += deletingRhythm[(current.length - 1 - length) % deletingRhythm.length];
+              typing.set(text, { textContent: current.slice(0, length) }, time);
+            }
+            time += 0.18;
+            for (let length = 1; length <= next.length; length++) {
+              time += typingRhythm[(length - 1) % typingRhythm.length];
+              typing.set(text, { textContent: next.slice(0, length) }, time);
+            }
+            time += next === "Nah" ? 0.85 : 1.3;
+            current = next;
+          }
+        }
+      }
+      const fade = { duration: 1.2, stagger: 0.012, ease: "sine.out" };
+      const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
+        const first = a.getBoundingClientRect();
+        const second = b.getBoundingClientRect();
+        return first.top - second.top || first.left - second.left;
+      });
+      let textLines: HTMLElement[] = [];
+      let queueReveal = () => {};
+      const revealedLines = new Set<HTMLElement>();
+      const textSplits = Array.from(document.querySelectorAll<HTMLElement>([
+        ".wiki-article-body > p",
+        ".wiki-section-content > p",
+        ".wiki-section-content > h3",
+        ".wiki-section-content .career-feature > h3",
+        ".wiki-section-content .career-feature > p"
+      ].join(", "))).map(target => {
+        let previousLines: HTMLElement[] = [];
+        return new SplitText(target, {
+        type: "lines",
+        tag: "span",
+        aria: "none",
+        ignore: ".reference",
+        wordsClass: "wiki-reveal-word",
+        linesClass: "wiki-reveal-line",
+        autoSplit: true,
+        onSplit(split) {
+          // Preserve revealed text ranges, not the whole paragraph, across rewraps.
+          const textLength = (line: HTMLElement) => (line.textContent ?? "").replace(/\s/g, "").length;
+          let previousOffset = 0;
+          const revealedRanges = previousLines.flatMap(line => {
+            const start = previousOffset;
+            previousOffset += textLength(line);
+            return revealedLines.has(line) ? [{ start, end: previousOffset }] : [];
+          });
+          gsap.killTweensOf(previousLines);
+          textLines = textLines.filter(line => !previousLines.includes(line));
+          previousLines.forEach(line => revealedLines.delete(line));
+          // SplitText clears its own lines array during resize; retain our snapshot.
+          previousLines = [...split.lines] as HTMLElement[];
+          textLines.push(...previousLines);
+          let nextOffset = 0;
+          previousLines.forEach(line => {
+            const start = nextOffset;
+            nextOffset += textLength(line);
+            const wasRevealed = revealedRanges.some(range => range.start < nextOffset && range.end > start);
+            if (wasRevealed) revealedLines.add(line);
+            gsap.set(line, { opacity: wasRevealed ? 1 : 0 });
+          });
+          queueReveal();
+        }
+      });
+      });
+      const rail = document.querySelector<HTMLElement>(".infobox");
+      if (rail) targets.push(rail);
+      const dividers = new Set(Array.from(document.querySelectorAll<HTMLElement>(
+        ".wiki-title-row, .wiki-tabs, .wiki-mobile-tools, .article-toc, .wiki-section, .wiki-section-toggle h2, .wiki-categories"
+      )));
+      dividers.forEach(divider => {
+        divider.classList.add("wiki-reveal-divider");
+        targets.push(divider);
+      });
+      const revealProperties = (element: HTMLElement, opacity: number) => {
+        if (element === rail) return { "--rail-surface-opacity": opacity };
+        if (dividers.has(element)) return { "--wiki-divider-opacity": opacity };
+        return { opacity };
+      };
+      const stage = (elements: HTMLElement[]) => elements.forEach(element => {
+        gsap.set(element, revealProperties(element, 0));
+      });
+      const fadeIn = (elements: HTMLElement[], delay = 0) => {
+        const timeline = gsap.timeline({ delay });
+        visualOrder(elements).forEach((element, index) => {
+          timeline.to(element, {
+            ...revealProperties(element, 1),
+            duration: fade.duration,
+            ease: fade.ease
+          }, index * fade.stagger);
+        });
+      };
+      const isInRevealArea = (element: HTMLElement) => {
+        const rect = element.getBoundingClientRect();
+        const atPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
+        const inset = atPageEnd ? 0 : 30;
+        return rect.bottom > 0 && rect.top <= window.innerHeight - inset;
+      };
+      // Fade each visible element once; fading its container too multiplies opacity.
+      stage([...targets, ...textLines]);
+      const revealedTargets = new Set<HTMLElement>();
+      let revealReady = false;
+      const startInitialReveal = () => {
+        // Sample after the loader clears, when header and profile layout have settled.
+        const initiallyVisible = targets.filter(isInRevealArea);
+        const initiallyVisibleLines = textLines.filter(isInRevealArea);
+        initiallyVisible.forEach(target => revealedTargets.add(target));
+        initiallyVisibleLines.forEach(line => revealedLines.add(line));
+        fadeIn([...initiallyVisible, ...initiallyVisibleLines]);
+        revealReady = true;
+      };
+      const initialRevealDelay = window.setTimeout(startInitialReveal, loaderDuration * 1000 + 700);
+      const reveal = () => {
+        const visibleTargets = targets.filter(target => !revealedTargets.has(target) && isInRevealArea(target));
+        const visibleLines = textLines.filter(line => !revealedLines.has(line) && isInRevealArea(line));
+
+        visibleTargets.forEach(target => revealedTargets.add(target));
+        visibleLines.forEach(line => revealedLines.add(line));
+        fadeIn([...visibleTargets, ...visibleLines]);
+      };
+
+      let frame = 0;
+      const onScroll = () => {
+        if (!revealReady) return;
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(reveal);
+      };
+      queueReveal = onScroll;
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      return () => {
+        queueReveal = () => {};
+        window.clearTimeout(initialRevealDelay);
+        cancelAnimationFrame(frame);
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+        textSplits.forEach(split => split.revert());
+        dividers.forEach(divider => divider.classList.remove("wiki-reveal-divider"));
+      };
+
+    });
+
+    return () => {
+      window.removeEventListener("resize", alignCounter);
+      document.fonts.removeEventListener("loadingdone", alignCounter);
+      window.clearTimeout(loaderDelay);
+      loaderTween.kill();
+      context.revert();
+    };
+  }, []);
+
+  return null;
+}
+
+export function WikiSubsection({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <section id={id} className="wiki-subsection">
+      <h3>{title}</h3>
+      <div className="wiki-subsection-body">{children}</div>
+    </section>
+  );
+}
+
+export function ArticleTabs() {
+  const [view, setView] = useState<"article" | "talk">("article");
+
+  useEffect(() => {
+    const syncView = () => setView(window.location.hash === "#talk" ? "talk" : "article");
+    syncView();
+    window.addEventListener("hashchange", syncView);
+    return () => window.removeEventListener("hashchange", syncView);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.articleView = view;
+    // Newly shown content was staged at opacity 0; let the reveal pass pick it up.
+    const frame = requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    return () => {
+      cancelAnimationFrame(frame);
+      delete document.documentElement.dataset.articleView;
+    };
+  }, [view]);
+
+  return (
+    <div className="wiki-tabs">
+      <div className="wiki-tab-primary" role="tablist" aria-label="Article views">
+        <a href="#article" className={"wiki-tab " + (view === "article" ? "is-selected" : "")} role="tab" aria-selected={view === "article"}>Article</a>
+        <a href="#talk" className={"wiki-tab " + (view === "talk" ? "is-selected" : "")} role="tab" aria-selected={view === "talk"}>Talk</a>
+      </div>
+      <div className="wiki-tab-actions">
+        <span>Read</span>
+        <button type="button" className="wiki-more-button" aria-label="More page actions"><MoreVertical size={18} strokeWidth={2} /></button>
+      </div>
+    </div>
+  );
+}
+
+export function SmoothAnchorScroll() {
+  const animationFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const lenis = reduceMotion.matches
+      ? null
+      : new Lenis({ lerp: 0.09, smoothWheel: true, wheelMultiplier: 0.85, touchMultiplier: 1 });
+    let lenisFrame: number | null = null;
+    const tick = (time: number) => {
+      lenis?.raf(time);
+      lenisFrame = requestAnimationFrame(tick);
+    };
+    if (lenis) lenisFrame = requestAnimationFrame(tick);
+
+    function easeInOutCubic(t: number) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function handleClick(event: MouseEvent) {
+      const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+      if (!link) return;
+
+      const id = decodeURIComponent(link.hash.slice(1));
+      const target = id ? document.getElementById(id) : document.getElementById("top");
+      if (!target) return;
+
+      event.preventDefault();
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      const nextHash = link.hash || "#top";
+      const section = target.closest<HTMLElement>(".wiki-section");
+      const subsection = target.closest<HTMLElement>(".wiki-subsection");
+      const toggles = [
+        section?.querySelector<HTMLButtonElement>(".wiki-section-toggle"),
+        subsection?.querySelector<HTMLButtonElement>(".wiki-subsection-toggle"),
+      ];
+      toggles.forEach(toggle => {
+        if (toggle?.getAttribute("aria-expanded") === "false") toggle.click();
+      });
+
+      animationFrameRef.current = requestAnimationFrame(() => {
+        animationFrameRef.current = requestAnimationFrame(() => {
+        const start = window.scrollY;
+        const header = document.querySelector<HTMLElement>(".wiki-topbar");
+        const headerOffset = header && getComputedStyle(header).position === "fixed"
+          ? header.getBoundingClientRect().height + 8
+          : 8;
+        const destination = Math.max(0, target.getBoundingClientRect().top + start - headerOffset);
+        const distance = destination - start;
+
+        if (reduceMotion.matches || Math.abs(distance) < 2) {
+          window.scrollTo(0, destination);
+          history.pushState(null, "", nextHash);
+          animationFrameRef.current = null;
+          return;
+        }
+
+        const duration = Math.min(1000, Math.max(500, Math.abs(distance) * 0.3));
+        const started = performance.now();
+        function step(now: number) {
+          const progress = Math.min((now - started) / duration, 1);
+          window.scrollTo(0, start + distance * easeInOutCubic(progress));
+          if (progress < 1) {
+            animationFrameRef.current = requestAnimationFrame(step);
+          } else {
+            history.pushState(null, "", nextHash);
+            animationFrameRef.current = null;
+          }
+        }
+        animationFrameRef.current = requestAnimationFrame(step);
+        });
+      });
+    }
+
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+      if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current);
+      if (lenisFrame !== null) cancelAnimationFrame(lenisFrame);
+      lenis?.destroy();
+    };
+  }, []);
+
+  return null;
+}
+
+export function ContentsScrollSpy() {
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 901px)");
+    let frame: number | null = null;
+
+    const update = () => {
+      frame = null;
+      if (!media.matches) return;
+
+      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(".wiki-contents a[href^='#']"));
+      const headerHeight = document.querySelector<HTMLElement>(".wiki-topbar")?.getBoundingClientRect().height ?? 0;
+      const marker = headerHeight + 28;
+      let activeId = "top";
+
+      for (const link of links) {
+        const id = decodeURIComponent(link.hash.slice(1));
+        const target = id === "top" ? document.getElementById("top") : document.getElementById(id);
+        if (target && target.getBoundingClientRect().top <= marker) activeId = id;
+      }
+
+      links.forEach((link) => {
+        const isActive = decodeURIComponent(link.hash.slice(1)) === activeId;
+        link.classList.toggle("is-active", isActive);
+        if (isActive) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+    };
+
+    const schedule = () => {
+      if (frame === null) frame = requestAnimationFrame(update);
+    };
+
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    media.addEventListener("change", schedule);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      media.removeEventListener("change", schedule);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return null;
+}

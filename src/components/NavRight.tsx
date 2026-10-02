@@ -7,14 +7,16 @@ interface NavRightProps {
 export default function NavRight({ onLifeClick }: NavRightProps) {
   return (
     <>
-      {/* "Let's Go" — top-right */}
+      {/* Cases — top-right */}
       <div className="nav-right">
         <div className="inner-nav">
           <a
-            href="mailto:alex.lakas@gmail.com?subject=Let's%20collab"
+            href="https://alexslakas.medium.com"
             className="link enabled"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <p className="base">Let&apos;s Go</p>
+            <p className="base">Cases</p>
             <div className="link-strip" />
           </a>
         </div>

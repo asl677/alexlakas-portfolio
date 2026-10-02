@@ -8,6 +8,10 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function LenisInit() {
   useEffect(() => {
+    const previousScrollRestoration = history.scrollRestoration;
+    history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
     const lenis = new Lenis({
@@ -15,6 +19,9 @@ export default function LenisInit() {
       lerp: isSafari ? 0.14 : 0.1,
       wheelMultiplier: 1.1,
     });
+
+    lenis.scrollTo(0, { immediate: true, force: true });
+    window.requestAnimationFrame(() => lenis.scrollTo(0, { immediate: true, force: true }));
 
     const onTick = (time: number) => {
       lenis.raf(time * 1000);
@@ -30,6 +37,7 @@ export default function LenisInit() {
       gsap.ticker.remove(onTick);
       lenis.off("scroll", ScrollTrigger.update);
       lenis.destroy();
+      history.scrollRestoration = previousScrollRestoration;
     };
   }, []);
 
