@@ -527,6 +527,8 @@ export function IntroSequence() {
       articleHeader.classList.toggle("is-scrolled", isScrolled);
       contents.classList.toggle("is-scrolled", isScrolled);
       articleHeader.style.setProperty("--wiki-language-opacity", String(1 - easedProgress));
+      // Section headings stick directly beneath the article header's real height.
+      document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.offsetHeight}px`);
       // Top bar contents fade to exactly 0 by the time the bar has scrolled out of view.
       const topbarFade = Math.max(0, 1 - window.scrollY / Math.max(1, topbar.offsetHeight));
       topbar.style.setProperty("--wiki-topbar-fade", topbarFade.toFixed(3));
@@ -623,7 +625,7 @@ export function IntroSequence() {
       ".wiki-topbar > .wiki-wordmark",
       ".wiki-topbar > .wiki-brand",
       ".wiki-topbar > .wiki-search",
-      ".wiki-topbar > .wiki-mobile-actions > *",
+      ".wiki-topbar nav > :not(.wiki-mobile-search-sheet)",
       ".wiki-contents summary",
       ".wiki-contents nav > a",
       ".wiki-title-row > *",
@@ -665,7 +667,8 @@ export function IntroSequence() {
           loaderDone.then(() => gsap.delayedCall(0.4, () => typing.play()));
           const typingRhythm = [0.095, 0.075, 0.115, 0.085, 0.105, 0.08];
           const deletingRhythm = [0.055, 0.04, 0.045, 0.035];
-          let time = 0;
+          // Hold "Wikipidia" for 3s before the first delete.
+          let time = 3;
           for (const next of ["Alexipidia", "Nah", "Designer"]) {
             for (let length = current.length - 1; length >= 0; length--) {
               time += deletingRhythm[(current.length - 1 - length) % deletingRhythm.length];

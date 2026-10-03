@@ -23,6 +23,8 @@ export default function ThemeSwitch() {
     const root = document.documentElement;
     root.classList.add("theme-switching");
     document.documentElement.dataset.theme = nextTheme;
+    // Safari recolors its top and bottom bars from theme-color immediately, not on next scroll.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", nextTheme === "dark" ? "#000000" : "#ffffff");
     localStorage.setItem(storageKey, nextTheme);
     window.dispatchEvent(new Event("alexpedia-theme-change"));
     void root.offsetHeight;

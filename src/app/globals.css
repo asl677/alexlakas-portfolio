@@ -4520,3 +4520,62 @@ html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) {
     min-width: 4.75rem !important;
   }
 }
+
+/* One type scale at every width: mobile body copy matches desktop exactly. */
+html body .wiki-shell :is(
+  .wiki-section-content li,
+  .wiki-article-body ol > li,
+  .career-feature p,
+  .wiki-link-list li,
+  .wiki-talk-notice p,
+  .wiki-talk-thread p,
+  .wiki-talk-priority
+) {
+  font-size: 1rem !important;
+  line-height: 1.58 !important;
+}
+
+html body .wiki-shell .wiki-section-content > .references > li {
+  font-size: 0.8125rem !important;
+  line-height: 1.58 !important;
+}
+
+html body .wiki-shell .infobox :is(dt, dd) {
+  font-size: 0.78125rem !important;
+  line-height: 1.35 !important;
+}
+
+html body .wiki-shell .infobox .caption {
+  font-size: 0.75rem !important;
+  line-height: 1.58 !important;
+}
+
+html body .wiki-shell .article-list-item p:not(.article-list-meta) {
+  font-size: 0.875rem !important;
+  line-height: 1.45 !important;
+}
+
+/* Mobile/tablet: the sticky header and section headings span the full viewport width so
+   scrolling content never shows in the side gutters, and headings pin under the header. */
+@media (max-width: 68.6875rem) {
+  html body .wiki-shell .wiki-article-header {
+    width: calc(100% + 2 * var(--wiki-page-gutter)) !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    margin-inline: calc(-1 * var(--wiki-page-gutter)) !important;
+    padding-inline: var(--wiki-page-gutter) !important;
+  }
+
+  html body .wiki-shell .wiki-section-toggle {
+    position: sticky !important;
+    top: var(--wiki-article-header-height, 6.125rem) !important;
+    z-index: 90 !important;
+    display: flex !important;
+    width: calc(100% + 2 * var(--wiki-page-gutter)) !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    margin-inline: calc(-1 * var(--wiki-page-gutter)) !important;
+    padding-inline: var(--wiki-page-gutter) !important;
+    background: var(--wiki-page) !important;
+  }
+}
