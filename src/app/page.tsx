@@ -142,7 +142,7 @@ export default function Home() {
                 <dt>Born</dt><dd>United States</dd>
                 <dt>Based in</dt><dd>Los Angeles, California</dd>
                 <dt>Occupation</dt><dd>Sr. staff designer, art director, product designer</dd>
-                <dt>Known for</dt><dd>&ldquo;Incredibly talented designer&rdquo;, &ldquo;Simple, clear aesthetic&rdquo;</dd>
+                <dt>Known for</dt><dd>&ldquo;Incredibly talented designer&rdquo;, &ldquo;Simple, clear aesthetic&rdquo;, &ldquo;Good people&rdquo;</dd>
                 <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">linkedin.com/in/latenights</a></dd>
                 <dt>Interests</dt><dd>Cars, design, engineering, comedy, AI, systems</dd>
               </dl>
@@ -197,7 +197,7 @@ export default function Home() {
                   <img src="https://miro.medium.com/v2/resize:fit:700/1*nacLVsr2ifTQvHN_qQknYw.png" alt="Alex with the LinkedIn Sharing team" />
                   <figcaption>The Sharing Team: I&apos;m the one in the hat</figcaption>
                 </figure>
-                <p>As a Senior Product Designer at <a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>, Alex worked on the home experience and sharing tools, then helped develop polls and live video features as the platform expanded how professional communities could participate and connect.<Ref n={3} /><Ref n={6} /><Ref n={10} /></p>
+                <p>As a Senior Product Designer at <a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>, Alex worked on the home experience and sharing tools, then helped develop polls and live video features as the platform expanded how professional communities could participate and connect. The work spanned design systems, product design, and prototyping.<Ref n={3} /><Ref n={6} /><Ref n={10} /></p>
                 <p>The goal was to make professional participation feel less formal and more immediate. Streamlined sharing, lightweight polls, and live formats gave members more ways to contribute, while preserving the context and utility people expect from a professional network.</p>
               </div>
               <div id="freelance-and-0-1" className="career-feature career-feature--left career-feature--wide career-feature--peanut">
@@ -208,7 +208,7 @@ export default function Home() {
                   </div>
                   <figcaption>Peanut Travel</figcaption>
                 </figure>
-                <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut Travel</a>, a browser-based travel-planning product that partnered with Insured Nomads, a travel-insurance company, before it was acquired by the company. He then served as Design Director at Culprit Creative, extending his work across brand, social, and product experiences.<Ref n={1} /><Ref n={11} /></p>
+                <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut Travel</a>, a browser-based travel-planning product that partnered with Insured Nomads, a travel-insurance company, before it was acquired by the company. His work there spanned design systems, product design, and prototyping. He then served as Design Director at Culprit Creative, extending his work across brand, social, and product experiences.<Ref n={1} /><Ref n={11} /></p>
                 <p>Built by a lean founding team, Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Peanut, the product brought useful travel choices into the browsing moment, reducing the distance between research and action. At Culprit, Alex applied the same product thinking to creative direction, building systems that could carry a clear point of view across platforms and campaigns.<Ref n={7} /></p>
               </div>
               <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape">
@@ -255,7 +255,7 @@ export default function Home() {
               </div>
               <p><a className="external-link" href="https://alexslakas.medium.com/" target="_blank" rel="noreferrer">More on Medium</a></p>
             </WikiSection>
-            <WikiSection id="stack" title="Stack"><ul className="stack-tags"><li>Claude</li><li>Codex</li><li>Hermes</li><li>Vercel</li><li>GitHub</li><li>Figma</li><li>Midjourney</li><li>shadcn/ui</li><li>Three.js</li><li>WebGL</li><li>Webflow</li><li>React</li><li>GSAP</li><li>IXD</li><li>Visual design</li><li>UXD</li><li>Mixed Methods Research</li><li>Strategy</li><li>Leadership</li><li>Gen AI</li><li>Rapid prototyping</li><li>Basic ass design principles</li><li>Grids</li><li>Minimalism</li></ul></WikiSection>
+            <WikiSection id="stack" title="Stack"><ul className="stack-tags"><li>Claude</li><li>Codex</li><li>Hermes</li><li>Vercel</li><li>GitHub</li><li>Figma</li><li>Midjourney</li><li>shadcn/ui</li><li>Three.js</li><li>WebGL</li><li>Webflow</li><li>React</li><li>GSAP</li><li>IXD</li><li>Visual design</li><li>UXD</li><li>Mixed Methods Research</li><li>Strategy</li><li>Leadership</li><li>Gen AI</li><li>Rapid prototyping</li><li>Brand</li><li>Presentations</li><li>Basic ass design principles</li><li>Grids</li><li>Minimalism</li></ul></WikiSection>
             <WikiSection id="references" title="References"><ol className="references">{references.map((reference, index) => {
               const patentLinks = reference.links ?? [];
               return <li id={"ref-" + (index + 1)} key={reference.label}><a className="reference-backlink" href={"#cite-" + (index + 1)} aria-label={`Back to citation ${index + 1}`}>^</a>{patentLinks.length ? <><span>{reference.label}: </span>{patentLinks.map((patent, patentIndex) => <span key={patent.href}><a href={patent.href}>{patent.label}</a>{patentIndex < patentLinks.length - 1 ? ", " : ""}</span>)}</> : <a href={reference.href ?? "#references"}>{reference.label}</a>}. <i>{reference.source}</i>.</li>;
