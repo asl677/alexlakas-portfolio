@@ -720,7 +720,10 @@ export function IntroSequence() {
     const context = gsap.context(() => {
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const text = document.querySelector<HTMLElement>(".wiki-wordmark-text");
-        if (text) {
+        // Crawlers and automated browsers only ever see "Designer", so the animation's
+        // placeholder names are never rendered into anything a search engine indexes.
+        const isCrawler = navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(navigator.userAgent);
+        if (text && !isCrawler) {
           let current = "Wikipidia";
           gsap.set(text, { textContent: current });
           // Typing starts from the real loader finishing, not a fixed timer.

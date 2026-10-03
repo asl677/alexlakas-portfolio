@@ -5,9 +5,9 @@ export default function NotFound() {
     <main className="wiki-shell">
       <article className="wiki-article not-found-page">
         <h1>Page not found</h1>
-        <p>The requested Alexipidia page does not exist.</p>
+        <p>The requested page does not exist.</p>
         <p>
-          <Link href="/">Return to Alexipidia</Link>
+          <Link href="/">Return home</Link>
         </p>
       </article>
     </main>

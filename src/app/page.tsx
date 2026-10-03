@@ -61,7 +61,7 @@ export default function Home() {
         <header className="wiki-topbar" data-lenis-prevent>
           <div className="wiki-brand">
             <a href="#top" className="wiki-wordmark" aria-label="Alex | Designer">
-              <span className="wiki-wordmark-text" aria-hidden="true">Designer</span>
+              <span className="wiki-wordmark-text" aria-hidden="true" data-nosnippet>Designer</span>
             </a>
           </div>
           <PageSearch />
@@ -121,7 +121,7 @@ export default function Home() {
                 <p>If you are the subject of this article, or are acting on behalf of one, use this page to raise a specific concern or propose a sourced change.</p>
               </div>
               <div className="wiki-talk-status">
-                <div className="wiki-talk-rating"><span aria-hidden="true" className="wiki-talk-rating-mark">A</span><span>This article is rated <strong>A-class</strong> on Alexipidia&apos;s content assessment scale.</span><a href="#start-discussion">[hide]</a></div>
+                <div className="wiki-talk-rating"><span aria-hidden="true" className="wiki-talk-rating-mark">A</span><span>This article is rated <strong>A-class</strong> on this page&apos;s content assessment scale.</span><a href="#start-discussion">[hide]</a></div>
                 <div><strong>Biography: Arts and Entertainment</strong><a href="#start-discussion">[show]</a></div>
                 <div><strong>Graphic design</strong><span className="wiki-talk-priority">Insane-importance</span><a href="#start-discussion">[show]</a></div>
                 <div><strong>United States</strong><a href="#start-discussion">[show]</a></div>
