@@ -5,25 +5,26 @@ import ThemeSwitch from "../components/ThemeSwitch";
 import { ArticleTabs, ContentsScrollSpy, HoverPortrait, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
 
 const references = [
-  { label: "Alex Lakas featured in 10 UX design portfolio examples", href: "https://www.shutterstock.com/blog/ux-design-portfolios", source: "Shutterstock" },
   { label: "Alex Lakas featured in UX designer portfolios worth studying", href: "https://www.uxpin.com/studio/blog/ux-portfolio-examples/", source: "UXPin" },
+  { label: "Fiveonefour announces $17M raise", href: "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html", source: "PR Newswire" },
+  { label: "Alex Lakas portfolio", href: "https://craftwork.design/curated/website/alex-lakas", source: "Craftwork" },
+  { label: "Building a Side Hustle Business Remotely While Working Your 9-to-5 with Brady Simpson and Alex Lakas", href: "https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-", source: "As Told By Nomads" },
+  { label: "Insured Nomads acquires Peanut", href: "https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension", source: "ITIJ" },
+  { label: "Designing LinkedIn Home and Sharing Experience", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
+  { label: "Do I need a COVID test to travel? And other summer travel questions", href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/", source: "Forbes" },
+  { label: "LinkedIn adds polls and live video-based events", href: "https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/", source: "TechCrunch" },
+  { label: "U.S. design patents", links: [{ label: "D893,509", href: "https://uspto.report/patent/grant/D893%2C509" }, { label: "D892,816", href: "https://patentimages.storage.googleapis.com/94/19/e7/9f1b746a0a9912/USD892816.pdf" }, { label: "D869,501", href: "https://patents.justia.com/patent/D869501" }], source: "Patents" },
+  { label: "Google adds salon and spa bookings through Maps and Search", href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/", source: "TechCrunch" },
+  { label: "Google Live Popular Times featured on The Tonight Show Starring Jimmy Fallon", href: "https://www.youtube.com/watch?v=QIbPZgH1zRY", source: "YouTube" },
+  { label: "LinkedIn is gearing up for a redesign", href: "https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/", source: "TechCrunch" },
+  { label: "Alex Lakas featured in 10 UX design portfolio examples", href: "https://www.shutterstock.com/blog/ux-design-portfolios", source: "Shutterstock" },
   { label: "Alex Lakas featured in 30 UX designer portfolio examples", href: "https://www.founderjar.com/inspiration/ux-designer-portfolio-examples/", source: "FounderJar" },
   { label: "Alex Lakas featured in product-designer portfolio case studies", href: "https://blog.designpeeps.net/blog/product-design-portfolios/?p=403", source: "DesignPeeps" },
   { label: "Google Maps redesign case study crediting Alex Lakas", href: "https://www.simonfungcreative.com/google-maps.html", source: "Simon Fung Creative" },
   { label: "Alex Lakas portfolio and product-design archive", href: "https://dribbble.com/alex2pt0", source: "Dribbble" },
   { label: "Alex Lakas product-design portfolio", href: "https://www.behance.net/alexlakas?locale=en_US", source: "Behance" },
-  { label: "Fiveonefour announces $17M raise", href: "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html", source: "PR Newswire" },
-  { label: "Insured Nomads acquires Peanut", href: "https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension", source: "ITIJ" },
-  { label: "Do I need a COVID test to travel? And other summer travel questions", href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/", source: "Forbes" },
-  { label: "Designing LinkedIn Home and Sharing Experience", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
-  { label: "LinkedIn adds polls and live video-based events", href: "https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/", source: "TechCrunch" },
-  { label: "Google Live Popular Times featured on The Tonight Show Starring Jimmy Fallon", href: "https://www.youtube.com/watch?v=QIbPZgH1zRY", source: "YouTube" },
-  { label: "Google adds salon and spa bookings through Maps and Search", href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/", source: "TechCrunch" },
-  { label: "LinkedIn is gearing up for a redesign", href: "https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/", source: "TechCrunch" },
-  { label: "Alex Lakas portfolio", href: "https://craftwork.design/curated/website/alex-lakas", source: "Craftwork" },
   { label: "Google Business Profile help: popular times, wait times, and visit duration", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
   { label: "Alex's design portfolio archive", href: "https://thecreativefinder.com/export-portfolio.php?username=asl677", source: "The Creative Finder" },
-  { label: "U.S. design patents", links: [{ label: "D893,509", href: "https://uspto.report/patent/grant/D893%2C509" }, { label: "D892,816", href: "https://patentimages.storage.googleapis.com/94/19/e7/9f1b746a0a9912/USD892816.pdf" }, { label: "D869,501", href: "https://patents.justia.com/patent/D869501" }], source: "Patents" },
 ];
 
 const articles = [
@@ -40,7 +41,7 @@ const articles = [
 ];
 
 function Ref({ n }: { n: number }) {
-  const referenceNumber = ({ 1: 12, 2: 12, 3: 12, 4: 12, 5: 1, 6: 4, 7: 12, 8: 13, 9: 10, 10: 7, 11: 11, 12: 5, 13: 6, 14: 8, 15: 2, 16: 3, 17: 14, 18: 9 } as Record<number, number>)[n] ?? n;
+  const referenceNumber = ({ 1: 8, 2: 8, 3: 8, 4: 8, 5: 13, 6: 15, 7: 8, 8: 11, 9: 7, 10: 18, 11: 6, 12: 16, 13: 17, 14: 2, 15: 1, 16: 14, 17: 10, 18: 5, 20: 4 } as Record<number, number>)[n] ?? n;
   return (
     <sup id={"cite-" + n} className="reference">
       <a href={"#ref-" + referenceNumber}>[{referenceNumber}]</a>
@@ -120,7 +121,7 @@ export default function Home() {
                 <p>If you are the subject of this article, or are acting on behalf of one, use this page to raise a specific concern or propose a sourced change.</p>
               </div>
               <div className="wiki-talk-status">
-                <div className="wiki-talk-rating"><span aria-hidden="true" className="wiki-talk-rating-mark" /><span>This article is rated <strong>Start-class</strong> on Alexipidia&apos;s content assessment scale.</span><a href="#start-discussion">[hide]</a></div>
+                <div className="wiki-talk-rating"><span aria-hidden="true" className="wiki-talk-rating-mark">A</span><span>This article is rated <strong>A-class</strong> on Alexipidia&apos;s content assessment scale.</span><a href="#start-discussion">[hide]</a></div>
                 <div><strong>Biography: Arts and Entertainment</strong><a href="#start-discussion">[show]</a></div>
                 <div><strong>Graphic design</strong><span className="wiki-talk-priority">Insane-importance</span><a href="#start-discussion">[show]</a></div>
                 <div><strong>United States</strong><a href="#start-discussion">[show]</a></div>
@@ -226,14 +227,16 @@ export default function Home() {
             <WikiSection id="media" title="In the media">
               <p>Alex&apos;s work has appeared in coverage of independent product, travel, and technology projects. <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a> featured Peanut Travel in reporting on travel planning, while <a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a> covered LinkedIn work involving polls and live video-based events, as well as the modernization of LinkedIn&apos;s homepage and sharing experience.<Ref n={10} /><Ref n={12} /><Ref n={14} /></p>
               <p>His Google Live Popular Times work was featured on <a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">The Tonight Show Starring Jimmy Fallon</a>, alongside publication coverage of Fiveonefour&apos;s data-infrastructure practice and other independent creative projects.<Ref n={16} /></p>
+              <p>In 2022 he appeared on the <a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">As Told By Nomads</a> podcast with Brady Simpson, discussing building a side business remotely while working a full-time job.<Ref n={20} /></p>
               <ul className="wiki-link-list media-links">
                 <li><a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour announces its $17M raise</a>. <i>PR Newswire</i>.</li>
+                <li><a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">Building a Side Hustle Business Remotely While Working Your 9-to-5</a>. <i>As Told By Nomads</i>.</li>
+                <li><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">Designing a simpler, more inclusive LinkedIn Home and Sharing experience</a>. <i>Case Study Club</i>.</li>
                 <li><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Do I need a COVID test to travel? And other summer travel questions</a>. <i>Forbes</i>.</li>
                 <li><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">LinkedIn adds polls and live video-based events</a>. <i>TechCrunch</i>.</li>
                 <li><a href="https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/" target="_blank" rel="noreferrer">Google adds salon and spa bookings through Maps and Search</a>. <i>TechCrunch</i>.</li>
                 <li><a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">Google Live Popular Times featured on The Tonight Show</a>. <i>YouTube</i>.</li>
                 <li><a href="https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/" target="_blank" rel="noreferrer">LinkedIn is gearing up for a redesign</a>. <i>TechCrunch</i>.</li>
-                <li><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">Designing a simpler, more inclusive LinkedIn Home and Sharing experience</a>. <i>Case Study Club</i>.</li>
               </ul>
             </WikiSection>
             <WikiSection id="publications" title="Articles">

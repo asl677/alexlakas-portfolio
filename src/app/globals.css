@@ -7,16 +7,16 @@
   --wiki-ink: #171717;
   --wiki-muted: #737373;
   --wiki-link: #171717;
-  --wiki-link-visited: #54595d;
-  --wiki-link-blue: #54595d;
-  --wiki-link-blue-hover: #36c;
+  --wiki-link-visited: #585858;
+  --wiki-link-blue: #585858;
+  --wiki-link-blue-hover: #6b6b6b;
   --wiki-border: #a3a3a3;
   --wiki-subtle: #e5e5e5;
   --wiki-search-match: #d6d6d6;
-  --wiki-search-match-ink: #36c;
-  --wiki-panel: #f8f9fa;
-  --wiki-profile-surface: #f8f9fa;
-  --wiki-media-surface: #f8f9fa;
+  --wiki-search-match-ink: #6b6b6b;
+  --wiki-panel: #f9f9f9;
+  --wiki-profile-surface: #f9f9f9;
+  --wiki-media-surface: #f9f9f9;
   --wiki-blue-light: #f5f5f5;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -126,7 +126,7 @@
 
 .wiki-search .search-clear:hover,
 .wiki-search .search-clear:focus-visible {
-  color: #36c;
+  color: #6b6b6b;
 }
 
 .career-feature > h3,
@@ -293,7 +293,7 @@
     overflow: hidden;
     height: auto;
     opacity: 1;
-    transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease;
+    transition: height 560ms cubic-bezier(0.65, 0, 0.35, 1), opacity 480ms cubic-bezier(0.65, 0, 0.35, 1);
     will-change: height, opacity;
   }
 
@@ -365,7 +365,7 @@
 .wiki-talk-status {
   max-width: 660px;
   border: 1px solid var(--wiki-border);
-  background: #fff8dc;
+  background: #f8f8f8;
 }
 
 .wiki-talk-notice {
@@ -384,7 +384,7 @@
 .wiki-talk-status {
   margin: 0 auto 32px;
   padding: 4px 7px;
-  background: #fff1b8;
+  background: #f1f1f1;
 }
 
 .wiki-talk-status > div {
@@ -392,7 +392,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   padding: 6px;
-  border-top: 1px solid #d2c58a;
+  border-top: 1px solid #c4c4c4;
 }
 
 .wiki-talk-status > div:first-child {
@@ -406,9 +406,9 @@
 .wiki-talk-rating-mark {
   width: 20px;
   height: 20px;
-  border: 3px solid #f86b2b;
+  border: 3px solid #969696;
   border-radius: 50%;
-  background: #ffca80;
+  background: #d3d3d3;
 }
 
 .wiki-talk-status > div:not(.wiki-talk-rating) > a {
@@ -420,8 +420,8 @@
   width: fit-content;
   padding: 1px 6px;
   border-radius: 8px;
-  background: #ead4e9;
-  color: #241d24;
+  background: #dadada;
+  color: #1f1f1f;
 }
 
 .wiki-talk-thread {
@@ -568,13 +568,13 @@ header.wiki-topbar::after {
   --wiki-ink: #fff;
   --wiki-muted: #a3a3a3;
   --wiki-link: #fff;
-  --wiki-link-visited: #a2a9b1;
-  --wiki-link-blue: #a2a9b1;
-  --wiki-link-blue-hover: #36c;
+  --wiki-link-visited: #a8a8a8;
+  --wiki-link-blue: #a8a8a8;
+  --wiki-link-blue-hover: #6b6b6b;
   --wiki-border: #242424;
   --wiki-subtle: #171717;
   --wiki-search-match: #303030;
-  --wiki-search-match-ink: #8ab4f8;
+  --wiki-search-match-ink: #b3b3b3;
   --wiki-panel: #000;
   --wiki-profile-surface: #161616;
   --wiki-media-surface: #161616;
@@ -618,7 +618,7 @@ a {
 }
 
 a:hover {
-  color: #36c;
+  color: #6b6b6b;
   text-decoration: none;
 }
 .wiki-article-body a:hover,
@@ -627,7 +627,7 @@ a:hover {
 .article-list-item h3 a:hover,
 .wiki-link-list a:hover,
 .work-links a:hover {
-  color: #36c !important;
+  color: #6b6b6b !important;
 }
 
 button,
@@ -948,8 +948,8 @@ input {
 
 .wiki-search-results button:hover,
 .wiki-search-results button:focus-visible {
-  background: rgb(51 102 204 / 12%);
-  color: #36c;
+  background: rgb(107 107 107 / 12%);
+  color: #6b6b6b;
 }
 
 .wiki-search .wiki-search-results strong,
@@ -2114,7 +2114,7 @@ ul {
   }
 
   .wiki-topbar {
-    border-bottom: 1px solid #c8ccd1;
+    border-bottom: 1px solid #cccccc;
   }
 
   .wiki-brand {
@@ -2124,7 +2124,7 @@ ul {
 
   .wiki-wordmark {
     font-size: 21px;
-    color: #202122;
+    color: #212121;
   }
 
   h1 {
@@ -2134,7 +2134,7 @@ ul {
   }
 
   .wiki-tabs {
-    border-bottom: 1px solid #a2a9b1;
+    border-bottom: 1px solid #a8a8a8;
     margin-bottom: 0;
     min-height: 40px;
   }
@@ -2151,7 +2151,7 @@ ul {
     min-height: 44px;
     margin: 0 0 12px;
     border-top: 0;
-    border-bottom: 1px solid #c8ccd1;
+    border-bottom: 1px solid #cccccc;
   }
 
   .wiki-mobile-tools button {
@@ -2364,7 +2364,7 @@ ul {
     overflow: hidden !important;
     opacity: 1 !important;
     transform: none !important;
-    transition: var(--wiki-section-transition, height 240ms ease) !important;
+    transition: var(--wiki-section-transition, height 540ms cubic-bezier(0.65, 0, 0.35, 1)) !important;
     will-change: height;
   }
 
@@ -4537,7 +4537,13 @@ html body .wiki-shell :is(
 
 html body .wiki-shell .wiki-section-content > .references > li {
   font-size: 0.8125rem !important;
-  line-height: 1.58 !important;
+  line-height: 1.45 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Link lists use no extra gap between items at any width (matches desktop). */
+html body .wiki-shell .wiki-link-list li {
+  margin-block: 0 !important;
 }
 
 html body .wiki-shell .infobox :is(dt, dd) {
@@ -4570,12 +4576,289 @@ html body .wiki-shell .article-list-item p:not(.article-list-meta) {
     position: sticky !important;
     top: var(--wiki-article-header-height, 6.125rem) !important;
     z-index: 90 !important;
+    background: var(--wiki-page) !important;
+  }
+}
+
+/* Headings bleed full width only on phones, where the profile card stacks above the text.
+   At tablet widths the card has its own column, so headings stay within the text column. */
+@media (max-width: 47.9375rem) {
+  html body .wiki-shell .wiki-section-toggle {
     display: flex !important;
     width: calc(100% + 2 * var(--wiki-page-gutter)) !important;
     max-width: none !important;
     box-sizing: border-box !important;
     margin-inline: calc(-1 * var(--wiki-page-gutter)) !important;
     padding-inline: var(--wiki-page-gutter) !important;
-    background: var(--wiki-page) !important;
   }
+}
+
+/* Long-press plays the portrait frames; suppress the iOS image callout and selection. */
+.infobox-portrait,
+.infobox-portrait img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* "So many languages" fades both ways: visible immediately when fading in, hidden only
+   after the fade completes when fading out. */
+html body .wiki-article-header:not(.is-scrolled) .wiki-language {
+  transition: opacity 240ms ease, visibility 0s linear 0s !important;
+}
+
+html body .wiki-article-header.is-scrolled .wiki-language {
+  transition: opacity 240ms ease, visibility 0s linear 240ms !important;
+}
+
+/* Tailwind preflight's default border color (#e5e7eb) is a cool gray; use a pure neutral. */
+*,
+::before,
+::after {
+  border-color: #e6e6e6;
+}
+
+/* Sticky profile card keeps the same 1.125rem gap below the article header's real height. */
+html body .wiki-shell .wiki-article-body > .infobox {
+  top: calc(var(--wiki-article-header-height, 6rem) + 1.125rem) !important;
+}
+
+/* Search: results attach flush to the box (overlapping its bottom border), compact rows,
+   and a neutral focus state instead of the browser's blue ring. */
+html body .wiki-shell .wiki-search .wiki-search-results {
+  top: 100% !important;
+  margin-top: 0 !important;
+}
+
+html body .wiki-shell .wiki-search-results img,
+html body .wiki-shell .wiki-search-results video,
+html body .wiki-shell .wiki-search-results .wiki-search-result-icon {
+  width: 3rem !important;
+  height: 3rem !important;
+  flex: 0 0 3rem;
+}
+
+html body .wiki-shell .wiki-search input:focus,
+html body .wiki-shell .wiki-search input:focus-visible {
+  outline: none !important;
+  border-color: var(--wiki-ink) !important;
+}
+
+html body .wiki-shell .wiki-search:focus-within {
+  outline: none !important;
+}
+
+html body .wiki-shell .wiki-search-results button {
+  min-height: 0 !important;
+  height: auto !important;
+  grid-template-columns: 3rem minmax(0, 1fr) !important;
+  grid-template-rows: auto !important;
+}
+
+html body .wiki-shell .wiki-search-results .wiki-search-result-copy {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* Title bar: everything centers on the bar's true middle.
+   - Sticky icons center on the row (not a fixed distance from the bottom).
+   - Below 1100px the row has 0.5rem top padding; the sticky search offsets it.
+   - "Alex" (and the baseline-aligned label) shift by the measured ink offset, set in JS. */
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-sticky-actions,
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+}
+
+@media (max-width: 68.6875rem) {
+  html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-scroll-actions {
+    align-self: center !important;
+    margin-top: -0.5rem !important;
+  }
+}
+
+/* Title and label are bottom-anchored in both header states so nothing shifts when the header
+   sticks. JS sets the optical nudge and the label's baseline match. */
+html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-article-title,
+html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-talk-title,
+html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-title-action,
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row > .wiki-title-action {
+  align-self: end !important;
+}
+
+html body .wiki-shell .wiki-title-row > .wiki-article-title,
+html body .wiki-shell .wiki-title-row > .wiki-talk-title {
+  transform: translateY(var(--wiki-title-nudge, 0px));
+}
+
+html body .wiki-shell .wiki-title-row .wiki-language {
+  transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px)));
+}
+
+
+/* Phones: a tighter side gutter that matches the vertical rhythm. */
+@media (max-width: 35rem) {
+  .wiki-shell {
+    --wiki-page-gutter: 1rem;
+  }
+}
+
+/* Media thumbnails: no gray box behind images and video. The surface color was only a
+   loading fallback and showed around media that doesn't fill its frame. */
+html body .wiki-shell :is(a, figure, div, span):has(> img, > video):not(.infobox-portrait),
+html body .wiki-shell :is(img, video):not(.infobox-portrait img) {
+  background: transparent !important;
+}
+
+/* Stacked layout: the gap between the profile card and the Contents card equals the side gutter. */
+@media (max-width: 56.25rem) {
+  html body .wiki-shell .wiki-article-body > .infobox {
+    margin-bottom: 0 !important;
+  }
+
+  html body .wiki-shell .wiki-article-body > .article-toc {
+    margin-top: var(--wiki-page-gutter) !important;
+  }
+}
+
+/* Talk page: rating rows use the same 16px body size as the article. */
+html body .wiki-shell .wiki-talk-status,
+html body .wiki-shell .wiki-talk-status * {
+  font-size: 1rem !important;
+  line-height: 1.58 !important;
+}
+
+/* Focus: no browser-blue rings anywhere. Mouse/touch clicks show nothing; keyboard focus
+   gets a neutral outline in the text color. */
+html body :focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+html body :focus-visible {
+  outline: 1px solid var(--wiki-ink) !important;
+  outline-offset: 2px !important;
+}
+
+/* Talk rating box: no container padding; every row has equal 0.75rem padding on all sides,
+   a single divider between rows, and label / pill / [show] centered on one line. */
+html body .wiki-shell .wiki-talk-status {
+  padding: 0 !important;
+}
+
+html body .wiki-shell .wiki-talk-status > div {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center !important;
+  gap: 0.5rem 0.625rem !important;
+  padding: 0.75rem !important;
+  margin: 0 !important;
+}
+
+html body .wiki-shell .wiki-talk-status > div > :is(span:not(.wiki-talk-rating-mark):not(.wiki-talk-priority), strong) {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+html body .wiki-shell .wiki-talk-status > div.wiki-talk-rating > span:not(.wiki-talk-rating-mark) {
+  flex: 1 1 0;
+}
+
+html body .wiki-shell .wiki-talk-status > div > a {
+  margin-left: auto !important;
+  flex: none;
+}
+
+html body .wiki-shell .wiki-talk-status .wiki-talk-rating-mark {
+  flex: none;
+  align-self: center !important;
+}
+
+html body .wiki-shell .wiki-talk-status .wiki-talk-priority {
+  flex: none;
+}
+
+/* Talk: "Latest comment" has equal space above (to the tabs) and below (to the notice). */
+html body .wiki-shell .wiki-talk-page {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+html body .wiki-shell .wiki-talk-page > .wiki-talk-latest {
+  margin: 1rem 0 !important;
+}
+
+/* Talk rating badge: Wikipedia-style A-class assessment icon. Intentional color exception
+   to the neutral palette (assessment classes are color-coded). */
+html body .wiki-shell .wiki-talk-status .wiki-talk-rating-mark {
+  display: inline-grid !important;
+  place-items: center;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border-radius: 50% !important;
+  background: #a3cfff !important;
+  border: 1.5px solid #2f6fd1 !important;
+  box-shadow: inset 0 0 0 1.5px #d6eaff;
+  color: #1d4fa3 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 0.9375rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  padding-top: 1px;
+  box-sizing: border-box;
+}
+
+/* Titles never wrap; the language label gives up space first (truncates with an ellipsis). */
+html body .wiki-shell .wiki-title-row > :is(.wiki-article-title, .wiki-talk-title) {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+html body .wiki-shell .wiki-title-row > .wiki-title-action {
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+}
+
+html body .wiki-shell .wiki-title-row .wiki-language {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Text selection: inverse of the current theme (ink background, page-colored text). */
+::selection {
+  background: var(--wiki-ink);
+  color: var(--wiki-page);
+}
+
+::-moz-selection {
+  background: var(--wiki-ink);
+  color: var(--wiki-page);
+}
+
+/* Tabs: the active tab uses the full text color, inactive tabs the muted link gray;
+   tighter bar and spacing to match Wikipedia's tab row. */
+html body .wiki-shell .wiki-article-header .wiki-tabs,
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-tabs {
+  min-height: 2.25rem !important;
+}
+
+html body .wiki-shell .wiki-article-header .wiki-tab-primary,
+html body .wiki-shell .wiki-article-header .wiki-tab-actions {
+  gap: 1rem !important;
+}
+
+html body .wiki-shell .wiki-article-header .wiki-tabs :is(a, span, button) {
+  padding-block: 0.375rem !important;
+  font-weight: 400 !important;
+}
+
+html body .wiki-shell .wiki-article-header .wiki-tab {
+  color: var(--wiki-link-blue) !important;
+}
+
+html body .wiki-shell .wiki-article-header .wiki-tab.is-selected {
+  color: var(--wiki-ink) !important;
 }

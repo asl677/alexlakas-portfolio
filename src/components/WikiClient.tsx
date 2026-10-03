@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { BookMarked, BriefcaseBusiness, ChevronDown, Code2, FileText, GraduationCap, Link, MoreVertical, Newspaper, Palette, Quote, Search, X } from "lucide-react";
+import { BookMarked, BriefcaseBusiness, ChevronDown, Code2, FileText, GraduationCap, Link, Newspaper, Palette, Quote, Search, X } from "lucide-react";
 import { gsap, SplitText } from "gsap/all";
 import Lenis from "lenis";
 
@@ -313,6 +313,9 @@ export function HoverPortrait() {
   const [frame, setFrame] = useState(0);
   const frameRef = useRef(0);
   const loadedFramesRef = useRef(new Set<string>());
+  const longPressRef = useRef(0);
+
+  useEffect(() => () => window.clearTimeout(longPressRef.current), []);
 
   useEffect(() => {
     hoverPortraitFrames.forEach(src => {
@@ -354,11 +357,29 @@ export function HoverPortrait() {
     <div
       className="infobox-portrait"
       onPointerEnter={() => {
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        if (window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 56.3125rem)").matches) {
           setIsHovering(true);
         }
       }}
       onPointerLeave={() => setIsHovering(false)}
+      // Touch: press and hold to play the frames; lifting or scrolling stops it.
+      onPointerDown={event => {
+        // Long-press wherever hover is not the trigger: touch, or any pointer on narrow screens.
+        const hoverTrigger = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 56.3125rem)").matches;
+        if (event.pointerType !== "touch" && hoverTrigger) return;
+        window.clearTimeout(longPressRef.current);
+        longPressRef.current = window.setTimeout(() => setIsHovering(true), 350);
+      }}
+      onPointerUp={() => {
+        window.clearTimeout(longPressRef.current);
+        if (window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 56.3125rem)").matches) return;
+        setIsHovering(false);
+      }}
+      onPointerCancel={() => {
+        window.clearTimeout(longPressRef.current);
+        setIsHovering(false);
+      }}
+      onContextMenu={event => event.preventDefault()}
     >
       {/* The frame changes in place; the rail never moves or reflows. */}
       <img src={isHovering && activeFrame ? activeFrame : portraitSrc} alt="Alex" width={1254} height={1254} />
@@ -486,11 +507,11 @@ export function WikiSection({
         aria-controls={contentId}
         onClick={() => {
           if (isMobile) {
-            setOpen((value) => {
-              const next = !value;
-              if (next) window.dispatchEvent(new CustomEvent("alexpedia-accordion-open", { detail: id }));
-              return next;
-            });
+            // Notify other sections from the event handler, never inside a state updater
+            // (updaters run during render, so closing siblings there triggers a React error).
+            const next = !open;
+            setOpen(next);
+            if (next) window.dispatchEvent(new CustomEvent("alexpedia-accordion-open", { detail: id }));
           }
         }}
       >
@@ -513,6 +534,37 @@ export function IntroSequence() {
     const contents = document.querySelector<HTMLElement>(".wiki-contents");
     if (!topbar || !articleHeader || !contents) return;
 
+    // Optical centering: the title's ink (not its text box) sits on the bar's middle, and the
+    // label shares the title's baseline. Layout is identical in both header states, so this is
+    // measured once (after fonts load) and on resize.
+    const centerTitle = () => {
+      const row = articleHeader.querySelector<HTMLElement>(".wiki-title-row");
+      // Measure whichever title is showing (the article or the Talk view).
+      const title = Array.from(articleHeader.querySelectorAll<HTMLElement>(".wiki-article-title, .wiki-talk-title"))
+        .find(candidate => window.getComputedStyle(candidate).display !== "none");
+      const label = articleHeader.querySelector<HTMLElement>(".wiki-language");
+      const context = document.createElement("canvas").getContext("2d");
+      if (!row || !title || !context) return;
+      articleHeader.style.setProperty("--wiki-title-nudge", "0px");
+      articleHeader.style.setProperty("--wiki-language-shift", "0px");
+      const baselineOf = (element: HTMLElement) => {
+        const marker = document.createElement("span");
+        marker.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
+        element.appendChild(marker);
+        const y = marker.getBoundingClientRect().top;
+        marker.remove();
+        return y;
+      };
+      const style = window.getComputedStyle(title);
+      context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      const ink = context.measureText(title.textContent ?? "");
+      const titleBaseline = baselineOf(title);
+      const rowBox = row.getBoundingClientRect();
+      const rowCenter = rowBox.top + row.clientTop + row.clientHeight / 2;
+      const inkCenter = titleBaseline - (ink.actualBoundingBoxAscent - ink.actualBoundingBoxDescent) / 2;
+      articleHeader.style.setProperty("--wiki-title-nudge", `${(rowCenter - inkCenter).toFixed(2)}px`);
+      if (label) articleHeader.style.setProperty("--wiki-language-shift", `${(titleBaseline - baselineOf(label)).toFixed(2)}px`);
+    };
     const updateSearchVisibility = () => {
       // Match the visual handoff to the article header becoming sticky.
       const stickyTop = Number.parseFloat(window.getComputedStyle(articleHeader).top) || 0;
@@ -534,12 +586,21 @@ export function IntroSequence() {
       topbar.style.setProperty("--wiki-topbar-fade", topbarFade.toFixed(3));
     };
 
+    centerTitle();
+    document.fonts.ready.then(centerTitle);
+    window.addEventListener("resize", centerTitle);
+    // Switching Article/Talk swaps the visible title; measure after the view updates.
+    const recenterAfterView = () => requestAnimationFrame(() => requestAnimationFrame(centerTitle));
+    window.addEventListener("hashchange", recenterAfterView);
+
     updateSearchVisibility();
     window.addEventListener("scroll", updateSearchVisibility, { passive: true });
     window.addEventListener("resize", updateSearchVisibility);
     return () => {
       window.removeEventListener("scroll", updateSearchVisibility);
       window.removeEventListener("resize", updateSearchVisibility);
+      window.removeEventListener("resize", centerTitle);
+      window.removeEventListener("hashchange", recenterAfterView);
     };
   }, []);
 
@@ -665,21 +726,29 @@ export function IntroSequence() {
           // Typing starts from the real loader finishing, not a fixed timer.
           const typing = gsap.timeline({ paused: true });
           loaderDone.then(() => gsap.delayedCall(0.4, () => typing.play()));
-          const typingRhythm = [0.095, 0.075, 0.115, 0.085, 0.105, 0.08];
-          const deletingRhythm = [0.055, 0.04, 0.045, 0.035];
+          // Human rhythm: seeded jitter (same every load, never a visible loop), a key-repeat
+          // delay before backspacing speeds up, and a hesitation before each new word.
+          let seed = 7;
+          const jitter = (min: number, max: number) => {
+            seed = (seed * 9301 + 49297) % 233280;
+            return min + (seed / 233280) * (max - min);
+          };
           // Hold "Wikipidia" for 3s before the first delete.
           let time = 3;
           for (const next of ["Alexipidia", "Nah", "Designer"]) {
             for (let length = current.length - 1; length >= 0; length--) {
-              time += deletingRhythm[(current.length - 1 - length) % deletingRhythm.length];
+              const presses = current.length - 1 - length;
+              // First press, then the OS key-repeat delay, then a steady repeat.
+              time += presses === 0 ? 0 : presses === 1 ? jitter(0.36, 0.44) : jitter(0.085, 0.11);
               typing.set(text, { textContent: current.slice(0, length) }, time);
             }
-            time += 0.18;
+            time += jitter(0.4, 0.5);
             for (let length = 1; length <= next.length; length++) {
-              time += typingRhythm[(length - 1) % typingRhythm.length];
+              const afterCapital = length === 2 ? jitter(0.05, 0.09) : 0;
+              time += jitter(0.14, 0.26) + afterCapital;
               typing.set(text, { textContent: next.slice(0, length) }, time);
             }
-            time += next === "Nah" ? 0.85 : 1.3;
+            time += next === "Nah" ? 1.1 : 1.6;
             current = next;
           }
         }
@@ -836,6 +905,11 @@ export function WikiSubsection({ id, title, children }: { id: string; title: str
   );
 }
 
+// Pointer clicks on tabs must not leave a focus ring (keyboard focus still shows one).
+const releasePointerFocus = (event: React.MouseEvent<HTMLElement>) => {
+  if (event.detail > 0) event.currentTarget.blur();
+};
+
 export function ArticleTabs() {
   const [view, setView] = useState<"article" | "talk">("article");
 
@@ -859,12 +933,11 @@ export function ArticleTabs() {
   return (
     <div className="wiki-tabs">
       <div className="wiki-tab-primary" role="tablist" aria-label="Article views">
-        <a href="#article" className={"wiki-tab " + (view === "article" ? "is-selected" : "")} role="tab" aria-selected={view === "article"}>Article</a>
-        <a href="#talk" className={"wiki-tab " + (view === "talk" ? "is-selected" : "")} role="tab" aria-selected={view === "talk"}>Talk</a>
+        <a href="#article" className={"wiki-tab " + (view === "article" ? "is-selected" : "")} role="tab" aria-selected={view === "article"} onClick={releasePointerFocus}>Article</a>
+        <a href="#talk" className={"wiki-tab " + (view === "talk" ? "is-selected" : "")} role="tab" aria-selected={view === "talk"} onClick={releasePointerFocus}>Talk</a>
       </div>
       <div className="wiki-tab-actions">
         <span>Read</span>
-        <button type="button" className="wiki-more-button" aria-label="More page actions"><MoreVertical size={18} strokeWidth={2} /></button>
       </div>
     </div>
   );
