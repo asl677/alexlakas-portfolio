@@ -217,7 +217,7 @@ export default function Home() {
                   <SeamlessVideo />
                   <figcaption>Data Infra AI Agents</figcaption>
                 </figure>
-                <p>As Head of Design at <a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex shaped data-infrastructure products and design systems through 2026, including work for F45 and District Cannabis.<Ref n={5} /></p>
+                <p>As Head of Design at <a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex shaped a Vercel-inspired data-infrastructure suite powered by AI, along with its design system, through 2026, helping companies such as F45 and District Cannabis rethink their data.<Ref n={5} /></p>
                 <p>The work focused on making technical systems easier to understand and operate: interfaces that reveal what data is doing, workflows that support faster decisions, and a shared design language that can scale across a growing product. The team also built AI agents that ingest, stream, and transform data in just a few clicks. The F45 and District Cannabis projects carried that discipline into consumer-facing experiences.</p>
               </div>
             </WikiSection>
