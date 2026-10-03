@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-hello.png",
+        url: "/og-hello-2.png",
         width: 1200,
         height: 630,
         alt: "Hello.",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/og-hello.png"],
+    images: ["/og-hello-2.png"],
     title: "Alex | Designer",
     description: "Alex Lakas, Los Angeles-based designer and art director. Product design, identity, systems, and creative work.",
   },

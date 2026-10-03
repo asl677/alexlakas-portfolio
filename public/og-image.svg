@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#000" />
-  <text x="600" y="315" fill="#fff" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="400" text-anchor="middle" dominant-baseline="middle">Hello.</text>
+  <!-- Positioned by measured ink bounds (alphabetic baseline) so the glyphs are optically centered. -->
+  <text x="500.24" y="342.8" fill="#fff" font-family="Georgia, 'Times New Roman', serif" font-size="75" font-weight="400">Hello.</text>
 </svg>
