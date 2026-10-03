@@ -212,10 +212,10 @@ export default function Home() {
                 <p>Built by a lean founding team, Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Peanut, the product brought useful travel choices into the browsing moment, reducing the distance between research and action. At Culprit, Alex applied the same product thinking to creative direction, building systems that could carry a clear point of view across platforms and campaigns.<Ref n={7} /></p>
               </div>
               <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape">
-                <h3>New territory — AI Data Infra at 514</h3>
+                <h3>New territory — Data Infra &amp; AI</h3>
                 <figure>
                   <SeamlessVideo />
-                  <figcaption>Data Infra AI Agents</figcaption>
+                  <figcaption>AI Agents</figcaption>
                 </figure>
                 <p>As Head of Design at <a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex shaped a Vercel-inspired data-infra suite powered by AI, helping folks like F45 and District Cannabis rethink their data.<Ref n={5} /></p>
                 <p>The work focused on making technical systems easier to understand and operate: interfaces that reveal what data is doing, workflows that support faster decisions, and a shared design language that can scale across a growing product. The team also built AI agents that ingest, stream, and transform data in just a few clicks. The F45 and District Cannabis projects carried that discipline into consumer-facing experiences.</p>
