@@ -5110,3 +5110,17 @@ html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row .wiki-lan
   transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px) + 2px)) !important;
   transition: opacity 240ms cubic-bezier(0.45, 0, 0.55, 1), transform 240ms cubic-bezier(0.45, 0, 0.55, 1), visibility 0s linear 240ms !important;
 }
+
+/* Accordions: 740ms ease-in-out, matching the scroll that brings the section to the top. */
+@media (max-width: 35rem) {
+  html body .wiki-section-body,
+  html body .wiki-section-body:is([aria-hidden="true"], [aria-hidden="false"], [hidden]) {
+    transition: var(--wiki-section-transition, height 740ms cubic-bezier(0.65, 0, 0.35, 1)) !important;
+  }
+}
+
+@media (min-width: 35.0625rem) and (max-width: 56.25rem) {
+  html body .wiki-section-body {
+    transition: height 740ms cubic-bezier(0.65, 0, 0.35, 1), opacity 640ms cubic-bezier(0.65, 0, 0.35, 1) !important;
+  }
+}

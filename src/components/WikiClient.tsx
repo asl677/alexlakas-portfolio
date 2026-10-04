@@ -616,18 +616,19 @@ export function WikiSection({
               // The line reveal normally runs on scroll; run it as the section expands so the
               // new content staggers in wherever the page is, instead of staying hidden.
               [50, 300, 620].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("resize")), delay));
-              // Bring the opened section to the top, just under the sticky header. A section
-              // closing above shifts the page while it animates, so correct once it settles.
-              const scrollToSection = (behavior: ScrollBehavior) => {
-                const section = document.getElementById(id);
-                const header = document.querySelector<HTMLElement>(".wiki-article-header");
-                if (!section) return;
+              // Bring the opened section to the top, just under the sticky header, in step with
+              // the accordion. Any open section above will collapse, so its height is subtracted
+              // up front; the scroll then runs with the accordion's duration and easing.
+              const section = document.getElementById(id);
+              const header = document.querySelector<HTMLElement>(".wiki-article-header");
+              if (section) {
+                const collapsingAbove = Array.from(document.querySelectorAll<HTMLElement>(".wiki-section-body[aria-hidden='false']"))
+                  .filter(other => !section.contains(other) && other.getBoundingClientRect().top < section.getBoundingClientRect().top)
+                  .reduce((total, other) => total + other.getBoundingClientRect().height, 0);
                 const offset = header ? header.getBoundingClientRect().height : 0;
-                const top = section.getBoundingClientRect().top + window.scrollY - offset + 1;
-                if (Math.abs(top - window.scrollY) > 2) window.scrollTo({ top: Math.max(0, top), behavior });
-              };
-              window.setTimeout(() => scrollToSection("smooth"), 60);
-              window.setTimeout(() => scrollToSection("smooth"), 640);
+                const top = Math.max(0, section.getBoundingClientRect().top + window.scrollY - collapsingAbove - offset + 1);
+                window.dispatchEvent(new CustomEvent("alexpedia-scroll-to", { detail: { top, duration: 0.74 } }));
+              }
             }
           }
         }}
@@ -1092,6 +1093,27 @@ export function SmoothAnchorScroll() {
     // the current position. (lenis.stop() is avoided: it animates back to a stale target.)
     const lockScroll = () => lenis?.scrollTo(window.scrollY, { immediate: true, force: true });
     const unlockScroll = () => undefined;
+    // Accordions request a scroll timed to their own animation (easeInOutCubic, same curve).
+    // Driven frame by frame (not lenis.scrollTo): Lenis clamps to the page height at the start,
+    // but the page grows while the section expands, so the target must stay reachable.
+    let accordionScrollFrame: number | null = null;
+    const scrollToRequest = (event: Event) => {
+      const { top, duration } = (event as CustomEvent<{ top: number; duration: number }>).detail;
+      if (accordionScrollFrame !== null) cancelAnimationFrame(accordionScrollFrame);
+      const start = window.scrollY;
+      const startTime = performance.now();
+      const step = (now: number) => {
+        const progress = Math.min(1, (now - startTime) / (duration * 1000));
+        const y = start + (top - start) * easeInOutCubic(progress);
+        // Native scroll each frame (Lenis follows native scroll); Lenis's own scrollTo uses a
+        // cached page height that lags behind the expanding section.
+        window.scrollTo(0, y);
+        if (progress < 1) accordionScrollFrame = requestAnimationFrame(step);
+        else { accordionScrollFrame = null; lenis?.resize(); lenis?.scrollTo(window.scrollY, { immediate: true, force: true }); }
+      };
+      accordionScrollFrame = requestAnimationFrame(step);
+    };
+    window.addEventListener("alexpedia-scroll-to", scrollToRequest);
     window.addEventListener("alexpedia-scroll-lock", lockScroll);
     window.addEventListener("alexpedia-scroll-unlock", unlockScroll);
 
@@ -1165,6 +1187,7 @@ export function SmoothAnchorScroll() {
       if (lenisFrame !== null) cancelAnimationFrame(lenisFrame);
       window.removeEventListener("alexpedia-scroll-lock", lockScroll);
       window.removeEventListener("alexpedia-scroll-unlock", unlockScroll);
+      window.removeEventListener("alexpedia-scroll-to", scrollToRequest);
       lenis?.destroy();
     };
   }, []);
