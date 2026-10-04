@@ -923,7 +923,7 @@ export function IntroSequence() {
           }
         }
       }
-      const fade = { duration: 1.2, stagger: 0.012, ease: wikiEase };
+      const fade = { duration: 1, stagger: 0.012, ease: wikiEase };
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
         const second = b.getBoundingClientRect();
