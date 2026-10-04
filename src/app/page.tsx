@@ -216,6 +216,7 @@ export default function Home() {
                   <figcaption>AI video gen</figcaption>
                 </figure>
                 <p>Built by a lean founding team, Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Peanut, the product brought useful travel choices into the browsing moment, reducing the distance between research and action. At Culprit, Alex applied the same product thinking to creative direction, building systems that could carry a clear point of view across platforms and campaigns.<Ref n={7} /></p>
+                <p className="career-ai-note">This later led to conceptual and public work using AI, video and motion to explore new mediums, including Midjourney, Claude and MCPs.</p>
                             </div>
               <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape">
                 <h3>New territory — Data Infra &amp; AI</h3>

@@ -5323,7 +5323,7 @@ html body .wiki-shell .wiki-article-header.is-recentering .wiki-title-row :is(.w
 html body .wiki-shell .career-feature > figure.career-video {
   clear: both;
   float: none !important;
-  width: min(100%, 33.5rem) !important;
+  width: min(100%, 16.75rem) !important;
   max-width: none !important;
   margin: 0.5rem auto 1.25rem !important;
 }
@@ -5373,4 +5373,89 @@ html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) 
 
 html body .wiki-shell .wiki-article-header .wiki-title-row > :is(.wiki-title-action, .wiki-scroll-actions) {
   opacity: 1 !important;
+}
+
+/* The video card uses the same surface as the other media cards (the "no gray behind media"
+   rule matches figures that directly contain a video, so restore it here). */
+html body .wiki-shell .career-feature > figure.career-video {
+  background: var(--wiki-media-surface) !important;
+}
+
+/* Video card floats left into the section (like the Peanut card); full width on phones. */
+html body .wiki-shell .career-feature > figure.career-video {
+  float: left !important;
+  clear: left !important;
+  margin: 0.25rem 1.25rem 0.75rem 0 !important;
+}
+
+@media (max-width: 35rem) {
+  html body .wiki-shell .career-feature > figure.career-video {
+    float: none !important;
+    width: 100% !important;
+    margin: 0.75rem 0 1rem !important;
+  }
+}
+
+/* Video card floats right; text wraps on its left. Phones keep it full width. */
+@media (min-width: 35.0625rem) {
+  html body .wiki-shell .career-feature > figure.career-video {
+    float: right !important;
+    clear: right !important;
+    margin: 0.25rem 0 0.75rem 1.25rem !important;
+  }
+}
+
+/* AI Agents video card matches the AI video gen card width. */
+@media (min-width: 35.0625rem) {
+  html body .wiki-shell #new-territory-ai-data-infra > figure {
+    width: min(100%, 16.75rem) !important;
+    max-width: none !important;
+  }
+}
+
+@media (min-width: 35.0625rem) {
+  html body .wiki-shell #branching-out > figure {
+    width: min(100%, 16.75rem) !important;
+    max-width: none !important;
+  }
+}
+
+/* Every Career media card shares one width. */
+@media (min-width: 35.0625rem) {
+  html body .wiki-shell .career-feature > figure {
+    width: min(100%, 16.75rem) !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 35rem) {
+  html body .wiki-shell .career-feature > figure.career-video {
+    width: 17.5rem !important;
+    max-width: 100% !important;
+    margin: 0.75rem auto 1rem !important;
+  }
+}
+
+/* Phones: Career media cards span the text column (no narrow centered cards). */
+@media (max-width: 35rem) {
+  html body .wiki-shell .career-feature > figure,
+  html body .wiki-shell .career-feature > figure.career-video {
+    float: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0.75rem 0 1rem !important;
+  }
+}
+
+/* Phones: show the AI video directly above the AI paragraph it belongs to (on wider screens
+   it floats beside "Built by a lean founding team..."). Flex order moves both to the end. */
+@media (max-width: 35rem) {
+  html body .wiki-shell #freelance-and-0-1 {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  html body .wiki-shell #freelance-and-0-1 > :is(figure.career-video, .career-ai-note) {
+    order: 1;
+  }
 }
