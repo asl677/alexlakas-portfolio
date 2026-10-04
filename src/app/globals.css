@@ -4930,3 +4930,46 @@ html body .wiki-shell .infobox dl {
 html body .wiki-shell .article-toc {
   padding: 1rem !important;
 }
+
+/* Desktop: both search boxes use Wikipedia's ~488px width (input + button), left-aligned. */
+@media (min-width: 68.75rem) {
+  html body .wiki-shell header.wiki-topbar > .wiki-search {
+    width: 30.5rem !important;
+    max-width: 100% !important;
+    justify-self: start !important;
+  }
+
+  html body .wiki-shell .wiki-article-header :is(.wiki-scroll-actions, .wiki-scroll-search, .wiki-scroll-search .wiki-search) {
+    width: 30.5rem !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Top bar: 4px more space above and below (52px -> 60px tall). */
+html body header.wiki-topbar,
+html body header.wiki-topbar.is-scrolled {
+  height: 3.75rem !important;
+  min-height: 3.75rem !important;
+  padding-block: 0.8125rem !important;
+}
+
+/* Desktop: left rail 20px narrower (216px -> 196px); the top bar's first column matches so
+   the search box stays aligned with the article. The pinned wordmark matches the taller bar. */
+@media (min-width: 68.75rem) {
+  html body .wiki-shell .wiki-layout {
+    grid-template-columns: 12.25rem minmax(0, 1fr) !important;
+  }
+
+  html body .wiki-shell header.wiki-topbar,
+  html body .wiki-shell header.wiki-topbar.is-scrolled {
+    grid-template-columns: 12.25rem minmax(0, 1fr) auto !important;
+  }
+
+  html body header.wiki-topbar .wiki-brand {
+    height: 3.75rem !important;
+  }
+
+  html body .wiki-shell .wiki-layout .wiki-contents {
+    top: 5.625rem !important;
+  }
+}
