@@ -696,7 +696,7 @@ export function IntroSequence() {
       contents.classList.toggle("is-scrolled", isScrolled);
       articleHeader.style.setProperty("--wiki-language-opacity", String(1 - easedProgress));
       // Section headings stick directly beneath the article header's real height.
-      document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.offsetHeight}px`);
+      document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.getBoundingClientRect().height}px`);
       // Top bar contents fade to exactly 0 by the time the bar has scrolled out of view.
       const topbarFade = Math.max(0, 1 - window.scrollY / Math.max(1, topbar.offsetHeight));
       topbar.style.setProperty("--wiki-topbar-fade", topbarFade.toFixed(3));

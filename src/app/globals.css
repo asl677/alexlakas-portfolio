@@ -4550,7 +4550,8 @@ html body .wiki-shell .article-list-item p:not(.article-list-meta) {
 
   html body .wiki-shell .wiki-section-toggle {
     position: sticky !important;
-    top: var(--wiki-article-header-height, 6.125rem) !important;
+    /* Exact (fractional) header height, overlapped by 1px so no hairline gap can show. */
+    top: calc(var(--wiki-article-header-height, 6.125rem) - 1px) !important;
     z-index: 90 !important;
     background: var(--wiki-page) !important;
   }
