@@ -1076,9 +1076,10 @@ export function SmoothAnchorScroll() {
       lenisFrame = requestAnimationFrame(tick);
     };
     if (lenis) lenisFrame = requestAnimationFrame(tick);
-    // The search sheet pauses smooth scrolling while it is open.
-    const lockScroll = () => lenis?.stop();
-    const unlockScroll = () => lenis?.start();
+    // The search sheet cancels any in-flight smooth-scroll glide by pinning Lenis's target to
+    // the current position. (lenis.stop() is avoided: it animates back to a stale target.)
+    const lockScroll = () => lenis?.scrollTo(window.scrollY, { immediate: true, force: true });
+    const unlockScroll = () => undefined;
     window.addEventListener("alexpedia-scroll-lock", lockScroll);
     window.addEventListener("alexpedia-scroll-unlock", unlockScroll);
 
