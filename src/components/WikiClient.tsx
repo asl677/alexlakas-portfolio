@@ -47,8 +47,12 @@ function SearchResultIcon({ id }: { id: string }) {
   return <Icon size={22} />;
 }
 
-export function PageSearch({ inputId = "page-search", autoFocus = false }: { inputId?: string; autoFocus?: boolean }) {
+// Placeholder "recent searches" shown before the first keystroke; tapping one runs it.
+const recentSearches = ["AI", "Product design", "Google"];
+
+export function PageSearch({ inputId = "page-search", autoFocus = false, recentOnMount = false }: { inputId?: string; autoFocus?: boolean; recentOnMount?: boolean }) {
   const [query, setQuery] = useState("");
+  const [showRecent, setShowRecent] = useState(recentOnMount);
   const [status, setStatus] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const searchRef = useRef<HTMLFormElement>(null);
@@ -75,7 +79,7 @@ export function PageSearch({ inputId = "page-search", autoFocus = false }: { inp
   }, [results.length]);
 
   useEffect(() => {
-    if (!results.length) return;
+    if (!results.length && !showRecent) return;
 
     const closeOnOutsideClick = (event: PointerEvent) => {
       const target = event.target as Node;
@@ -83,11 +87,12 @@ export function PageSearch({ inputId = "page-search", autoFocus = false }: { inp
       const sheet = searchRef.current?.closest(".wiki-mobile-search-sheet-panel");
       if (searchRef.current?.contains(target) || sheet?.contains(target)) return;
       setResults([]);
+      if (!sheet) setShowRecent(false);
     };
 
     document.addEventListener("pointerdown", closeOnOutsideClick);
     return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
-  }, [results.length]);
+  }, [results.length, showRecent]);
 
   const updateResults = (value: string) => {
     const term = value.trim();
@@ -198,8 +203,10 @@ export function PageSearch({ inputId = "page-search", autoFocus = false }: { inp
           id={inputId}
           autoFocus={autoFocus}
           value={query}
+          onFocus={() => { if (!query) setShowRecent(true); }}
           onChange={(event) => {
             setQuery(event.target.value);
+            setShowRecent(!event.target.value);
             updateResults(event.target.value);
           }}
           placeholder="Search"
@@ -213,10 +220,37 @@ export function PageSearch({ inputId = "page-search", autoFocus = false }: { inp
               setQuery("");
               setResults([]);
               setStatus("");
+              setShowRecent(true);
+              document.getElementById(inputId)?.focus();
             }}
           >
             <X size={16} />
           </button>
+        )}
+        {showRecent && !query && results.length === 0 && (
+          <div className="wiki-search-results wiki-search-recent" data-lenis-prevent>
+          <ul aria-label="Recent searches">
+            {recentSearches.map((term) => (
+              <li key={term}>
+                <button
+                  type="button"
+                  // Keep focus in the input so the list does not close before the click lands.
+                  onPointerDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    setQuery(term);
+                    setShowRecent(false);
+                    updateResults(term);
+                  }}
+                >
+                  <span className="wiki-search-result-icon" aria-hidden="true"><Search size={20} strokeWidth={2} /></span>
+                  <span className="wiki-search-result-copy">
+                    <strong>{term}</strong>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          </div>
         )}
         {results.length > 0 && (
           <div ref={resultsRef} className="wiki-search-results" data-lenis-prevent>
@@ -308,7 +342,7 @@ export function MobileSearchSheet() {
           >
             <span aria-hidden="true" />
           </div>
-          <PageSearch inputId="mobile-sheet-search" />
+          <PageSearch inputId="mobile-sheet-search" recentOnMount />
         </section>
       </div>
     </>
