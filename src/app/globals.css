@@ -4916,7 +4916,7 @@ html body .wiki-shell .infobox .caption {
 }
 
 html body .wiki-shell .infobox :is(dt, dd) {
-  padding: 0.4375rem 0 !important;
+  padding: 0.3125rem 0 !important;
 }
 
 html body .wiki-shell .infobox dd {
