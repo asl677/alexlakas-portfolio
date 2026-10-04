@@ -294,15 +294,9 @@ export function MobileSearchSheet() {
 
     document.addEventListener("keydown", closeOnEscape);
     window.addEventListener("alexpedia-search-selected", closeOnSelect);
-    // Lock page scrolling while the sheet is open so dragging it never moves the page.
-    // iOS Safari ignores overflow:hidden on the body, so pin the body in place instead.
-    const scrollY = window.scrollY;
-    const body = document.body;
+    // Lock page scrolling while the sheet is open. The sheet covers the viewport, so a
+    // non-passive touchmove guard on it is enough; the page itself is never moved.
     document.documentElement.classList.add("wiki-sheet-open");
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.left = "0";
-    body.style.right = "0";
     // React touch handlers are passive; this one must be able to cancel page scrolling.
     // Only the results list may scroll, and only while it has room to scroll.
     const sheet = sheetRef.current;
@@ -326,11 +320,6 @@ export function MobileSearchSheet() {
       sheet?.removeEventListener("touchstart", onTouchStart);
       sheet?.removeEventListener("touchmove", onTouchMove);
       document.documentElement.classList.remove("wiki-sheet-open");
-      body.style.position = "";
-      body.style.top = "";
-      body.style.left = "";
-      body.style.right = "";
-      window.scrollTo(0, scrollY);
       document.removeEventListener("keydown", closeOnEscape);
       window.removeEventListener("alexpedia-search-selected", closeOnSelect);
     };
@@ -619,7 +608,12 @@ export function WikiSection({
             // (updaters run during render, so closing siblings there triggers a React error).
             const next = !open;
             setOpen(next);
-            if (next) window.dispatchEvent(new CustomEvent("alexpedia-accordion-open", { detail: id }));
+            if (next) {
+              window.dispatchEvent(new CustomEvent("alexpedia-accordion-open", { detail: id }));
+              // The line reveal normally runs on scroll; run it as the section expands so the
+              // new content staggers in wherever the page is, instead of staying hidden.
+              [50, 300, 620].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("resize")), delay));
+            }
           }
         }}
       >

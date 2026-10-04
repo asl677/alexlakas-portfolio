@@ -5073,9 +5073,10 @@ html body .wiki-mobile-search-sheet .wiki-search-results button {
 }
 
 /* Sheet open: the page behind cannot scroll or rubber-band. */
+/* Sheet open: no overflow lock (the body is this page's scroller, and hiding its overflow
+   breaks the sticky header). The sheet's touch guard prevents page scrolling instead. */
 html.wiki-sheet-open,
 html.wiki-sheet-open body {
-  overflow: hidden !important;
   overscroll-behavior: none !important;
 }
 
