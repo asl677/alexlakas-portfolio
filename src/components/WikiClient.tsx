@@ -78,7 +78,11 @@ export function PageSearch({ inputId = "page-search", autoFocus = false }: { inp
     if (!results.length) return;
 
     const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!searchRef.current?.contains(event.target as Node)) setResults([]);
+      const target = event.target as Node;
+      // Inside the mobile sheet (e.g. its drag handle) is not "outside" the search.
+      const sheet = searchRef.current?.closest(".wiki-mobile-search-sheet-panel");
+      if (searchRef.current?.contains(target) || sheet?.contains(target)) return;
+      setResults([]);
     };
 
     document.addEventListener("pointerdown", closeOnOutsideClick);
@@ -153,6 +157,8 @@ export function PageSearch({ inputId = "page-search", autoFocus = false }: { inp
   };
 
   const selectResult = (result: SearchResult) => {
+    // Lets the mobile bottom sheet slide away once a result is chosen.
+    window.dispatchEvent(new Event("alexpedia-search-selected"));
     const target = document.getElementById(result.id);
     const section = target?.closest<HTMLElement>(".wiki-section") || target;
     const toggle = section?.querySelector<HTMLButtonElement>(".wiki-section-toggle");
@@ -240,6 +246,8 @@ export function PageSearch({ inputId = "page-search", autoFocus = false }: { inp
 
 export function MobileSearchSheet() {
   const [isOpen, setIsOpen] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const dragRef = useRef<{ startY: number; startTime: number } | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -247,27 +255,58 @@ export function MobileSearchSheet() {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsOpen(false);
     };
+    const closeOnSelect = () => setIsOpen(false);
 
     document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
+    window.addEventListener("alexpedia-search-selected", closeOnSelect);
+    // Lock page scrolling while the sheet is open so dragging it never moves the page.
+    document.documentElement.classList.add("wiki-sheet-open");
+    return () => {
+      document.documentElement.classList.remove("wiki-sheet-open");
+      document.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("alexpedia-search-selected", closeOnSelect);
+    };
   }, [isOpen]);
+
+  // Drag the handle down to dismiss: past 80px, or a quick downward flick, closes the sheet.
+  const onHandlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = { startY: event.clientY, startTime: performance.now() };
+  };
+  const onHandlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    setDragOffset(Math.max(0, event.clientY - dragRef.current.startY));
+  };
+  const onHandlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    const distance = Math.max(0, event.clientY - dragRef.current.startY);
+    const velocity = distance / Math.max(1, performance.now() - dragRef.current.startTime);
+    dragRef.current = null;
+    setDragOffset(0);
+    if (distance > 80 || velocity > 0.6) setIsOpen(false);
+  };
 
   return (
     <>
       <button type="button" className="wiki-icon-button wiki-nav-search" aria-label="Search" title="Search" aria-expanded={isOpen} onClick={() => setIsOpen((open) => !open)}><Search size={20} strokeWidth={2} /></button>
-      <div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} onPointerDown={() => setIsOpen(false)}>
-        <section className="wiki-mobile-search-sheet-panel" role="dialog" aria-modal="true" aria-label="Search this page" onPointerDown={(event) => event.stopPropagation()}>
-          <div className="wiki-mobile-search-sheet-header">
-            <span>Search</span>
-            <button
-              type="button"
-              aria-label="Close search"
-              title="Close search"
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={() => setIsOpen(false)}
-            >
-              <X size={20} strokeWidth={2} />
-            </button>
+      <div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} data-lenis-prevent onPointerDown={() => setIsOpen(false)} onTouchMove={(event) => { if (!(event.target as HTMLElement).closest(".wiki-search-results")) event.preventDefault(); }}>
+        <section
+          className={`wiki-mobile-search-sheet-panel${dragOffset ? " is-dragging" : ""}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search this page"
+          style={dragOffset ? { transform: `translateY(${dragOffset}px)` } : undefined}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <div
+            className="wiki-mobile-search-sheet-handle"
+            onPointerDown={onHandlePointerDown}
+            onPointerMove={onHandlePointerMove}
+            onPointerUp={onHandlePointerUp}
+            onPointerCancel={onHandlePointerUp}
+          >
+            <span aria-hidden="true" />
           </div>
           <PageSearch inputId="mobile-sheet-search" />
         </section>

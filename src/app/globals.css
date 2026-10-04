@@ -5010,3 +5010,107 @@ html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
   max-height: 90dvh !important;
   box-sizing: border-box;
 }
+
+/* Mobile search sheet: the whole sheet is the results list. A drag handle replaces the close
+   button; the search submit button is hidden inside the sheet. */
+html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 1rem 1rem !important;
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel.is-dragging {
+  transition: none !important;
+}
+
+.wiki-mobile-search-sheet-handle {
+  display: grid;
+  place-items: center;
+  flex: none;
+  height: 1.75rem;
+  margin: 0 -1rem 0.5rem;
+  touch-action: none;
+}
+
+.wiki-mobile-search-sheet-handle > span {
+  width: 2.5rem;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: var(--wiki-border);
+}
+
+html body .wiki-mobile-search-sheet .wiki-search {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+html body .wiki-mobile-search-sheet .wiki-search :is(button[type="submit"], .wiki-search-submit) {
+  display: none !important;
+}
+
+html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
+  position: static !important;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none !important;
+  width: 100% !important;
+  margin: 0.5rem 0 0 !important;
+  overflow-y: auto !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  touch-action: pan-y;
+}
+
+html body .wiki-mobile-search-sheet .wiki-search-results button {
+  padding-inline: 0 !important;
+}
+
+/* Sheet open: the page behind cannot scroll or rubber-band. */
+html.wiki-sheet-open,
+html.wiki-sheet-open body {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+.wiki-mobile-search-sheet {
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
+/* Results fill the sheet: form and input wrapper are flex columns; only the list scrolls. */
+html body .wiki-shell .wiki-topbar .wiki-mobile-search-sheet .wiki-search,
+html body .wiki-mobile-search-sheet form.wiki-search {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+html body .wiki-mobile-search-sheet .wiki-search .wiki-search-input {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+html body .wiki-mobile-search-sheet .wiki-search .wiki-search-input > :not(.wiki-search-results) {
+  flex: none;
+}
+
+html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
+  overscroll-behavior: contain;
+}
+
+/* Sheet: the clear button stays centered on the input row, not the full-height wrapper. */
+html body .wiki-mobile-search-sheet .wiki-search .wiki-search-input > button:not([type="submit"]) {
+  top: 1.0625rem !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+}
