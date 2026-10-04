@@ -12,7 +12,25 @@ export default function ThemeSwitch() {
     const syncTheme = () => setIsDark(document.documentElement.dataset.theme === "dark");
     syncTheme();
     window.addEventListener("alexpedia-theme-change", syncTheme);
-    return () => window.removeEventListener("alexpedia-theme-change", syncTheme);
+
+    // Phones: the toggle is hidden and the theme follows the device setting, live.
+    const phone = window.matchMedia("(max-width: 35rem)");
+    const device = window.matchMedia("(prefers-color-scheme: dark)");
+    const followDevice = () => {
+      if (!phone.matches) return;
+      const theme = device.matches ? "dark" : "light";
+      document.documentElement.dataset.theme = theme;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#000000" : "#ffffff");
+      syncTheme();
+    };
+    followDevice();
+    device.addEventListener("change", followDevice);
+    phone.addEventListener("change", followDevice);
+    return () => {
+      window.removeEventListener("alexpedia-theme-change", syncTheme);
+      device.removeEventListener("change", followDevice);
+      phone.removeEventListener("change", followDevice);
+    };
   }, []);
 
   function toggleTheme(event: React.MouseEvent<HTMLButtonElement>) {

@@ -4411,8 +4411,6 @@ header.wiki-topbar {
 .wiki-article-header .wiki-title-row > .wiki-title-action,
 .wiki-article-header.is-scrolled .wiki-title-row > .wiki-title-action {
   align-self: flex-end !important;
-  height: 2.125rem !important;
-  margin-bottom: 0.5rem !important;
 }
 .theme-toggle:focus,
 .wiki-sticky-actions > a:focus,
@@ -4444,8 +4442,6 @@ html.theme-switching *::before,
 html.theme-switching *::after {
   transition: none !important;
 }
-
-/* "So many languages" shares the title's text baseline at every size. */
 .wiki-article-header .wiki-title-row > .wiki-article-title,
 .wiki-article-header .wiki-title-row > .wiki-talk-title,
 .wiki-article-header .wiki-title-row > .wiki-title-action,
@@ -4458,8 +4454,6 @@ html.theme-switching *::after {
   height: auto !important;
   margin-bottom: 0 !important;
 }
-
-/* Sticky icons center on the title box (row bottom minus the title's 0.5rem margin). */
 .wiki-article-header .wiki-title-row > .wiki-title-action {
   position: static !important;
 }
@@ -4471,11 +4465,6 @@ html.theme-switching *::after {
   right: 0 !important;
   transform: none !important;
 }
-
-/* Scroll-linked top bar fade. filter: opacity() multiplies with the intro animation's
-   inline opacity instead of fighting it, so both always resolve fully. */
-/* Never filter <nav> itself: a filter makes it the containing block for the fixed
-   mobile search sheet inside it, which pulls the sheet onto the page. */
 html body header.wiki-topbar > .wiki-search,
 html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) {
   filter: opacity(var(--wiki-topbar-fade, 1));
@@ -4486,17 +4475,11 @@ html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) {
     filter: opacity(var(--wiki-topbar-fade, 1));
   }
 }
-
-/* Leaving the sticky state: the sticky search disappears instantly in place. Fading it
-   out while the title row re-lays out made it flash across the header. */
 .wiki-article-header:not(.is-scrolled) .wiki-scroll-actions,
 .wiki-article-header:not(.is-scrolled) .wiki-scroll-search,
 .wiki-article-header:not(.is-scrolled) .wiki-sticky-actions {
   transition: none !important;
 }
-
-/* Tablet (900–1100px): the top bar carries the full search, matching the sticky header,
-   so search is present both at the top and when scrolled. */
 @media (min-width: 56.3125rem) and (max-width: 68.6875rem) {
   header.wiki-topbar {
     grid-template-columns: auto minmax(0, 1fr) auto !important;
@@ -4520,8 +4503,6 @@ html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) {
     min-width: 4.75rem !important;
   }
 }
-
-/* One type scale at every width: mobile body copy matches desktop exactly. */
 html body .wiki-shell :is(
   .wiki-section-content li,
   .wiki-article-body ol > li,
@@ -4540,8 +4521,6 @@ html body .wiki-shell .wiki-section-content > .references > li {
   line-height: 1.45 !important;
   margin-bottom: 0.25rem !important;
 }
-
-/* Link lists use no extra gap between items at any width (matches desktop). */
 html body .wiki-shell .wiki-link-list li {
   margin-block: 0 !important;
 }
@@ -4560,9 +4539,6 @@ html body .wiki-shell .article-list-item p:not(.article-list-meta) {
   font-size: 0.875rem !important;
   line-height: 1.45 !important;
 }
-
-/* Mobile/tablet: the sticky header and section headings span the full viewport width so
-   scrolling content never shows in the side gutters, and headings pin under the header. */
 @media (max-width: 68.6875rem) {
   html body .wiki-shell .wiki-article-header {
     width: calc(100% + 2 * var(--wiki-page-gutter)) !important;
@@ -4579,9 +4555,6 @@ html body .wiki-shell .article-list-item p:not(.article-list-meta) {
     background: var(--wiki-page) !important;
   }
 }
-
-/* Headings bleed full width only on phones, where the profile card stacks above the text.
-   At tablet widths the card has its own column, so headings stay within the text column. */
 @media (max-width: 47.9375rem) {
   html body .wiki-shell .wiki-section-toggle {
     display: flex !important;
@@ -4592,8 +4565,6 @@ html body .wiki-shell .article-list-item p:not(.article-list-meta) {
     padding-inline: var(--wiki-page-gutter) !important;
   }
 }
-
-/* Long-press plays the portrait frames; suppress the iOS image callout and selection. */
 .infobox-portrait,
 .infobox-portrait img {
   -webkit-touch-callout: none;
@@ -4601,9 +4572,6 @@ html body .wiki-shell .article-list-item p:not(.article-list-meta) {
   user-select: none;
   -webkit-user-drag: none;
 }
-
-/* "So many languages" fades both ways: visible immediately when fading in, hidden only
-   after the fade completes when fading out. */
 html body .wiki-article-header:not(.is-scrolled) .wiki-language {
   transition: opacity 240ms ease, visibility 0s linear 0s !important;
 }
@@ -4611,21 +4579,14 @@ html body .wiki-article-header:not(.is-scrolled) .wiki-language {
 html body .wiki-article-header.is-scrolled .wiki-language {
   transition: opacity 240ms ease, visibility 0s linear 240ms !important;
 }
-
-/* Tailwind preflight's default border color (#e5e7eb) is a cool gray; use a pure neutral. */
 *,
 ::before,
 ::after {
   border-color: #e6e6e6;
 }
-
-/* Sticky profile card keeps the same 1.125rem gap below the article header's real height. */
 html body .wiki-shell .wiki-article-body > .infobox {
   top: calc(var(--wiki-article-header-height, 6rem) + 1.125rem) !important;
 }
-
-/* Search: results attach flush to the box (overlapping its bottom border), compact rows,
-   and a neutral focus state instead of the browser's blue ring. */
 html body .wiki-shell .wiki-search .wiki-search-results {
   top: 100% !important;
   margin-top: 0 !important;
@@ -4660,11 +4621,6 @@ html body .wiki-shell .wiki-search-results .wiki-search-result-copy {
   height: auto !important;
   min-height: 0 !important;
 }
-
-/* Title bar: everything centers on the bar's true middle.
-   - Sticky icons center on the row (not a fixed distance from the bottom).
-   - Below 1100px the row has 0.5rem top padding; the sticky search offsets it.
-   - "Alex" (and the baseline-aligned label) shift by the measured ink offset, set in JS. */
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-sticky-actions,
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions {
   top: 50% !important;
@@ -4678,9 +4634,6 @@ html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .w
     margin-top: -0.5rem !important;
   }
 }
-
-/* Title and label are bottom-anchored in both header states so nothing shifts when the header
-   sticks. JS sets the optical nudge and the label's baseline match. */
 html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-article-title,
 html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-talk-title,
 html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-title-action,
@@ -4696,23 +4649,15 @@ html body .wiki-shell .wiki-title-row > .wiki-talk-title {
 html body .wiki-shell .wiki-title-row .wiki-language {
   transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px)));
 }
-
-
-/* Phones: a tighter side gutter that matches the vertical rhythm. */
 @media (max-width: 35rem) {
   .wiki-shell {
     --wiki-page-gutter: 1rem;
   }
 }
-
-/* Media thumbnails: no gray box behind images and video. The surface color was only a
-   loading fallback and showed around media that doesn't fill its frame. */
 html body .wiki-shell :is(a, figure, div, span):has(> img, > video):not(.infobox-portrait),
 html body .wiki-shell :is(img, video):not(.infobox-portrait img) {
   background: transparent !important;
 }
-
-/* Stacked layout: the gap between the profile card and the Contents card equals the side gutter. */
 @media (max-width: 56.25rem) {
   html body .wiki-shell .wiki-article-body > .infobox {
     margin-bottom: 0 !important;
@@ -4722,16 +4667,11 @@ html body .wiki-shell :is(img, video):not(.infobox-portrait img) {
     margin-top: var(--wiki-page-gutter) !important;
   }
 }
-
-/* Talk page: rating rows use the same 16px body size as the article. */
 html body .wiki-shell .wiki-talk-status,
 html body .wiki-shell .wiki-talk-status * {
   font-size: 1rem !important;
   line-height: 1.58 !important;
 }
-
-/* Focus: no browser-blue rings anywhere. Mouse/touch clicks show nothing; keyboard focus
-   gets a neutral outline in the text color. */
 html body :focus:not(:focus-visible) {
   outline: none !important;
 }
@@ -4740,9 +4680,6 @@ html body :focus-visible {
   outline: 1px solid var(--wiki-ink) !important;
   outline-offset: 2px !important;
 }
-
-/* Talk rating box: no container padding; every row has equal 0.75rem padding on all sides,
-   a single divider between rows, and label / pill / [show] centered on one line. */
 html body .wiki-shell .wiki-talk-status {
   padding: 0 !important;
 }
@@ -4778,8 +4715,6 @@ html body .wiki-shell .wiki-talk-status .wiki-talk-rating-mark {
 html body .wiki-shell .wiki-talk-status .wiki-talk-priority {
   flex: none;
 }
-
-/* Talk: "Latest comment" has equal space above (to the tabs) and below (to the notice). */
 html body .wiki-shell .wiki-talk-page {
   padding-top: 0 !important;
   margin-top: 0 !important;
@@ -4788,9 +4723,6 @@ html body .wiki-shell .wiki-talk-page {
 html body .wiki-shell .wiki-talk-page > .wiki-talk-latest {
   margin: 1rem 0 !important;
 }
-
-/* Talk rating badge: Wikipedia-style A-class assessment icon. Intentional color exception
-   to the neutral palette (assessment classes are color-coded). */
 html body .wiki-shell .wiki-talk-status .wiki-talk-rating-mark {
   display: inline-grid !important;
   place-items: center;
@@ -4808,8 +4740,6 @@ html body .wiki-shell .wiki-talk-status .wiki-talk-rating-mark {
   padding-top: 1px;
   box-sizing: border-box;
 }
-
-/* Titles never wrap; the language label gives up space first (truncates with an ellipsis). */
 html body .wiki-shell .wiki-title-row > :is(.wiki-article-title, .wiki-talk-title) {
   white-space: nowrap !important;
   flex-shrink: 0 !important;
@@ -4826,8 +4756,6 @@ html body .wiki-shell .wiki-title-row .wiki-language {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-/* Text selection: inverse of the current theme (ink background, page-colored text). */
 ::selection {
   background: var(--wiki-ink);
   color: var(--wiki-page);
@@ -4837,9 +4765,6 @@ html body .wiki-shell .wiki-title-row .wiki-language {
   background: var(--wiki-ink);
   color: var(--wiki-page);
 }
-
-/* Tabs: the active tab uses the full text color, inactive tabs the muted link gray;
-   tighter bar and spacing to match Wikipedia's tab row. */
 html body .wiki-shell .wiki-article-header .wiki-tabs,
 html body .wiki-shell .wiki-article-header.is-scrolled .wiki-tabs {
   min-height: 2.25rem !important;
@@ -4862,9 +4787,6 @@ html body .wiki-shell .wiki-article-header .wiki-tab {
 html body .wiki-shell .wiki-article-header .wiki-tab.is-selected {
   color: var(--wiki-ink) !important;
 }
-
-/* Language label <-> sticky icons hand-off: one continuous upward motion. The outgoing item
-   fades and rises 2px; the incoming item starts 180ms later and rises 2px into place. */
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions,
 html body .wiki-shell .wiki-article-header:not(.is-scrolled) .wiki-title-row .wiki-title-action .wiki-sticky-actions {
   opacity: 0 !important;
@@ -4894,9 +4816,6 @@ html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row .wiki-lan
   transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px) - 2px)) !important;
   transition: opacity 260ms cubic-bezier(0.45, 0, 0.55, 1), transform 260ms cubic-bezier(0.45, 0, 0.55, 1), visibility 0s linear 260ms !important;
 }
-
-/* Profile and Contents cards: equal 1rem inset on every side and a roomier rhythm that
-   matches the page body. */
 html body .wiki-shell .wiki-article-body > .infobox {
   padding: 1rem !important;
 }
@@ -4930,8 +4849,6 @@ html body .wiki-shell .infobox dl {
 html body .wiki-shell .article-toc {
   padding: 1rem !important;
 }
-
-/* Desktop: both search boxes use Wikipedia's ~488px width (input + button), left-aligned. */
 @media (min-width: 68.75rem) {
   html body .wiki-shell header.wiki-topbar > .wiki-search {
     width: 30.5rem !important;
@@ -4944,17 +4861,12 @@ html body .wiki-shell .article-toc {
     max-width: 100% !important;
   }
 }
-
-/* Top bar: 4px more space above and below (52px -> 60px tall). */
 html body header.wiki-topbar,
 html body header.wiki-topbar.is-scrolled {
   height: 3.75rem !important;
   min-height: 3.75rem !important;
   padding-block: 0.8125rem !important;
 }
-
-/* Desktop: left rail 20px narrower (216px -> 196px); the top bar's first column matches so
-   the search box stays aligned with the article. The pinned wordmark matches the taller bar. */
 @media (min-width: 68.75rem) {
   html body .wiki-shell .wiki-layout {
     grid-template-columns: 12.25rem minmax(0, 1fr) !important;
@@ -4973,13 +4885,9 @@ html body header.wiki-topbar.is-scrolled {
     top: 5.625rem !important;
   }
 }
-
-/* Sticky search: horizontally centered between the title and the icons (shift set in JS). */
 html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-scroll-actions {
   translate: var(--wiki-search-shift, 0px) 0;
 }
-
-/* Tablet (900px+): search keeps the desktop 488px width until the mobile icon takes over. */
 @media (min-width: 56.3125rem) {
   html body .wiki-shell header.wiki-topbar > .wiki-search {
     width: 30.5rem !important;
@@ -4992,15 +4900,11 @@ html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-scroll-action
     max-width: 100% !important;
   }
 }
-
-/* Tablet top bar: search centered between the wordmark and the icons. */
 @media (min-width: 56.3125rem) and (max-width: 68.6875rem) {
   html body .wiki-shell header.wiki-topbar > .wiki-search {
     justify-self: center !important;
   }
 }
-
-/* Mobile search sheet: 90% of the viewport tall; the page behind dims by 60%. */
 html body .wiki-mobile-search-sheet.is-open {
   background: rgb(0 0 0 / 60%) !important;
 }
@@ -5010,9 +4914,6 @@ html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
   max-height: 90dvh !important;
   box-sizing: border-box;
 }
-
-/* Mobile search sheet: the whole sheet is the results list. A drag handle replaces the close
-   button; the search submit button is hidden inside the sheet. */
 html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
   display: flex !important;
   flex-direction: column !important;
@@ -5071,10 +4972,6 @@ html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
 html body .wiki-mobile-search-sheet .wiki-search-results button {
   padding-inline: 0 !important;
 }
-
-/* Sheet open: the page behind cannot scroll or rubber-band. */
-/* Sheet open: no overflow lock (the body is this page's scroller, and hiding its overflow
-   breaks the sticky header). The sheet's touch guard prevents page scrolling instead. */
 html.wiki-sheet-open,
 html.wiki-sheet-open body {
   overscroll-behavior: none !important;
@@ -5084,8 +4981,6 @@ html.wiki-sheet-open body {
   overscroll-behavior: contain;
   touch-action: none;
 }
-
-/* Results fill the sheet: form and input wrapper are flex columns; only the list scrolls. */
 html body .wiki-shell .wiki-topbar .wiki-mobile-search-sheet .wiki-search,
 html body .wiki-mobile-search-sheet form.wiki-search {
   display: flex !important;
@@ -5108,23 +5003,15 @@ html body .wiki-mobile-search-sheet .wiki-search .wiki-search-input > :not(.wiki
 html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
   overscroll-behavior: contain;
 }
-
-/* Sheet: the clear button stays centered on the input row, not the full-height wrapper. */
 html body .wiki-mobile-search-sheet .wiki-search .wiki-search-input > button:not([type="submit"]) {
   top: 1.0625rem !important;
   bottom: auto !important;
   transform: translateY(-50%) !important;
 }
-
-
-/* The nav search icon sits at the same level as the other icons, so the open sheet's
-   backdrop dims all three equally. */
 html body .wiki-topbar nav > .wiki-nav-search {
   position: static !important;
   z-index: auto !important;
 }
-
-/* Search result rows: no rounded hover box; hover backgrounds only on devices that hover. */
 html body .wiki-search-results button {
   border-radius: 0 !important;
 }
@@ -5136,9 +5023,6 @@ html body .wiki-search-results button {
     background: transparent !important;
   }
 }
-
-/* Sticky cluster search icon: mobile/tablet only (where search is an icon), fading in with
-   the other icons. The cluster widens to fit three icons there. */
 html body .wiki-shell .wiki-sticky-actions > .wiki-sticky-search {
   display: none !important;
 }
@@ -5160,8 +5044,6 @@ html body .wiki-shell .wiki-sticky-actions > .wiki-sticky-search {
     color: var(--wiki-ink);
   }
 }
-
-/* Search sheet: slower, smoother open/close. */
 html body .wiki-mobile-search-sheet {
   transition: background-color 360ms ease, visibility 0s linear 360ms !important;
 }
@@ -5173,10 +5055,18 @@ html body .wiki-mobile-search-sheet.is-open {
 html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel:not(.is-dragging) {
   transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
-
-/* Results inside the sheet: square container, so row hover backgrounds are not clipped. */
 html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
   border-radius: 0 !important;
   overflow-x: hidden !important;
 }
+@media (max-width: 35rem) {
+  html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) > .theme-toggle {
+    display: none !important;
+  }
 
+  html body .wiki-shell .wiki-topbar nav,
+  html body .wiki-shell .wiki-article-header .wiki-sticky-actions {
+    width: 4.75rem !important;
+    min-width: 4.75rem !important;
+  }
+}

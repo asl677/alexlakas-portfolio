@@ -64,7 +64,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             // Creates the single theme-color tag Safari uses to tint its toolbars. Created here (not in
             // JSX) so React hydration never duplicates it with a stale value.
-            __html: `(() => { try { const saved = localStorage.getItem('alexpedia-theme'); const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; const theme = dark ? 'dark' : 'light'; document.documentElement.dataset.theme = theme; let meta = document.querySelector('meta[name="theme-color"]'); if (!meta) { meta = document.createElement('meta'); meta.name = 'theme-color'; document.head.appendChild(meta); } meta.content = dark ? '#000000' : '#ffffff'; } catch {} })();`,
+            __html: `(() => { try { const phone = matchMedia('(max-width: 35rem)').matches; const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches; const saved = phone ? null : localStorage.getItem('alexpedia-theme'); const dark = saved ? saved === 'dark' : prefersDark; const theme = dark ? 'dark' : 'light'; document.documentElement.dataset.theme = theme; let meta = document.querySelector('meta[name="theme-color"]'); if (!meta) { meta = document.createElement('meta'); meta.name = 'theme-color'; document.head.appendChild(meta); } meta.content = dark ? '#000000' : '#ffffff'; } catch {} })();`,
           }}
         />
         <script
