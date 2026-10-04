@@ -4862,3 +4862,84 @@ html body .wiki-shell .wiki-article-header .wiki-tab {
 html body .wiki-shell .wiki-article-header .wiki-tab.is-selected {
   color: var(--wiki-ink) !important;
 }
+
+/* Language label <-> sticky icons hand-off. They share one spot, so they never fade at the
+   same time: the outgoing item fades and slides 3px away, then the incoming item fades in
+   and slides 3px into place after a short buffer. */
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions,
+html body .wiki-shell .wiki-article-header:not(.is-scrolled) .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(calc(-50% + 3px)) !important;
+  transition:
+    opacity 320ms cubic-bezier(0.45, 0, 0.55, 1),
+    transform 320ms cubic-bezier(0.45, 0, 0.55, 1),
+    visibility 0s linear 320ms !important;
+}
+
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(-50%) !important;
+  transition:
+    opacity 320ms cubic-bezier(0.45, 0, 0.55, 1) 280ms,
+    transform 320ms cubic-bezier(0.45, 0, 0.55, 1) 280ms,
+    visibility 0s linear 280ms !important;
+}
+
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-language,
+html body .wiki-shell .wiki-article-header:not(.is-scrolled) .wiki-title-row .wiki-language {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px))) !important;
+  transition:
+    opacity 320ms cubic-bezier(0.45, 0, 0.55, 1) 280ms,
+    transform 320ms cubic-bezier(0.45, 0, 0.55, 1) 280ms,
+    visibility 0s linear 280ms !important;
+}
+
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row .wiki-language {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px) - 3px)) !important;
+  transition:
+    opacity 320ms cubic-bezier(0.45, 0, 0.55, 1),
+    transform 320ms cubic-bezier(0.45, 0, 0.55, 1),
+    visibility 0s linear 320ms !important;
+}
+
+/* Profile and Contents cards: equal 1rem inset on every side and a roomier rhythm that
+   matches the page body. */
+html body .wiki-shell .wiki-article-body > .infobox {
+  padding: 1rem !important;
+}
+
+html body .wiki-shell .infobox > h2 {
+  margin: 0 0 0.75rem !important;
+  padding: 0 !important;
+}
+
+html body .wiki-shell .infobox .infobox-portrait {
+  margin-top: 0 !important;
+}
+
+html body .wiki-shell .infobox .caption {
+  margin: 0.5rem 0 0.75rem !important;
+  padding: 0 !important;
+}
+
+html body .wiki-shell .infobox :is(dt, dd) {
+  padding: 0.4375rem 0 !important;
+}
+
+html body .wiki-shell .infobox dd {
+  padding-left: 0.75rem !important;
+}
+
+html body .wiki-shell .infobox dl {
+  margin: 0 !important;
+}
+
+html body .wiki-shell .article-toc {
+  padding: 1rem !important;
+}
