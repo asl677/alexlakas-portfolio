@@ -929,7 +929,7 @@ export function IntroSequence() {
           };
           // Hold "Wikipidia" for 3s before the first delete.
           let time = 3;
-          for (const next of ["Alexipidia", "Nah", "Designer"]) {
+          for (const next of ["Alexapedia", "Nah", "Designer"]) {
             for (let length = current.length - 1; length >= 0; length--) {
               const presses = current.length - 1 - length;
               // First press, then the OS key-repeat delay, then a steady repeat.
