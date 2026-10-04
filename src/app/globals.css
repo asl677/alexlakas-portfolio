@@ -4999,3 +4999,14 @@ html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-scroll-action
     justify-self: center !important;
   }
 }
+
+/* Mobile search sheet: 90% of the viewport tall; the page behind dims by 60%. */
+html body .wiki-mobile-search-sheet.is-open {
+  background: rgb(0 0 0 / 60%) !important;
+}
+
+html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
+  height: 90dvh !important;
+  max-height: 90dvh !important;
+  box-sizing: border-box;
+}
