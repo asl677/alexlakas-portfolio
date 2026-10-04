@@ -5323,10 +5323,11 @@ html body .wiki-shell .wiki-article-header.is-recentering .wiki-title-row :is(.w
 html body .wiki-shell .career-feature > figure.career-video {
   clear: both;
   float: none !important;
-  width: 100% !important;
+  width: min(100%, 36rem) !important;
   max-width: none !important;
-  margin: 1rem 0 0 !important;
+  margin: 0.5rem auto 1.25rem !important;
 }
+
 
 html body .wiki-shell .career-feature > figure.career-video video {
   display: block;
@@ -5353,4 +5354,23 @@ html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row :is(.wiki
 html body .wiki-shell .wiki-article-header .wiki-scroll-actions .wiki-scroll-search {
   opacity: 1 !important;
   transform: none !important;
+}
+
+/* Load reveal x scroll hand-off: --wiki-reveal (load fade, set by the intro) multiplies the
+   hand-off opacity, so the header controls stagger in with the page and still hand off. */
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-language {
+  opacity: calc(var(--wiki-reveal, 1) * clamp(0, calc(1 - var(--wiki-handoff, 0) * 2), 1)) !important;
+}
+
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-title-action .wiki-sticky-actions,
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-scroll-actions {
+  opacity: calc(var(--wiki-reveal, 1) * clamp(0, calc(var(--wiki-handoff, 0) * 2 - 1), 1)) !important;
+}
+
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-scroll-actions .wiki-scroll-search {
+  opacity: 1 !important;
+}
+
+html body .wiki-shell .wiki-article-header .wiki-title-row > :is(.wiki-title-action, .wiki-scroll-actions) {
+  opacity: 1 !important;
 }

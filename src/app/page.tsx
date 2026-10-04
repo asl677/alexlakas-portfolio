@@ -204,6 +204,10 @@ export default function Home() {
               </div>
               <div id="freelance-and-0-1" className="career-feature career-feature--left career-feature--wide career-feature--peanut">
                 <h3>Freelance and 0-1</h3>
+                <figure className="career-video">
+                  <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
+                  <figcaption>AI video gen</figcaption>
+                </figure>
                 <figure>
                   <div className="peanut-still">
                     <img src="/peanut-travel-on.png" alt="Peanut Travel: Travel on." />
@@ -212,11 +216,7 @@ export default function Home() {
                 </figure>
                 <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut Travel</a>, a browser-based Chrome extension that surfaced critical travel info during your online booking process. It partnered with Insured Nomads, a travel-insurance company, before it was acquired by the company. His work there spanned art direction, design systems, product design, prototyping, research, and marketing. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a>, extending his work across brand, social, and product experiences.<Ref n={1} /><Ref n={11} /></p>
                 <p>Built by a lean founding team, Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Peanut, the product brought useful travel choices into the browsing moment, reducing the distance between research and action. At Culprit, Alex applied the same product thinking to creative direction, building systems that could carry a clear point of view across platforms and campaigns.<Ref n={7} /></p>
-                              <figure className="career-video">
-                  <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="Out of touch" />
-                  <figcaption>Out of touch</figcaption>
-                </figure>
-              </div>
+                            </div>
               <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape">
                 <h3>New territory — Data Infra &amp; AI</h3>
                 <figure>

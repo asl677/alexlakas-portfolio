@@ -693,6 +693,12 @@ export function IntroSequence() {
       const label = articleHeader.querySelector<HTMLElement>(".wiki-language");
       const context = document.createElement("canvas").getContext("2d");
       if (!row || !title || !context) return;
+      // Measure with the scroll hand-off at rest (label in place, not slid up), and with
+      // transitions off; otherwise a page that loads scrolled bakes the slide into the offset.
+      const handoff = articleHeader.style.getPropertyValue("--wiki-handoff");
+      const wasRecentering = articleHeader.classList.contains("is-recentering");
+      articleHeader.classList.add("is-recentering");
+      articleHeader.style.setProperty("--wiki-handoff", "0");
       articleHeader.style.setProperty("--wiki-title-nudge", "0px");
       articleHeader.style.setProperty("--wiki-language-shift", "0px");
       const baselineOf = (element: HTMLElement) => {
@@ -712,6 +718,11 @@ export function IntroSequence() {
       const inkCenter = titleBaseline - (ink.actualBoundingBoxAscent - ink.actualBoundingBoxDescent) / 2;
       articleHeader.style.setProperty("--wiki-title-nudge", `${(rowCenter - inkCenter).toFixed(2)}px`);
       if (label) articleHeader.style.setProperty("--wiki-language-shift", `${(titleBaseline - baselineOf(label)).toFixed(2)}px`);
+      if (handoff) articleHeader.style.setProperty("--wiki-handoff", handoff);
+      if (!wasRecentering) {
+        void articleHeader.offsetHeight;
+        requestAnimationFrame(() => articleHeader.classList.remove("is-recentering"));
+      }
 
       // Sticky search sits exactly midway between the title's right edge and the icons.
       const search = articleHeader.querySelector<HTMLElement>(".wiki-scroll-actions");
@@ -734,6 +745,8 @@ export function IntroSequence() {
       const isScrolled = wasScrolled ? headerTop <= stickyTop + 8 : headerTop <= stickyTop + 1;
       const scrollProgress = Math.min(window.scrollY / 96, 1);
       const easedProgress = scrollProgress * scrollProgress * (3 - (2 * scrollProgress));
+      // Header back at rest: re-measure the title/label offsets against the settled layout.
+      if (wasScrolled && !isScrolled) requestAnimationFrame(centerTitle);
       topbar.classList.toggle("is-scrolled", isScrolled);
       articleHeader.classList.toggle("is-scrolled", isScrolled);
       contents.classList.toggle("is-scrolled", isScrolled);
@@ -992,6 +1005,9 @@ export function IntroSequence() {
       const revealProperties = (element: HTMLElement, opacity: number) => {
         if (element === rail) return { "--rail-surface-opacity": opacity };
         if (dividers.has(element)) return { "--wiki-divider-opacity": opacity };
+        // Header controls whose opacity CSS also drives (scroll-linked hand-off): reveal through
+        // a variable that CSS multiplies in, so the load fade and the hand-off combine.
+        if (element.matches(".wiki-title-row > .wiki-title-action, .wiki-title-row > .wiki-scroll-actions")) return { "--wiki-reveal": opacity };
         return { opacity };
       };
       const stage = (elements: HTMLElement[]) => elements.forEach(element => {
