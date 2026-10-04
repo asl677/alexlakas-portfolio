@@ -5115,3 +5115,23 @@ html body .wiki-mobile-search-sheet .wiki-search .wiki-search-input > button:not
   transform: translateY(-50%) !important;
 }
 
+
+/* The nav search icon sits at the same level as the other icons, so the open sheet's
+   backdrop dims all three equally. */
+html body .wiki-topbar nav > .wiki-nav-search {
+  position: static !important;
+  z-index: auto !important;
+}
+
+/* Search result rows: no rounded hover box; hover backgrounds only on devices that hover. */
+html body .wiki-search-results button {
+  border-radius: 0 !important;
+}
+
+@media (hover: none) {
+  html body .wiki-search-results button:is(:hover, :focus, :focus-visible, :active),
+  html body .wiki-topbar nav > :is(a, button, .theme-toggle):is(:hover, :focus, :active),
+  html body .wiki-sticky-actions > :is(a, button, .theme-toggle):is(:hover, :focus, :active) {
+    background: transparent !important;
+  }
+}

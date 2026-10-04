@@ -282,6 +282,7 @@ export function MobileSearchSheet() {
   const [isOpen, setIsOpen] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const dragRef = useRef<{ startY: number; startTime: number } | null>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -294,9 +295,42 @@ export function MobileSearchSheet() {
     document.addEventListener("keydown", closeOnEscape);
     window.addEventListener("alexpedia-search-selected", closeOnSelect);
     // Lock page scrolling while the sheet is open so dragging it never moves the page.
+    // iOS Safari ignores overflow:hidden on the body, so pin the body in place instead.
+    const scrollY = window.scrollY;
+    const body = document.body;
     document.documentElement.classList.add("wiki-sheet-open");
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    // React touch handlers are passive; this one must be able to cancel page scrolling.
+    // Only the results list may scroll, and only while it has room to scroll.
+    const sheet = sheetRef.current;
+    let lastY = 0;
+    const onTouchStart = (event: TouchEvent) => { lastY = event.touches[0]?.clientY ?? 0; };
+    const onTouchMove = (event: TouchEvent) => {
+      const list = (event.target as HTMLElement).closest<HTMLElement>(".wiki-search-results");
+      const y = event.touches[0]?.clientY ?? 0;
+      const deltaY = y - lastY;
+      lastY = y;
+      if (list) {
+        const atTop = list.scrollTop <= 0 && deltaY > 0;
+        const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 1 && deltaY < 0;
+        if (!atTop && !atBottom) return;
+      }
+      event.preventDefault();
+    };
+    sheet?.addEventListener("touchstart", onTouchStart, { passive: true });
+    sheet?.addEventListener("touchmove", onTouchMove, { passive: false });
     return () => {
+      sheet?.removeEventListener("touchstart", onTouchStart);
+      sheet?.removeEventListener("touchmove", onTouchMove);
       document.documentElement.classList.remove("wiki-sheet-open");
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      window.scrollTo(0, scrollY);
       document.removeEventListener("keydown", closeOnEscape);
       window.removeEventListener("alexpedia-search-selected", closeOnSelect);
     };
@@ -324,7 +358,7 @@ export function MobileSearchSheet() {
   return (
     <>
       <button type="button" className="wiki-icon-button wiki-nav-search" aria-label="Search" title="Search" aria-expanded={isOpen} onClick={() => setIsOpen((open) => !open)}><Search size={20} strokeWidth={2} /></button>
-      <div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} data-lenis-prevent onPointerDown={() => setIsOpen(false)} onTouchMove={(event) => { if (!(event.target as HTMLElement).closest(".wiki-search-results")) event.preventDefault(); }}>
+      <div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} data-lenis-prevent ref={sheetRef} onPointerDown={() => setIsOpen(false)}>
         <section
           className={`wiki-mobile-search-sheet-panel${dragOffset ? " is-dragging" : ""}`}
           role="dialog"
