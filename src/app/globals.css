@@ -5323,7 +5323,7 @@ html body .wiki-shell .wiki-article-header.is-recentering .wiki-title-row :is(.w
 html body .wiki-shell .career-feature > figure.career-video {
   clear: both;
   float: none !important;
-  width: min(100%, 36rem) !important;
+  width: min(100%, 33.5rem) !important;
   max-width: none !important;
   margin: 0.5rem auto 1.25rem !important;
 }
