@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { BookMarked, BriefcaseBusiness, ChevronDown, Code2, FileText, GraduationCap, Link, Newspaper, Palette, Quote, Search, X } from "lucide-react";
+import { BookMarked, BriefcaseBusiness, ChevronDown, Code2, FileText, GraduationCap, History, Link, Newspaper, Palette, Quote, Search, X } from "lucide-react";
 import { gsap, SplitText } from "gsap/all";
 import Lenis from "lenis";
 
@@ -242,7 +242,7 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
                     updateResults(term);
                   }}
                 >
-                  <span className="wiki-search-result-icon" aria-hidden="true"><Search size={20} strokeWidth={2} /></span>
+                  <span className="wiki-search-result-icon" aria-hidden="true"><History size={20} strokeWidth={2} /></span>
                   <span className="wiki-search-result-copy">
                     <strong>{term}</strong>
                   </span>
