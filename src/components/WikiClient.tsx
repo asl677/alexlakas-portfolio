@@ -627,7 +627,7 @@ export function WikiSection({
                   .reduce((total, other) => total + other.getBoundingClientRect().height, 0);
                 const offset = header ? header.getBoundingClientRect().height : 0;
                 const top = Math.max(0, section.getBoundingClientRect().top + window.scrollY - collapsingAbove - offset + 1);
-                window.dispatchEvent(new CustomEvent("alexpedia-scroll-to", { detail: { top, duration: 0.74 } }));
+                window.dispatchEvent(new CustomEvent("alexpedia-scroll-to", { detail: { top, duration: 0.6 } }));
               }
             }
           }
@@ -1101,15 +1101,20 @@ export function SmoothAnchorScroll() {
       const { top, duration } = (event as CustomEvent<{ top: number; duration: number }>).detail;
       if (accordionScrollFrame !== null) cancelAnimationFrame(accordionScrollFrame);
       const start = window.scrollY;
+      // Cancel any smooth-scroll glide still in flight, or Lenis pulls the page back each frame.
+      lenis?.scrollTo(start, { immediate: true, force: true });
       const startTime = performance.now();
       const step = (now: number) => {
         const progress = Math.min(1, (now - startTime) / (duration * 1000));
         const y = start + (top - start) * easeInOutCubic(progress);
-        // Native scroll each frame (Lenis follows native scroll); Lenis's own scrollTo uses a
-        // cached page height that lags behind the expanding section.
+        // Scroll natively (the page grows while the section expands), then sync Lenis to the
+        // same position with a fresh page height so it never fights the animation.
         window.scrollTo(0, y);
-        if (progress < 1) accordionScrollFrame = requestAnimationFrame(step);
-        else { accordionScrollFrame = null; lenis?.resize(); lenis?.scrollTo(window.scrollY, { immediate: true, force: true }); }
+        if (lenis) {
+          lenis.resize();
+          lenis.scrollTo(y, { immediate: true, force: true });
+        }
+        accordionScrollFrame = progress < 1 ? requestAnimationFrame(step) : null;
       };
       accordionScrollFrame = requestAnimationFrame(step);
     };
