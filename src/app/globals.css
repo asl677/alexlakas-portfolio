@@ -5318,3 +5318,39 @@ html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) 
 html body .wiki-shell .wiki-article-header.is-recentering .wiki-title-row :is(.wiki-language, .wiki-title-action .wiki-sticky-actions) {
   transition: none !important;
 }
+
+/* Freelance section video: full width below the Peanut copy. */
+html body .wiki-shell .career-feature > figure.career-video {
+  clear: both;
+  float: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 1rem 0 0 !important;
+}
+
+html body .wiki-shell .career-feature > figure.career-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1038 / 720;
+  object-fit: cover;
+}
+
+/* Sticky search joins the scroll-linked hand-off: it fades and rises in with the icons. */
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row :is(.wiki-scroll-actions, .wiki-scroll-search) {
+  opacity: clamp(0, calc(var(--wiki-handoff, 0) * 2 - 1), 1) !important;
+  visibility: visible !important;
+  transform: translateY(calc((1 - var(--wiki-handoff, 0)) * 14px)) !important;
+  transition: opacity 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 200ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  pointer-events: none !important;
+}
+
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row :is(.wiki-scroll-actions, .wiki-scroll-search) {
+  pointer-events: auto !important;
+}
+
+/* The inner search box itself carries no separate fade. */
+html body .wiki-shell .wiki-article-header .wiki-scroll-actions .wiki-scroll-search {
+  opacity: 1 !important;
+  transform: none !important;
+}

@@ -27,20 +27,21 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
 export const wikiEase = cubicBezier(0.76, 0.019, 0.483, 0.989);
 
 const hoverPortraitFrames = [
-  // First frame is a product shot, not a face.
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/66aed54564c490241089592d_hand.webp",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/692926ba1daaa6bd1d904499_shot3.webp",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/665554b2f2ee046740dbbd4f_syd-cover.jpeg",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/67700bb77f4bfa58786b7569_02%202.webp",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/65c99f3f74651f26dc44e777_0225.webp",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/67bb5c12c57a2790a896d2fe_man-red.avif",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/691d4a10a400d63fe056ed9f_220.avif",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/681309f43c2b0e7da6163320_logo.png",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/6813096813d071d057e17cab_man-stars.jpg",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/651d9b32904012a586063cc3_polls577_4x.webp",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/665565a0acb1cccd12cf8ab0_macbook-book.webp",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/691d4816ea87196a56f06bd6_01.webp",
+  // First frame is a product shot, not a face. Local 640px square crops: the originals are
+  // up to 5000px and alias badly when scaled down ~20x into the portrait box.
+  "/portrait/frame-01.webp",
+  "/portrait/frame-02.webp",
+  "/portrait/frame-03.webp",
+  "/portrait/frame-04.webp",
+  "/portrait/frame-05.webp",
+  "/portrait/frame-06.webp",
+  "/portrait/frame-07.webp",
+  "/portrait/frame-08.webp",
+  "/portrait/frame-09.webp",
+  "/portrait/frame-10.webp",
+  "/portrait/frame-11.webp",
+  "/portrait/frame-12.webp",
+  "/portrait/frame-13.webp",
 ];
 
 type SearchResult = {
