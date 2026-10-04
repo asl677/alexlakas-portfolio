@@ -753,7 +753,13 @@ export function IntroSequence() {
       articleHeader.style.setProperty("--wiki-language-opacity", String(1 - easedProgress));
       // Scroll-linked hand-off (like persistent sticky headers): over the last 32px before the
       // header sticks, the icons push the language label up and out. 0 = label, 1 = icons.
-      const handoff = Math.min(1, Math.max(0, 1 - (headerTop - stickyTop) / 32));
+      // Measured by scroll distance (the header's own position freezes once stuck), centred on
+      // the sticking point: the label leaves over the 16px before it, the icons arrive over the
+      // 16px after it.
+      const article = articleHeader.parentElement;
+      const naturalTop = article ? article.getBoundingClientRect().top + window.scrollY : headerTop + window.scrollY;
+      const stickScroll = naturalTop - stickyTop;
+      const handoff = Math.min(1, Math.max(0, (window.scrollY - stickScroll + 16) / 32));
       articleHeader.style.setProperty("--wiki-handoff", handoff.toFixed(3));
       // Section headings stick directly beneath the article header's real height.
       document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.getBoundingClientRect().height}px`);
