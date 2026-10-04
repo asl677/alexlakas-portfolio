@@ -5459,3 +5459,9 @@ html body .wiki-shell .career-feature > figure.career-video {
     order: 1;
   }
 }
+
+/* Talk: the "Latest comment" line matches the thread's meta line. */
+html body .wiki-shell .wiki-talk-page > .wiki-talk-latest {
+  font-size: 1rem !important;
+  line-height: 1.58 !important;
+}
