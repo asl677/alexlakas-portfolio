@@ -82,7 +82,7 @@ export default function Home() {
                 <a href="#career">Career</a>
                 <a href="#style">Style</a>
                 <a href="#media">In the media</a>
-                <a href="#publications">Articles</a>
+                <a href="#publications">Case studies</a>
                 <a href="#stack">Stack</a>
                 <a href="#references">References</a>
                 <a href="#external-links">External links</a>
@@ -157,7 +157,7 @@ export default function Home() {
                 <li><a href="#career">Career</a></li>
                 <li><a href="#style">Style</a></li>
                 <li><a href="#media">In the media</a></li>
-                <li><a href="#publications">Articles</a></li>
+                <li><a href="#publications">Case studies</a></li>
                 <li><a href="#stack">Stack</a></li>
                 <li><a href="#references">References</a></li>
                 <li><a href="#external-links">External links</a></li>
@@ -238,7 +238,7 @@ export default function Home() {
                 <li><a href="https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/" target="_blank" rel="noreferrer">LinkedIn is gearing up for a redesign</a>. <i>TechCrunch</i>.</li>
               </ul>
             </WikiSection>
-            <WikiSection id="publications" title="Articles">
+            <WikiSection id="publications" title="Case studies">
               <div className="article-list">
                 {articles.slice(0, 7).map((article) => (
                   <article id={`publication-${article.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`} className="article-list-item" key={article.href}>
