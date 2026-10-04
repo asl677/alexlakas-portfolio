@@ -7,6 +7,25 @@ import Lenis from "lenis";
 
 gsap.registerPlugin(SplitText);
 
+// Site-wide motion curve, matching --wiki-ease in globals.css: cubic-bezier(0.76, 0.019, 0.483, 0.989).
+function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
+  const sample = (a: number, b: number, t: number) => ((1 - 3 * b + 3 * a) * t + (3 * b - 6 * a)) * t * t + 3 * a * t;
+  const slope = (a: number, b: number, t: number) => 3 * (1 - 3 * b + 3 * a) * t * t + 2 * (3 * b - 6 * a) * t + 3 * a;
+  return (x: number) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) {
+      const error = sample(x1, x2, t) - x;
+      const d = slope(x1, x2, t);
+      if (Math.abs(error) < 1e-5 || Math.abs(d) < 1e-6) break;
+      t -= error / d;
+    }
+    return sample(y1, y2, Math.min(1, Math.max(0, t)));
+  };
+}
+export const wikiEase = cubicBezier(0.76, 0.019, 0.483, 0.989);
+
 const hoverPortraitFrames = [
   // First frame is a product shot, not a face.
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/66aed54564c490241089592d_hand.webp",
@@ -568,7 +587,11 @@ export function WikiSection({
     if (open) {
       setSectionHeight("0px");
       frame = window.requestAnimationFrame(() => {
-        setSectionHeight(`${body.scrollHeight}px`);
+        // Mirror of closing: animate only up to what will be visible (the section scrolls to
+        // just under the header), then release to auto height when the transition ends.
+        const header = document.querySelector<HTMLElement>(".wiki-article-header");
+        const visibleRoom = window.innerHeight - (header ? header.getBoundingClientRect().height : 0);
+        setSectionHeight(`${Math.min(body.scrollHeight, Math.max(visibleRoom, 1))}px`);
       });
     } else {
       if (!wasOpen) {
@@ -584,7 +607,13 @@ export function WikiSection({
         };
       }
 
-      const startHeight = body.getBoundingClientRect().height || body.scrollHeight;
+      // Collapse from the visible height: content below the screen is trimmed instantly
+      // (invisible, so nothing jumps), and only what can be seen animates to zero. Otherwise
+      // a tall section spends most of the animation shrinking off-screen and looks abrupt.
+      const box = body.getBoundingClientRect();
+      const fullHeight = box.height || body.scrollHeight;
+      const visibleBottom = Math.max(0, window.innerHeight - box.top);
+      const startHeight = box.top < window.innerHeight ? Math.min(fullHeight, visibleBottom) : fullHeight;
       setSectionHeight(`${startHeight}px`);
       void body.offsetHeight;
       frame = window.requestAnimationFrame(() => {
@@ -885,7 +914,7 @@ export function IntroSequence() {
           }
         }
       }
-      const fade = { duration: 1.4, stagger: 0.012, ease: "sine.out" };
+      const fade = { duration: 1.4, stagger: 0.012, ease: wikiEase };
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
         const second = b.getBoundingClientRect();
@@ -1093,7 +1122,7 @@ export function SmoothAnchorScroll() {
     // the current position. (lenis.stop() is avoided: it animates back to a stale target.)
     const lockScroll = () => lenis?.scrollTo(window.scrollY, { immediate: true, force: true });
     const unlockScroll = () => undefined;
-    // Accordions request a scroll timed to their own animation (easeInOutCubic, same curve).
+    // Accordions request a scroll timed to their own animation (same site-wide curve).
     // Driven frame by frame (not lenis.scrollTo): Lenis clamps to the page height at the start,
     // but the page grows while the section expands, so the target must stay reachable.
     let accordionScrollFrame: number | null = null;
@@ -1122,9 +1151,7 @@ export function SmoothAnchorScroll() {
     window.addEventListener("alexpedia-scroll-lock", lockScroll);
     window.addEventListener("alexpedia-scroll-unlock", unlockScroll);
 
-    function easeInOutCubic(t: number) {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
+    const easeInOutCubic = wikiEase;
 
     function handleClick(event: MouseEvent) {
       const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
