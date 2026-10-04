@@ -730,7 +730,7 @@ export function IntroSequence() {
       // of movement before un-sticking; otherwise the search fade restarts every frame.
       const headerTop = articleHeader.getBoundingClientRect().top;
       const wasScrolled = articleHeader.classList.contains("is-scrolled");
-      const isScrolled = wasScrolled ? headerTop <= stickyTop + 24 : headerTop <= stickyTop + 1;
+      const isScrolled = wasScrolled ? headerTop <= stickyTop + 8 : headerTop <= stickyTop + 1;
       const scrollProgress = Math.min(window.scrollY / 96, 1);
       const easedProgress = scrollProgress * scrollProgress * (3 - (2 * scrollProgress));
       topbar.classList.toggle("is-scrolled", isScrolled);
