@@ -172,7 +172,7 @@ export default function Home() {
               <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work followed by roles at Google, LinkedIn, Peanut Travel, Culprit Creative, and Fiveonefour.<Ref n={1} /><Ref n={3} /></p>
               <div id="social-games-and-ecommerce" className="career-feature">
                 <h3>Social games and ecommerce</h3>
-                <p>Beginning in 2009, Alex worked with Cubix Labs and Virid on digital experiences spanning social games and ecommerce. The work combined product thinking, interaction design, and campaign systems at a time when social platforms were becoming a primary place for brands to meet people.</p>
+                <p>Beginning in 2009, Alex worked with <a href="https://www.cubix.co/" target="_blank" rel="noreferrer">Cubix Labs</a> and <a href="https://virid.com/" target="_blank" rel="noreferrer">Virid</a> on digital experiences spanning social games and ecommerce. The work combined product thinking, interaction design, and campaign systems at a time when social platforms were becoming a primary place for brands to meet people.</p>
                 <p>That period included work connected to Converse, Nintendo, Journeys and Zippo, translating established brands into playful, participatory web experiences. It established an early interest in designing systems that balance clear utility with character, motion, and a strong visual point of view.<Ref n={1} /></p>
               </div>
               <div id="branching-out" className="career-feature career-feature--right career-feature--portrait">

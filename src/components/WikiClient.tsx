@@ -296,7 +296,9 @@ export function MobileSearchSheet() {
     window.addEventListener("alexpedia-search-selected", closeOnSelect);
     // Lock page scrolling while the sheet is open. The sheet covers the viewport, so a
     // non-passive touchmove guard on it is enough; the page itself is never moved.
+    // Smooth scrolling (Lenis) is paused too, so an in-flight glide cannot carry the page.
     document.documentElement.classList.add("wiki-sheet-open");
+    window.dispatchEvent(new Event("alexpedia-scroll-lock"));
     // React touch handlers are passive; this one must be able to cancel page scrolling.
     // Only the results list may scroll, and only while it has room to scroll.
     const sheet = sheetRef.current;
@@ -320,6 +322,7 @@ export function MobileSearchSheet() {
       sheet?.removeEventListener("touchstart", onTouchStart);
       sheet?.removeEventListener("touchmove", onTouchMove);
       document.documentElement.classList.remove("wiki-sheet-open");
+      window.dispatchEvent(new Event("alexpedia-scroll-unlock"));
       document.removeEventListener("keydown", closeOnEscape);
       window.removeEventListener("alexpedia-search-selected", closeOnSelect);
     };
@@ -1073,6 +1076,11 @@ export function SmoothAnchorScroll() {
       lenisFrame = requestAnimationFrame(tick);
     };
     if (lenis) lenisFrame = requestAnimationFrame(tick);
+    // The search sheet pauses smooth scrolling while it is open.
+    const lockScroll = () => lenis?.stop();
+    const unlockScroll = () => lenis?.start();
+    window.addEventListener("alexpedia-scroll-lock", lockScroll);
+    window.addEventListener("alexpedia-scroll-unlock", unlockScroll);
 
     function easeInOutCubic(t: number) {
       return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -1142,6 +1150,8 @@ export function SmoothAnchorScroll() {
       document.removeEventListener("click", handleClick);
       if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current);
       if (lenisFrame !== null) cancelAnimationFrame(lenisFrame);
+      window.removeEventListener("alexpedia-scroll-lock", lockScroll);
+      window.removeEventListener("alexpedia-scroll-unlock", unlockScroll);
       lenis?.destroy();
     };
   }, []);
