@@ -4973,3 +4973,29 @@ html body header.wiki-topbar.is-scrolled {
     top: 5.625rem !important;
   }
 }
+
+/* Sticky search: horizontally centered between the title and the icons (shift set in JS). */
+html body .wiki-shell .wiki-article-header .wiki-title-row > .wiki-scroll-actions {
+  translate: var(--wiki-search-shift, 0px) 0;
+}
+
+/* Tablet (900px+): search keeps the desktop 488px width until the mobile icon takes over. */
+@media (min-width: 56.3125rem) {
+  html body .wiki-shell header.wiki-topbar > .wiki-search {
+    width: 30.5rem !important;
+    max-width: 100% !important;
+    justify-self: start !important;
+  }
+
+  html body .wiki-shell .wiki-article-header :is(.wiki-scroll-actions, .wiki-scroll-search, .wiki-scroll-search .wiki-search) {
+    width: 30.5rem !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Tablet top bar: search centered between the wordmark and the icons. */
+@media (min-width: 56.3125rem) and (max-width: 68.6875rem) {
+  html body .wiki-shell header.wiki-topbar > .wiki-search {
+    justify-self: center !important;
+  }
+}

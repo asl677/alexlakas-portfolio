@@ -171,7 +171,7 @@ export default function Home() {
               <div id="social-games-and-ecommerce" className="career-feature">
                 <h3>Social games and ecommerce</h3>
                 <p>Beginning in 2009, Alex worked with Cubix Labs and Virid on digital experiences spanning social games and ecommerce. The work combined product thinking, interaction design, and campaign systems at a time when social platforms were becoming a primary place for brands to meet people.</p>
-                <p>That period included work connected to Zippo and Nintendo, translating established brands into playful, participatory web experiences. It established an early interest in designing systems that balance clear utility with character, motion, and a strong visual point of view.<Ref n={1} /></p>
+                <p>That period included work connected to Converse, Nintendo, Journeys and Zippo, translating established brands into playful, participatory web experiences. It established an early interest in designing systems that balance clear utility with character, motion, and a strong visual point of view.<Ref n={1} /></p>
               </div>
               <div id="branching-out" className="career-feature career-feature--right career-feature--portrait">
                 <h3>Branching out</h3>

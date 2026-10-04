@@ -564,6 +564,17 @@ export function IntroSequence() {
       const inkCenter = titleBaseline - (ink.actualBoundingBoxAscent - ink.actualBoundingBoxDescent) / 2;
       articleHeader.style.setProperty("--wiki-title-nudge", `${(rowCenter - inkCenter).toFixed(2)}px`);
       if (label) articleHeader.style.setProperty("--wiki-language-shift", `${(titleBaseline - baselineOf(label)).toFixed(2)}px`);
+
+      // Sticky search sits exactly midway between the title's right edge and the icons.
+      const search = articleHeader.querySelector<HTMLElement>(".wiki-scroll-actions");
+      const icons = articleHeader.querySelector<HTMLElement>(".wiki-sticky-actions");
+      if (search && icons && window.getComputedStyle(search).display !== "none") {
+        articleHeader.style.setProperty("--wiki-search-shift", "0px");
+        const searchBox = search.getBoundingClientRect();
+        const midpoint = (title.getBoundingClientRect().right + icons.getBoundingClientRect().left) / 2;
+        const shift = midpoint - (searchBox.left + searchBox.width / 2);
+        articleHeader.style.setProperty("--wiki-search-shift", `${shift.toFixed(2)}px`);
+      }
     };
     const updateSearchVisibility = () => {
       // Match the visual handoff to the article header becoming sticky.
