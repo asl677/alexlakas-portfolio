@@ -8,13 +8,14 @@ import Lenis from "lenis";
 gsap.registerPlugin(SplitText);
 
 const hoverPortraitFrames = [
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/67bb5c12c57a2790a896d2fe_man-red.avif",
-  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/692926ba1daaa6bd1d904499_shot3.webp",
+  // First frame is a product shot, not a face.
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/66aed54564c490241089592d_hand.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/692926ba1daaa6bd1d904499_shot3.webp",
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/665554b2f2ee046740dbbd4f_syd-cover.jpeg",
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp",
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/67700bb77f4bfa58786b7569_02%202.webp",
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/65c99f3f74651f26dc44e777_0225.webp",
+  "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/67bb5c12c57a2790a896d2fe_man-red.avif",
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/691d4a10a400d63fe056ed9f_220.avif",
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/681309f43c2b0e7da6163320_logo.png",
   "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/6813096813d071d057e17cab_man-stars.jpg",
