@@ -616,6 +616,18 @@ export function WikiSection({
               // The line reveal normally runs on scroll; run it as the section expands so the
               // new content staggers in wherever the page is, instead of staying hidden.
               [50, 300, 620].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("resize")), delay));
+              // Bring the opened section to the top, just under the sticky header. A section
+              // closing above shifts the page while it animates, so correct once it settles.
+              const scrollToSection = (behavior: ScrollBehavior) => {
+                const section = document.getElementById(id);
+                const header = document.querySelector<HTMLElement>(".wiki-article-header");
+                if (!section) return;
+                const offset = header ? header.getBoundingClientRect().height : 0;
+                const top = section.getBoundingClientRect().top + window.scrollY - offset + 1;
+                if (Math.abs(top - window.scrollY) > 2) window.scrollTo({ top: Math.max(0, top), behavior });
+              };
+              window.setTimeout(() => scrollToSection("smooth"), 60);
+              window.setTimeout(() => scrollToSection("smooth"), 640);
             }
           }
         }}

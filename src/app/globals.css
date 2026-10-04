@@ -5071,3 +5071,10 @@ html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
     min-width: 4.75rem !important;
   }
 }
+
+/* Case studies on desktop: text block vertically centered on its thumbnail. */
+@media (min-width: 56.3125rem) {
+  html body .wiki-shell .article-list-item {
+    align-items: center !important;
+  }
+}
