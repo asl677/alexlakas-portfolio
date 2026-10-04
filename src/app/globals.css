@@ -472,9 +472,6 @@
   display: block;
 }
 
-:root[data-article-view="talk"] .wiki-article-body {
-  display: none;
-}
 .infobox h2,
 .infobox dl,
 .infobox dt,
@@ -4359,10 +4356,6 @@ header.wiki-topbar {
     top: 7.25rem !important;
   }
 }
-:root[data-article-view="talk"] .wiki-article .wiki-article-body {
-  display: none !important;
-}
-
 :root[data-article-view="talk"] .wiki-article .wiki-talk-page {
   display: block !important;
 }
@@ -5465,3 +5458,17 @@ html body .wiki-shell .wiki-talk-page > .wiki-talk-latest {
   font-size: 1rem !important;
   line-height: 1.58 !important;
 }
+
+/* Talk view hides the article without display:none. Its width stays the same, so the line
+   splitter (autoSplit, which re-splits on width changes) never re-wraps the text. */
+:root[data-article-view="talk"] html body .wiki-shell .wiki-article .wiki-article-body,
+html:root[data-article-view="talk"] body .wiki-shell .wiki-article .wiki-article-body {
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+

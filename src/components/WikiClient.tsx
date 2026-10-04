@@ -645,7 +645,7 @@ export function WikiSection({
               window.dispatchEvent(new CustomEvent("alexpedia-accordion-open", { detail: id }));
               // The line reveal normally runs on scroll; run it as the section expands so the
               // new content staggers in wherever the page is, instead of staying hidden.
-              [50, 300, 620].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("resize")), delay));
+              [50, 300, 620].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("alexpedia-reveal")), delay));
               // Bring the opened section to the top, just under the sticky header, in step with
               // the accordion. Any open section above will collapse, so its height is subtracted
               // up front; the scroll then runs with the accordion's duration and easing.
@@ -1068,7 +1068,25 @@ export function IntroSequence() {
       queueReveal = onScroll;
       window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("resize", onScroll);
+      window.addEventListener("alexpedia-reveal", onScroll);
+      // Tab switch: everything in the shown view appears at once, already revealed.
+      const revealViewInstantly = (event: Event) => {
+        const view = (event as CustomEvent<string>).detail;
+        const root = document.querySelector<HTMLElement>(view === "talk" ? ".wiki-talk-page" : ".wiki-article-body");
+        if (!root) return;
+        targets.filter(target => root.contains(target) && !revealedTargets.has(target)).forEach(target => {
+          revealedTargets.add(target);
+          gsap.set(target, revealProperties(target, 1));
+        });
+        textLines.filter(line => root.contains(line) && !revealedLines.has(line)).forEach(line => {
+          revealedLines.add(line);
+          gsap.set(line, { opacity: 1 });
+        });
+      };
+      window.addEventListener("alexpedia-view-instant", revealViewInstantly);
       return () => {
+        window.removeEventListener("alexpedia-reveal", onScroll);
+        window.removeEventListener("alexpedia-view-instant", revealViewInstantly);
         queueReveal = () => {};
         revealCancelled = true;
         cancelAnimationFrame(frame);
@@ -1109,6 +1127,7 @@ const releasePointerFocus = (event: React.MouseEvent<HTMLElement>) => {
 
 export function ArticleTabs() {
   const [view, setView] = useState<"article" | "talk">("article");
+  const previousViewRef = useRef<"article" | "talk" | null>(null);
 
   useEffect(() => {
     const syncView = () => setView(window.location.hash === "#talk" ? "talk" : "article");
@@ -1120,7 +1139,12 @@ export function ArticleTabs() {
   useEffect(() => {
     document.documentElement.dataset.articleView = view;
     // Newly shown content was staged at opacity 0; let the reveal pass pick it up.
-    const frame = requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    // Switching tabs shows the other view instantly (no fade); skipped on the initial mount.
+    const isSwitch = previousViewRef.current !== null && previousViewRef.current !== view;
+    previousViewRef.current = view;
+    const frame = requestAnimationFrame(() => {
+      if (isSwitch) window.dispatchEvent(new CustomEvent("alexpedia-view-instant", { detail: view }));
+    });
     return () => {
       cancelAnimationFrame(frame);
       delete document.documentElement.dataset.articleView;
