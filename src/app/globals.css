@@ -5135,3 +5135,46 @@ html body .wiki-search-results button {
     background: transparent !important;
   }
 }
+
+/* Sticky cluster search icon: mobile/tablet only (where search is an icon), fading in with
+   the other icons. The cluster widens to fit three icons there. */
+html body .wiki-shell .wiki-sticky-actions > .wiki-sticky-search {
+  display: none !important;
+}
+
+@media (max-width: 56.25rem) {
+  html body .wiki-shell .wiki-article-header .wiki-sticky-actions {
+    width: 7.375rem !important;
+    min-width: 7.375rem !important;
+  }
+
+  html body .wiki-shell .wiki-sticky-actions > .wiki-sticky-search {
+    display: inline-grid !important;
+    place-items: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--wiki-ink);
+  }
+}
+
+/* Search sheet: slower, smoother open/close. */
+html body .wiki-mobile-search-sheet {
+  transition: background-color 360ms ease, visibility 0s linear 360ms !important;
+}
+
+html body .wiki-mobile-search-sheet.is-open {
+  transition: background-color 360ms ease, visibility 0s linear 0s !important;
+}
+
+html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel:not(.is-dragging) {
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+/* Results inside the sheet: square container, so row hover backgrounds are not clipped. */
+html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
+  border-radius: 0 !important;
+  overflow-x: hidden !important;
+}
