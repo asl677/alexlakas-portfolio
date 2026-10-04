@@ -5275,3 +5275,36 @@ html body .wiki-shell .wiki-article-header:not(.is-scrolled) .wiki-title-row .wi
 html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row .wiki-language {
   transition: opacity 500ms cubic-bezier(0.45, 0, 0.55, 1), transform 500ms cubic-bezier(0.45, 0, 0.55, 1), visibility 0s linear 500ms !important;
 }
+
+/* Scroll-linked label <-> icons hand-off. --wiki-handoff (0..1) follows the scroll position,
+   so there is no delay: the icons rise in from below and push the label up and out. */
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-language,
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-language {
+  opacity: calc(1 - var(--wiki-handoff, 0)) !important;
+  visibility: visible !important;
+  transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px) - var(--wiki-handoff, 0) * 14px)) !important;
+  transition: none !important;
+}
+
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions,
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+  opacity: var(--wiki-handoff, 0) !important;
+  visibility: visible !important;
+  transform: translateY(calc(-50% + (1 - var(--wiki-handoff, 0)) * 14px)) !important;
+  transition: none !important;
+  pointer-events: none !important;
+}
+
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+  pointer-events: auto !important;
+}
+
+/* No overlap: the label fades during the first half of the hand-off, the icons during the
+   second half; both keep moving with the scroll the whole way. */
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-language {
+  opacity: clamp(0, calc(1 - var(--wiki-handoff, 0) * 2), 1) !important;
+}
+
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+  opacity: clamp(0, calc(var(--wiki-handoff, 0) * 2 - 1), 1) !important;
+}

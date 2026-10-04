@@ -737,6 +737,10 @@ export function IntroSequence() {
       articleHeader.classList.toggle("is-scrolled", isScrolled);
       contents.classList.toggle("is-scrolled", isScrolled);
       articleHeader.style.setProperty("--wiki-language-opacity", String(1 - easedProgress));
+      // Scroll-linked hand-off (like persistent sticky headers): over the last 32px before the
+      // header sticks, the icons push the language label up and out. 0 = label, 1 = icons.
+      const handoff = Math.min(1, Math.max(0, 1 - (headerTop - stickyTop) / 32));
+      articleHeader.style.setProperty("--wiki-handoff", handoff.toFixed(3));
       // Section headings stick directly beneath the article header's real height.
       document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.getBoundingClientRect().height}px`);
       // Top bar contents fade to exactly 0 by the time the bar has scrolled out of view.
