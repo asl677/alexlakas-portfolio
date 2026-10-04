@@ -748,7 +748,14 @@ export function IntroSequence() {
     document.fonts.ready.then(centerTitle);
     window.addEventListener("resize", centerTitle);
     // Switching Article/Talk swaps the visible title; measure after the view updates.
-    const recenterAfterView = () => requestAnimationFrame(() => requestAnimationFrame(centerTitle));
+    // Switching Article/Talk swaps the visible title. Re-measure with transitions off so the
+    // title and label land in place instead of sliding or re-fading.
+    const recenterAfterView = () => requestAnimationFrame(() => requestAnimationFrame(() => {
+      articleHeader.classList.add("is-recentering");
+      centerTitle();
+      void articleHeader.offsetHeight;
+      requestAnimationFrame(() => requestAnimationFrame(() => articleHeader.classList.remove("is-recentering")));
+    }));
     window.addEventListener("hashchange", recenterAfterView);
 
     updateSearchVisibility();
@@ -847,7 +854,9 @@ export function IntroSequence() {
       ".wiki-topbar nav > :not(.wiki-mobile-search-sheet)",
       ".wiki-contents summary",
       ".wiki-contents nav > a",
-      ".wiki-title-row > *",
+      // The Talk title is hidden until its tab is chosen; it should switch in instantly,
+      // not run the page-load fade the first time it appears.
+      ".wiki-title-row > *:not(.wiki-talk-title)",
       ".wiki-tab-primary > *",
       ".wiki-tab-actions > *",
       ".wiki-mobile-tools > *",
@@ -914,7 +923,7 @@ export function IntroSequence() {
           }
         }
       }
-      const fade = { duration: 1.4, stagger: 0.012, ease: wikiEase };
+      const fade = { duration: 1.2, stagger: 0.012, ease: wikiEase };
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
         const second = b.getBoundingClientRect();

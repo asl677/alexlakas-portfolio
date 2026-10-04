@@ -5126,3 +5126,8 @@ html body .wiki-shell .wiki-article-header.is-scrolled .wiki-title-row .wiki-lan
     transition: height 600ms var(--wiki-ease), opacity 520ms var(--wiki-ease) !important;
   }
 }
+
+/* Re-measuring the title (Article/Talk switch) applies new offsets instantly. */
+html body .wiki-shell .wiki-article-header.is-recentering .wiki-title-row :is(.wiki-article-title, .wiki-talk-title, .wiki-language, .wiki-title-action, .wiki-sticky-actions, .wiki-scroll-actions) {
+  transition: none !important;
+}
