@@ -206,11 +206,11 @@ export default function Home() {
                 <h3>Freelance, 0-1, Gen AI</h3>
                 <figure>
                   <div className="peanut-still">
-                    <img src="/peanut-travel-on.png" alt="Peanut for Chrome: Travel on." />
+                    <img src="/peanut-travel-on.png" alt="Peanut: Travel on." />
                   </div>
-                  <figcaption>Peanut for Chrome</figcaption>
+                  <figcaption>Peanut</figcaption>
                 </figure>
-                <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut for Chrome</a>, a browser-based Chrome extension that surfaced critical travel info during your online booking process. It partnered with Insured Nomads, a travel-insurance company, before it was acquired by the company. His work there spanned art direction, design systems, product design, prototyping, research, and marketing. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a>, extending his work across brand, social, and product experiences.<Ref n={1} /><Ref n={11} /></p>
+                <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut</a>, a browser-based Chrome extension that surfaced critical travel info during your online booking process. It partnered with Insured Nomads, a travel-insurance company, before it was acquired by the company. His work there spanned art direction, design systems, product design, prototyping, research, and marketing. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a>, extending his work across brand, social, and product experiences.<Ref n={1} /><Ref n={11} /></p>
                 <figure className="career-video">
                   <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
                   <figcaption>AI video gen</figcaption>
