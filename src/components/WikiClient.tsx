@@ -745,8 +745,6 @@ export function IntroSequence() {
       const isScrolled = wasScrolled ? headerTop <= stickyTop + 8 : headerTop <= stickyTop + 1;
       const scrollProgress = Math.min(window.scrollY / 96, 1);
       const easedProgress = scrollProgress * scrollProgress * (3 - (2 * scrollProgress));
-      // Header back at rest: re-measure the title/label offsets against the settled layout.
-      if (wasScrolled && !isScrolled) requestAnimationFrame(centerTitle);
       topbar.classList.toggle("is-scrolled", isScrolled);
       articleHeader.classList.toggle("is-scrolled", isScrolled);
       contents.classList.toggle("is-scrolled", isScrolled);
