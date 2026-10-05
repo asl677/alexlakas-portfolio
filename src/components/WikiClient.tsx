@@ -865,8 +865,17 @@ export function IntroSequence() {
     const tickCounter = () => {
       const target = failsafeHit ? 100 : Math.min((loadedCount / assets.length) * 100, Math.max(inlineWindow.__wikiProgress ?? 0, display.value));
       // Ease toward real progress; keep moving at least slightly so it never stalls visually.
-      const step = Math.max((target - display.value) * 0.05, target > display.value ? 0.22 : 0);
-      display.value = Math.min(target, display.value + step);
+      // Typed, one number at a time with a human rhythm (same seeded jitter as the inline
+      // counter it takes over from): 16-42ms between numbers, a short hesitation now and then.
+      const now = performance.now();
+      const typed = inlineWindow as typeof inlineWindow & { __wikiNextAt?: number; __wikiSeed?: number };
+      if (display.value < target && now >= (typed.__wikiNextAt ?? 0)) {
+        display.value = Math.min(target, Math.floor(display.value) + 1);
+        typed.__wikiSeed = (((typed.__wikiSeed ?? 11) * 9301) + 49297) % 233280;
+        const r = typed.__wikiSeed / 233280;
+        const pause = Math.floor(display.value) % (12 + Math.floor(r * 7)) === 0 ? 90 + r * 80 : 0;
+        typed.__wikiNextAt = now + 16 + r * 26 + pause;
+      }
       if (counter) counter.textContent = String(Math.floor(display.value));
       if (display.value >= 100) finishLoader();
     };
