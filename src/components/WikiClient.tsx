@@ -1000,7 +1000,7 @@ export function IntroSequence() {
             nextOffset += textLength(line);
             const wasRevealed = revealedRanges.some(range => range.start < nextOffset && range.end > start);
             if (wasRevealed) revealedLines.add(line);
-            gsap.set(line, { opacity: wasRevealed ? 1 : 0 });
+            gsap.set(line, { opacity: 1, clipPath: `inset(-0.25em ${wasRevealed ? 0 : 100}% -0.25em 0)` });
           });
           queueReveal();
         }
@@ -1016,6 +1016,8 @@ export function IntroSequence() {
         targets.push(divider);
       });
       const revealProperties = (element: HTMLElement, opacity: number) => {
+        // Text lines "stream" in: fully opaque, revealed left to right through a mask.
+        if (element.classList.contains("wiki-reveal-line")) return { opacity: 1, clipPath: `inset(-0.25em ${(1 - opacity) * 100}% -0.25em 0)` };
         if (element === rail) return { "--rail-surface-opacity": opacity };
         if (dividers.has(element)) return { "--wiki-divider-opacity": opacity };
         // Header controls whose opacity CSS also drives (scroll-linked hand-off): reveal through
@@ -1028,12 +1030,28 @@ export function IntroSequence() {
       });
       const fadeIn = (elements: HTMLElement[], delay = 0) => {
         const timeline = gsap.timeline({ delay });
-        visualOrder(elements).forEach((element, index) => {
+        const ordered = visualOrder(elements);
+        // Images, cards and other elements: the staggered fade.
+        ordered.filter(element => !element.classList.contains("wiki-reveal-line")).forEach((element, index) => {
           timeline.to(element, {
             ...revealProperties(element, 1),
             duration: fade.duration,
             ease: fade.ease
           }, index * fade.stagger);
+        });
+        // Text: typewriter, ChatGPT-style. One character per step at a constant rate, in reading
+        // order; each line starts exactly as the previous one finishes (no overlap).
+        const SECONDS_PER_CHARACTER = 0.004;
+        let cursor = 0;
+        ordered.filter(element => element.classList.contains("wiki-reveal-line")).forEach(line => {
+          const characters = Math.max(1, (line.textContent ?? "").length);
+          const duration = characters * SECONDS_PER_CHARACTER;
+          timeline.to(line, {
+            ...revealProperties(line, 1),
+            duration,
+            ease: `steps(${characters})`
+          }, cursor);
+          cursor += duration;
         });
       };
       const isInRevealArea = (element: HTMLElement) => {
@@ -1087,7 +1105,7 @@ export function IntroSequence() {
         });
         textLines.filter(line => root.contains(line) && !revealedLines.has(line)).forEach(line => {
           revealedLines.add(line);
-          gsap.set(line, { opacity: 1 });
+          gsap.set(line, revealProperties(line, 1));
         });
       };
       window.addEventListener("alexpedia-view-instant", revealViewInstantly);
