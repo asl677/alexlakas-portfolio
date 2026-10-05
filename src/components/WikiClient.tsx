@@ -794,6 +794,12 @@ export function IntroSequence() {
   }, []);
 
   useLayoutEffect(() => {
+    // Every load starts fresh at the top: section hashes are dropped (#talk is kept because
+    // it selects the Talk tab) and the scroll position is reset before the reveal is staged.
+    if (window.location.hash && window.location.hash !== "#talk") {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+    window.scrollTo(0, 0);
     const shell = document.querySelector(".wiki-shell");
     const counter = document.querySelector<HTMLElement>(".wiki-loader-counter");
     const wordmark = document.querySelector<HTMLElement>(".wiki-wordmark-text");
@@ -825,7 +831,7 @@ export function IntroSequence() {
     document.fonts.addEventListener("loadingdone", alignCounter);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // The counter reports real loading: fonts, every image and video, then window load.
-    const LOADER_FADE_MS = 300;
+    const LOADER_FADE_MS = 400;
     const REVEAL_BUFFER_MS = 300;
     const LOADER_FAILSAFE_MS = 8000;
     const assets: Promise<unknown>[] = [
@@ -861,7 +867,7 @@ export function IntroSequence() {
     const tickCounter = () => {
       const target = failsafeHit ? 100 : Math.min((loadedCount / assets.length) * 100, Math.max(inlineWindow.__wikiProgress ?? 0, display.value));
       // Ease toward real progress; keep moving at least slightly so it never stalls visually.
-      const step = Math.max((target - display.value) * 0.08, target > display.value ? 0.35 : 0);
+      const step = Math.max((target - display.value) * 0.05, target > display.value ? 0.22 : 0);
       display.value = Math.min(target, display.value + step);
       if (counter) counter.textContent = String(Math.floor(display.value));
       if (display.value >= 100) finishLoader();
@@ -949,7 +955,7 @@ export function IntroSequence() {
           }
         }
       }
-      const fade = { duration: 1, stagger: 0.012, ease: wikiEase };
+      const fade = { duration: 1.2, stagger: 0.022, ease: wikiEase };
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
         const second = b.getBoundingClientRect();

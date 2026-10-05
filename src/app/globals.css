@@ -5477,3 +5477,13 @@ html:root[data-article-view="talk"] body .wiki-shell .wiki-article .wiki-article
 html body .wiki-shell .wiki-contents.is-scrolled .contents-top {
   opacity: var(--wiki-reveal, 1);
 }
+
+/* Loader: the counter fades in, and the loader fades out on the site curve (400ms). */
+html body .wiki-loader-counter {
+  opacity: 0;
+  transition: opacity 450ms var(--wiki-ease);
+}
+
+html body .wiki-loader {
+  transition: opacity 400ms var(--wiki-ease) !important;
+}
