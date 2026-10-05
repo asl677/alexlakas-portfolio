@@ -848,36 +848,25 @@ export function IntroSequence() {
     assets.forEach(asset => asset.then(() => { loadedCount += 1; }));
     let failsafeHit = false;
     const failsafe = window.setTimeout(() => { failsafeHit = true; }, LOADER_FAILSAFE_MS);
-    // Continue from the inline pre-hydration counter instead of restarting at 0.
-    const inlineWindow = window as Window & { __wikiProgress?: number; __wikiShown?: number; __wikiCounterOwned?: boolean };
-    inlineWindow.__wikiCounterOwned = true;
-    const display = { value: inlineWindow.__wikiShown ?? 0 };
+    // The inline script (layout.tsx) owns the counter: it types milestone numbers, backspacing
+    // between them, gated by real progress. The loader finishes once it has typed "100" and
+    // this bundle's own assets are in (or the failsafe fires).
+    const inlineWindow = window as Window & { __wikiDone?: boolean };
     let resolveLoader: () => void = () => {};
     const loaderDone = new Promise<void>(resolve => { resolveLoader = resolve; });
     let finishTimer = 0;
+    let finished = false;
     const finishLoader = () => {
+      if (finished) return;
+      finished = true;
       gsap.ticker.remove(tickCounter);
-      if (counter) counter.textContent = "100";
+      if (counter && failsafeHit) counter.textContent = "100";
       shell?.classList.remove("is-loading");
       // Loader fades out, then a short pause before the page starts revealing.
       finishTimer = window.setTimeout(resolveLoader, reducedMotion ? 0 : LOADER_FADE_MS + REVEAL_BUFFER_MS);
     };
     const tickCounter = () => {
-      const target = failsafeHit ? 100 : Math.min((loadedCount / assets.length) * 100, Math.max(inlineWindow.__wikiProgress ?? 0, display.value));
-      // Ease toward real progress; keep moving at least slightly so it never stalls visually.
-      // Typed, one number at a time with a human rhythm (same seeded jitter as the inline
-      // counter it takes over from): 16-42ms between numbers, a short hesitation now and then.
-      const now = performance.now();
-      const typed = inlineWindow as typeof inlineWindow & { __wikiNextAt?: number; __wikiSeed?: number };
-      if (display.value < target && now >= (typed.__wikiNextAt ?? 0)) {
-        display.value = Math.min(target, Math.floor(display.value) + 1);
-        typed.__wikiSeed = (((typed.__wikiSeed ?? 11) * 9301) + 49297) % 233280;
-        const r = typed.__wikiSeed / 233280;
-        const pause = Math.floor(display.value) % (12 + Math.floor(r * 7)) === 0 ? 90 + r * 80 : 0;
-        typed.__wikiNextAt = now + 16 + r * 26 + pause;
-      }
-      if (counter) counter.textContent = String(Math.floor(display.value));
-      if (display.value >= 100) finishLoader();
+      if (failsafeHit || (inlineWindow.__wikiDone && loadedCount >= assets.length)) finishLoader();
     };
     if (reducedMotion) {
       Promise.all(assets).then(finishLoader);
