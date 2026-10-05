@@ -831,7 +831,7 @@ export function IntroSequence() {
     // The counter reports real loading: fonts, every image and video, then window load.
     const LOADER_FADE_MS = 400;
     const REVEAL_BUFFER_MS = 300;
-    const LOADER_FAILSAFE_MS = 8000;
+    const LOADER_FAILSAFE_MS = 12000;
     const assets: Promise<unknown>[] = [
       document.fonts.ready,
       document.readyState === "complete" ? Promise.resolve() : new Promise(resolve => window.addEventListener("load", resolve, { once: true })),
@@ -849,7 +849,8 @@ export function IntroSequence() {
     let failsafeHit = false;
     const failsafe = window.setTimeout(() => { failsafeHit = true; }, LOADER_FAILSAFE_MS);
     // The inline script (layout.tsx) owns the counter: it types milestone numbers, backspacing
-    // between them, gated by real progress. The loader finishes once it has typed "100" and
+    // between them, gated by real progress, then types "Wikipidia" (handing off to the logo,
+    // which starts on that word). The loader finishes once that is typed and
     // this bundle's own assets are in (or the failsafe fires).
     const inlineWindow = window as Window & { __wikiDone?: boolean };
     let resolveLoader: () => void = () => {};
@@ -860,7 +861,9 @@ export function IntroSequence() {
       if (finished) return;
       finished = true;
       gsap.ticker.remove(tickCounter);
-      if (counter && failsafeHit) counter.textContent = "100";
+      // Hand off: the logo (already "Wikipidia" underneath the typed counter) is shown at once,
+      // so the word stays on screen while the loader fades around it.
+      window.dispatchEvent(new Event("alexpedia-loader-handoff"));
       shell?.classList.remove("is-loading");
       // Loader fades out, then a short pause before the page starts revealing.
       finishTimer = window.setTimeout(resolveLoader, reducedMotion ? 0 : LOADER_FADE_MS + REVEAL_BUFFER_MS);
@@ -1088,9 +1091,17 @@ export function IntroSequence() {
         });
       };
       window.addEventListener("alexpedia-view-instant", revealViewInstantly);
+      const showBrandForHandoff = () => {
+        const brand = document.querySelector<HTMLElement>(".wiki-topbar > .wiki-brand");
+        if (!brand) return;
+        revealedTargets.add(brand);
+        gsap.set(brand, { opacity: 1 });
+      };
+      window.addEventListener("alexpedia-loader-handoff", showBrandForHandoff);
       return () => {
         window.removeEventListener("alexpedia-reveal", onScroll);
         window.removeEventListener("alexpedia-view-instant", revealViewInstantly);
+        window.removeEventListener("alexpedia-loader-handoff", showBrandForHandoff);
         queueReveal = () => {};
         revealCancelled = true;
         cancelAnimationFrame(frame);

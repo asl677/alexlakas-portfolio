@@ -672,7 +672,7 @@ input {
   pointer-events: none;
 }
 .wiki-shell.is-loading .wiki-loader {
-  animation: wiki-loader-failsafe 0.01s linear 8s forwards;
+  animation: wiki-loader-failsafe 0.01s linear 12s forwards;
 }
 
 @keyframes wiki-loader-failsafe {
@@ -708,7 +708,7 @@ input {
   .wiki-categories,
   .wiki-talk-page > *
 ) {
-  animation: wiki-content-failsafe 0.01s linear 8s forwards;
+  animation: wiki-content-failsafe 0.01s linear 12s forwards;
 }
 
 @keyframes wiki-content-failsafe {
