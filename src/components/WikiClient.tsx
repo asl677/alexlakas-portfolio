@@ -877,6 +877,8 @@ export function IntroSequence() {
       ".wiki-topbar > .wiki-search",
       ".wiki-topbar nav > :not(.wiki-mobile-search-sheet)",
       ".wiki-contents summary",
+      // The rail's "Top" link joins the load reveal (it still only shows once scrolled).
+      ".wiki-contents .contents-top",
       ".wiki-contents nav > a",
       // The Talk title is hidden until its tab is chosen; it should switch in instantly,
       // not run the page-load fade the first time it appears.
@@ -1013,7 +1015,7 @@ export function IntroSequence() {
         if (dividers.has(element)) return { "--wiki-divider-opacity": opacity };
         // Header controls whose opacity CSS also drives (scroll-linked hand-off): reveal through
         // a variable that CSS multiplies in, so the load fade and the hand-off combine.
-        if (element.matches(".wiki-title-row > .wiki-title-action, .wiki-title-row > .wiki-scroll-actions")) return { "--wiki-reveal": opacity };
+        if (element.matches(".wiki-title-row > .wiki-title-action, .wiki-title-row > .wiki-scroll-actions, .wiki-contents .contents-top")) return { "--wiki-reveal": opacity };
         return { opacity };
       };
       const stage = (elements: HTMLElement[]) => elements.forEach(element => {

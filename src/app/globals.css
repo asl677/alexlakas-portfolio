@@ -5472,3 +5472,8 @@ html:root[data-article-view="talk"] body .wiki-shell .wiki-article .wiki-article
 }
 
 
+
+/* "Top" only shows once scrolled, and never before the page's load reveal reaches it. */
+html body .wiki-shell .wiki-contents.is-scrolled .contents-top {
+  opacity: var(--wiki-reveal, 1);
+}
