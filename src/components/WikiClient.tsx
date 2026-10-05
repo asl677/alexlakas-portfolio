@@ -829,8 +829,7 @@ export function IntroSequence() {
     document.fonts.addEventListener("loadingdone", alignCounter);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // The counter reports real loading: fonts, every image and video, then window load.
-    const LOADER_FADE_MS = 400;
-    const REVEAL_BUFFER_MS = 300;
+    const REVEAL_AFTER_HANDOFF_MS = 0;
     const LOADER_FAILSAFE_MS = 12000;
     const assets: Promise<unknown>[] = [
       document.fonts.ready,
@@ -849,8 +848,8 @@ export function IntroSequence() {
     let failsafeHit = false;
     const failsafe = window.setTimeout(() => { failsafeHit = true; }, LOADER_FAILSAFE_MS);
     // The inline script (layout.tsx) owns the counter: it types milestone numbers, backspacing
-    // between them, gated by real progress, then types "Wikipidia" (handing off to the logo,
-    // which starts on that word). The loader finishes once that is typed and
+    // between them, gated by real progress, then types "Designer" (handing off to the logo,
+    // which reads the same word). The loader finishes once that is typed and
     // this bundle's own assets are in (or the failsafe fires).
     const inlineWindow = window as Window & { __wikiDone?: boolean };
     let resolveLoader: () => void = () => {};
@@ -861,12 +860,14 @@ export function IntroSequence() {
       if (finished) return;
       finished = true;
       gsap.ticker.remove(tickCounter);
-      // Hand off: the logo (already "Wikipidia" underneath the typed counter) is shown at once,
+      // Hand off: the logo (already "Designer" underneath the typed counter) is shown at once,
       // so the word stays on screen while the loader fades around it.
       window.dispatchEvent(new Event("alexpedia-loader-handoff"));
       shell?.classList.remove("is-loading");
       // Loader fades out, then a short pause before the page starts revealing.
-      finishTimer = window.setTimeout(resolveLoader, reducedMotion ? 0 : LOADER_FADE_MS + REVEAL_BUFFER_MS);
+      // The logo is already on screen, so the page starts revealing shortly after the handoff
+      // while the loader finishes fading (no long wait for the full fade plus a buffer).
+      finishTimer = window.setTimeout(resolveLoader, reducedMotion ? 0 : REVEAL_AFTER_HANDOFF_MS);
     };
     const tickCounter = () => {
       if (failsafeHit || (inlineWindow.__wikiDone && loadedCount >= assets.length)) finishLoader();
@@ -916,45 +917,9 @@ export function IntroSequence() {
         return aRect.top - bRect.top || aRect.left - bRect.left;
       });
     const context = gsap.context(() => {
-      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        const text = document.querySelector<HTMLElement>(".wiki-wordmark-text");
-        // Crawlers and automated browsers only ever see "Designer", so the animation's
-        // placeholder names are never rendered into anything a search engine indexes.
-        const isCrawler = navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(navigator.userAgent);
-        if (text && !isCrawler) {
-          let current = "Wikipidia";
-          gsap.set(text, { textContent: current });
-          // Typing starts from the real loader finishing, not a fixed timer.
-          const typing = gsap.timeline({ paused: true });
-          loaderDone.then(() => gsap.delayedCall(0.4, () => typing.play()));
-          // Human rhythm: seeded jitter (same every load, never a visible loop), a key-repeat
-          // delay before backspacing speeds up, and a hesitation before each new word.
-          let seed = 7;
-          const jitter = (min: number, max: number) => {
-            seed = (seed * 9301 + 49297) % 233280;
-            return min + (seed / 233280) * (max - min);
-          };
-          // Hold "Wikipidia" for 3s before the first delete.
-          let time = 3;
-          for (const next of ["Alexapedia", "Nah", "Designer"]) {
-            for (let length = current.length - 1; length >= 0; length--) {
-              const presses = current.length - 1 - length;
-              // First press, then the OS key-repeat delay, then a steady repeat.
-              time += presses === 0 ? 0 : presses === 1 ? jitter(0.36, 0.44) : jitter(0.085, 0.11);
-              typing.set(text, { textContent: current.slice(0, length) }, time);
-            }
-            time += jitter(0.4, 0.5);
-            for (let length = 1; length <= next.length; length++) {
-              const afterCapital = length === 2 ? jitter(0.05, 0.09) : 0;
-              time += jitter(0.14, 0.26) + afterCapital;
-              typing.set(text, { textContent: next.slice(0, length) }, time);
-            }
-            time += next === "Nah" ? 1.1 : 1.6;
-            current = next;
-          }
-        }
-      }
-      const fade = { duration: 1.2, stagger: 0.022, ease: wikiEase };
+      // The logo shows "Designer" as server-rendered; the preloader types that word and hands
+      // off to it, so the logo has no typing cycle of its own.
+      const fade = { duration: 1.4, stagger: 0.022, ease: wikiEase };
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
         const second = b.getBoundingClientRect();
