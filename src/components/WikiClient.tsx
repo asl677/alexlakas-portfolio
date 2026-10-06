@@ -847,8 +847,8 @@ export function IntroSequence() {
     assets.forEach(asset => asset.then(() => { loadedCount += 1; }));
     let failsafeHit = false;
     const failsafe = window.setTimeout(() => { failsafeHit = true; }, LOADER_FAILSAFE_MS);
-    // The inline script (layout.tsx) owns the counter: it types milestone numbers, backspacing
-    // between them, gated by real progress, then types "Designer" (handing off to the logo,
+    // The inline script (layout.tsx) owns the loader text: it types "Loading", holds it until the
+    // page has loaded, then backspaces and types "Designer" (handing off to the logo,
     // which reads the same word). The loader finishes once that is typed and
     // this bundle's own assets are in (or the failsafe fires).
     const inlineWindow = window as Window & { __wikiDone?: boolean };
@@ -991,13 +991,13 @@ export function IntroSequence() {
       const stage = (elements: HTMLElement[]) => elements.forEach(element => {
         gsap.set(element, revealProperties(element, 0));
       });
-      const fadeIn = (elements: HTMLElement[], delay = 0) => {
+      const fadeIn = (elements: HTMLElement[], delay = 0, ease: string | ((t: number) => number) = fade.ease) => {
         const timeline = gsap.timeline({ delay });
         visualOrder(elements).forEach((element, index) => {
           timeline.to(element, {
             ...revealProperties(element, 1),
             duration: fade.duration,
-            ease: fade.ease
+            ease
           }, index * fade.stagger);
         });
       };
@@ -1017,7 +1017,9 @@ export function IntroSequence() {
         const initiallyVisibleLines = textLines.filter(isInRevealArea);
         initiallyVisible.forEach(target => revealedTargets.add(target));
         initiallyVisibleLines.forEach(line => revealedLines.add(line));
-        fadeIn([...initiallyVisible, ...initiallyVisibleLines]);
+        // Opening reveal starts visibly at once (no slow start), so content flows in as the
+        // loader's "Designer" lands; scroll reveals keep the site curve.
+        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, "power2.out");
         revealReady = true;
       };
       let revealCancelled = false;

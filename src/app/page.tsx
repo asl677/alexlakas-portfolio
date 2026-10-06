@@ -53,7 +53,7 @@ export default function Home() {
 
   return (
     <main className="wiki-shell is-loading">
-      <div className="wiki-loader" aria-hidden="true"><span className="wiki-loader-counter" suppressHydrationWarning>0</span></div>
+      <div className="wiki-loader" aria-hidden="true"><span className="wiki-loader-counter" suppressHydrationWarning></span></div>
       <IntroSequence />
       <SmoothAnchorScroll />
       <ContentsScrollSpy />
