@@ -5493,3 +5493,41 @@ html body .wiki-loader {
 html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row :is(.wiki-language, .wiki-title-action .wiki-sticky-actions, .wiki-scroll-actions) {
   transition: opacity 380ms cubic-bezier(0.25, 0.1, 0.25, 1), transform 380ms cubic-bezier(0.25, 0.1, 0.25, 1) !important;
 }
+
+/* No borders or dividers anywhere except the search box (and its results) and the active-tab
+   underline. Colors go transparent instead of removing borders, so nothing shifts. */
+html body .wiki-shell *:not(.wiki-search, .wiki-search *, .wiki-tabs, .wiki-tab.is-selected, .wiki-tab-actions > span),
+html body .wiki-shell *:not(.wiki-search, .wiki-search *)::before,
+html body .wiki-shell *:not(.wiki-search, .wiki-search *)::after {
+  border-color: transparent !important;
+}
+
+html body .wiki-shell hr {
+  display: none !important;
+}
+
+/* Dividers drawn with the reveal variable fade to nothing as well. */
+html body .wiki-shell .wiki-reveal-divider:not(.wiki-tabs) {
+  --wiki-divider-opacity: 0 !important;
+}
+
+/* Profile card: no background surface. */
+html body .wiki-shell .wiki-article-body > .infobox {
+  background: transparent !important;
+  --rail-surface-opacity: 0 !important;
+}
+
+/* Search: no submit button (Enter searches). */
+html body .wiki-search .search-submit {
+  display: none !important;
+}
+
+html body .wiki-shell .wiki-article .wiki-section,
+html body .wiki-shell .wiki-article .wiki-section .wiki-section-toggle,
+html body .wiki-shell .wiki-article .wiki-section-body {
+  border-color: transparent !important;
+}
+
+html body .wiki-shell .wiki-section:is(#references, #external-links) {
+  border-color: transparent !important;
+}
