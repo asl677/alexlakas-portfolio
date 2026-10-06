@@ -5507,7 +5507,7 @@ html body .wiki-shell hr {
 }
 
 /* Dividers drawn with the reveal variable fade to nothing as well. */
-html body .wiki-shell .wiki-reveal-divider:not(.wiki-tabs) {
+html body .wiki-shell .wiki-reveal-divider:not(.wiki-tabs, .wiki-title-row) {
   --wiki-divider-opacity: 0 !important;
 }
 
@@ -5546,14 +5546,6 @@ html body .wiki-shell .career-feature > figure figcaption {
   padding: 0.375rem 0 0 !important;
 }
 
-/* Divider under the title row (above the tabs) restored. */
-html body .wiki-shell .wiki-article-header .wiki-title-row {
-  border-bottom: 1px solid var(--wiki-border) !important;
-}
-
-html body .wiki-shell .wiki-article-header .wiki-title-row.wiki-reveal-divider {
-  --wiki-divider-opacity: 1 !important;
-}
 
 /* Hand-off: a short 4px slide and 0.3s smoothing (the 14px travel read as long and laggy). */
 html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-language {
@@ -5574,4 +5566,26 @@ html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) 
 
 html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row :is(.wiki-language, .wiki-title-action .wiki-sticky-actions, .wiki-scroll-actions) {
   transition: opacity 300ms cubic-bezier(0.25, 0.1, 0.25, 1), transform 300ms cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+}
+
+/* The two header dividers (under the title row and under the tabs) draw left to right as they
+   fade in. --wiki-divider-opacity is tweened by the load reveal in the same top-down stagger as
+   the text, so the lines grow in step with the content around them. */
+html body .wiki-shell .wiki-article-header :is(.wiki-title-row, .wiki-tabs) {
+  position: relative;
+  border-bottom: 1px solid transparent !important;
+}
+
+html body .wiki-shell .wiki-article-header :is(.wiki-title-row, .wiki-tabs)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--wiki-border);
+  transform-origin: left center;
+  transform: scaleX(var(--wiki-divider-opacity, 1));
+  opacity: var(--wiki-divider-opacity, 1);
+  pointer-events: none;
 }

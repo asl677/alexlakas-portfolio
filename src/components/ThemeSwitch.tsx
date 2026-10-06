@@ -17,7 +17,8 @@ export default function ThemeSwitch() {
     const phone = window.matchMedia("(max-width: 35rem)");
     const device = window.matchMedia("(prefers-color-scheme: dark)");
     const followDevice = () => {
-      if (!phone.matches) return;
+      // Phones always follow the device; larger screens follow it until the visitor toggles.
+      if (!phone.matches && sessionStorage.getItem(storageKey)) return;
       const theme = device.matches ? "dark" : "light";
       document.documentElement.dataset.theme = theme;
       document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#000000" : "#ffffff");
@@ -43,7 +44,8 @@ export default function ThemeSwitch() {
     document.documentElement.dataset.theme = nextTheme;
     // Safari recolors its top and bottom bars from theme-color immediately, not on next scroll.
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", nextTheme === "dark" ? "#000000" : "#ffffff");
-    localStorage.setItem(storageKey, nextTheme);
+    // Remembered for this visit only; every new visit starts from the OS theme.
+    sessionStorage.setItem(storageKey, nextTheme);
     window.dispatchEvent(new Event("alexpedia-theme-change"));
     void root.offsetHeight;
     requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
