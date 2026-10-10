@@ -5732,10 +5732,11 @@ html body .wiki-shell .wiki-contents.is-scrolled .contents-top { background: tra
    backdrop-filter hides the page from the child), so exactly one layer carries it:
    the results box on desktop, the sheet panel on mobile. */
 @media (max-width: 48rem) {
+  /* Mobile sheet: solid page-colored fill, no blur. */
   html body .wiki-shell .wiki-mobile-search-sheet-panel {
-    background: var(--wiki-glass-bg) !important;
-    -webkit-backdrop-filter: var(--wiki-glass-blur) !important;
-    backdrop-filter: var(--wiki-glass-blur) !important;
+    background: var(--wiki-page) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
   html body .wiki-shell .wiki-mobile-search-sheet-panel .wiki-search-results {
     background: transparent !important;
@@ -5867,4 +5868,13 @@ html body .wiki-shell .wiki-talk-page :is(.wiki-talk-notice, .wiki-talk-status) 
   margin-left: 0 !important;
   margin-right: 0 !important;
   box-sizing: border-box;
+}
+
+/* Mobile: section images are left-aligned thumbnails, not full-bleed. */
+@media (max-width: 767px) {
+  html body .wiki-shell :is(#career, #early-life) .career-feature figure {
+    width: min(100%, 240px) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
