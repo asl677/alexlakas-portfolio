@@ -5889,6 +5889,9 @@ html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-c
   background-position: 100% 100% !important;
   background-size: 0% 1px !important;
   transition: background-size 0.45s cubic-bezier(0.65, 0, 0.35, 1) !important;
+  /* Block-level links (Contents rail, lists) size to their text so the underline does too. */
+  width: fit-content;
+  max-width: 100%;
 }
 @media (hover: hover) {
   html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .wiki-contents, .references, .wiki-link-list) a:not(.article-list-image):not(.wiki-tab):is(:hover, :focus-visible) {
@@ -6020,7 +6023,8 @@ html body .wiki-shell .infobox dl {
   margin-right: auto !important;
 }
 @media (max-width: 56.25rem) {
-  html body .wiki-shell .infobox dl { width: min(18rem, 82%) !important; }
+  /* Stacked (single-column) layout: the details span the full column width. */
+  html body .wiki-shell .infobox dl { width: 100% !important; }
 }
 
 /* Desktop: the profile card's "Alex" heading sits on the first line of the lead paragraph. */
@@ -6033,3 +6037,19 @@ html body .wiki-shell .infobox dl {
 @media (min-width: 56.3125rem) {
   html body .wiki-shell .wiki-article-body > .infobox { top: calc(var(--wiki-article-header-height, 6rem) + 5px) !important; }
 }
+
+/* Contents rail: "Top" sits on the same baseline as the "Contents" label, flush right. */
+html body .wiki-shell .wiki-contents .contents-top {
+  top: 1px !important;
+  padding: 0 !important;
+  line-height: 1.5 !important;
+}
+
+/* Wiped images sit flush in their frame: block-level media leaves no inline baseline gap
+   under the image (it showed as a thin strip at the bottom during the reveal). */
+.wiki-wipe-media { line-height: 0; }
+.wiki-wipe-media > :is(img, video, a, div) { display: block; }
+.wiki-wipe-media img, .wiki-wipe-media video { display: block; }
+
+/* In-article Contents box: no panel fill, just the list on the page background. */
+html body .wiki-shell .article-toc { background: transparent !important; }

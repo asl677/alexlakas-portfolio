@@ -1128,15 +1128,16 @@ export function IntroSequence() {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
           const wipe = element.classList.contains("wiki-wipe");
-          // Load only: text lines also rise 10px as they fade (scroll reveals stay fade-only).
+          // Load only: text lines also rise 20px up through their line mask as they fade (scroll
+          // reveals stay fade-only).
           const rise = element.classList.contains("wiki-reveal-line");
-          timeline.fromTo(element, { ...revealProperties(element, 0), ...(rise ? { y: 10 } : {}) }, {
+          timeline.fromTo(element, { ...revealProperties(element, 0), ...(rise ? { y: 20 } : {}) }, {
             ...revealProperties(element, 1),
             ...(rise ? { y: 0, force3D: true, clearProps: "transform" } : {}),
             // One curve (easeInOutQuart) for everything. A wipe covers then uncovers, so it runs
             // twice as long and starts half a fade early: its content appears exactly when a
             // plain fade at the same slot would.
-            duration: wipe ? 1.2 : fade.duration,
+            duration: wipe ? 1.2 : rise ? 0.8 : fade.duration,
             // Strip wipes keep a symmetric curve (cover, then uncover) and start 0.6s early so
             // their content shows when a text fade in the same slot would.
             ease: wipe ? "power3.inOut" : ease
