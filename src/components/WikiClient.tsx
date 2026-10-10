@@ -999,10 +999,10 @@ export function IntroSequence() {
     const context = gsap.context(() => {
       // The logo shows "Designer" as server-rendered; the preloader types that word and hands
       // off to it, so the logo has no typing cycle of its own.
-      // Phones run every reveal slower (1.7x), and scroll reveals play over a longer stretch of
+      // Phones run every reveal slower (1.4x on top of the base timing), and scroll reveals play over a longer stretch of
       // scrolling: the same motion reads rushed on a small screen.
-      const pace = window.matchMedia("(max-width: 768px)").matches ? 1.7 : 1;
-      const fade = { duration: 0.6 * pace, stagger: 0.08 * pace, ease: wikiEase };
+      const pace = window.matchMedia("(max-width: 768px)").matches ? 1.4 : 1;
+      const fade = { duration: 1 * pace, stagger: 0.08 * pace, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
@@ -1128,7 +1128,7 @@ export function IntroSequence() {
         const timeline = gsap.timeline({ delay });
         // Up to 80ms between items, each a 0.6s expo.out fade, with the whole cascade held to
         // ~1.2s: per-line items made a fixed 80ms step crawl down a full screen of text.
-        const step = Math.min(fade.stagger, (1.2 * pace) / Math.max(1, elements.length));
+        const step = Math.min(fade.stagger, (1.6 * pace) / Math.max(1, elements.length));
         visualOrder(elements).forEach((element, index) => {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
@@ -1141,11 +1141,11 @@ export function IntroSequence() {
             // One curve (easeInOutQuart) for everything. A wipe covers then uncovers, so it runs
             // twice as long and starts half a fade early: its content appears exactly when a
             // plain fade at the same slot would.
-            duration: wipe ? 1.2 * pace : rise ? 0.8 : fade.duration,
+            duration: wipe ? 1.6 * pace : rise ? 0.8 : fade.duration,
             // Strip wipes keep a symmetric curve (cover, then uncover) and start 0.6s early so
             // their content shows when a text fade in the same slot would.
             ease: wipe ? "power3.inOut" : ease
-          }, wipe ? Math.max(0, index * step - 0.6 * pace) : index * step);
+          }, wipe ? Math.max(0, index * step - 0.8 * pace) : index * step);
         });
       };
       const isInRevealArea = (element: HTMLElement) => {
