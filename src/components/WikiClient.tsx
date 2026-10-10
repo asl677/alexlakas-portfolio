@@ -926,8 +926,7 @@ export function IntroSequence() {
       // The logo shows "Designer" as server-rendered; the preloader types that word and hands
       // off to it, so the logo has no typing cycle of its own.
       const fade = { duration: 0.8, stagger: 0.03, ease: wikiEase };
-      // Scroll reveals are scrubbed: progress is tied to the scroll position, with a small slide.
-      const SLIDE = 4;
+      // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
@@ -1012,18 +1011,20 @@ export function IntroSequence() {
         // Header controls whose opacity CSS also drives (scroll-linked hand-off): reveal through
         // a variable that CSS multiplies in, so the load fade and the hand-off combine.
         if (element.matches(".wiki-title-row > .wiki-title-action, .wiki-title-row > .wiki-scroll-actions, .wiki-contents .contents-top")) return { "--wiki-reveal": opacity };
-        // Content slides down ~4px as it fades in (CSS `translate`, so it never fights transforms).
-        if (element.classList.contains("wiki-reveal-line") || element.classList.contains("wiki-slide")) {
-          // Split lines travel a full line height so the line mask visibly clips them.
-          const lineSlide = element.classList.contains("wiki-reveal-line");
-          // Lines travel 30% of their height, other content 4px: enough to feel, not to notice.
-          // Direct transforms (GPU-composited) instead of a CSS variable, which forced a style
-          // recalculation on every animated element each frame.
-          return lineSlide
-            ? { opacity, yPercent: (opacity - 1) * 30, force3D: true }
-            : { opacity, y: (opacity - 1) * SLIDE, force3D: true };
-        }
+        // Opacity only: the slide (line yPercent / 4px block offset) was dropped on purpose.
         return { opacity };
+      };
+      // Per-frame writer for the scrub loop. gsap.set builds a tween per call, and each one
+      // reads computed styles on init: hundreds of forced style recalcs per frame while
+      // scrolling. Writing the same values straight to the inline style reads nothing.
+      const applyReveal = (element: HTMLElement, value: number) => {
+        const props = revealProperties(element, value);
+        if (element === rail || dividers.has(element) || "--wiki-reveal" in props) {
+          const name = Object.keys(props)[0];
+          element.style.setProperty(name, String(value));
+          return;
+        }
+        element.style.opacity = String(value);
       };
       const stage = (elements: HTMLElement[]) => elements.forEach(element => {
         gsap.set(element, revealProperties(element, 0));
@@ -1031,7 +1032,9 @@ export function IntroSequence() {
       const fadeIn = (elements: HTMLElement[], delay = 0, ease: string | ((t: number) => number) = fade.ease) => {
         const timeline = gsap.timeline({ delay });
         visualOrder(elements).forEach((element, index) => {
-          timeline.to(element, {
+          // fromTo with explicit start values: a plain `to` reads computed styles when each
+          // staggered tween first renders, forcing a synchronous style recalc on most frames.
+          timeline.fromTo(element, revealProperties(element, 0), {
             ...revealProperties(element, 1),
             duration: fade.duration,
             ease
@@ -1067,9 +1070,19 @@ export function IntroSequence() {
       const scrubEase = (t: number) => 1 - Math.pow(1 - t, 3);
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
+      // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
+      // wrote styles, forced a synchronous style recalc every frame of the opening reveal.
+      let scrollHeight = 0;
+      // window.scrollY flushes pending style + layout. Read in the scrub it ran right after the
+      // reveal tweens wrote, forcing a full recalc every frame (the load lag and mid-scroll
+      // stalls). Sampled first thing in the frame instead (after Lenis, before any writes).
+      let frameScrollY = window.scrollY;
+      const readScroll = () => { frameScrollY = window.scrollY; };
+      gsap.ticker.add(readScroll, false, true);
       // Re-measure (also re-collects text lines, which SplitText recreates on rewrap).
       const measure = () => {
         const y = window.scrollY;
+        scrollHeight = document.documentElement.scrollHeight;
         scrubItems = [...targets, ...textLines].map(element => {
           const item = scrubState.get(element) ?? { element, top: 0, hidden: false, media: element.matches("figure, .article-list-item, .infobox"), current: 0 };
           scrubState.set(element, item);
@@ -1084,8 +1097,8 @@ export function IntroSequence() {
         const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac));
         const range = clampRange(scrubConfig.text);
         const mediaRange = clampRange(scrubConfig.media);
-        const y = window.scrollY;
-        const remaining = Math.max(0, document.documentElement.scrollHeight - vh - y);
+        const y = frameScrollY;
+        const remaining = Math.max(0, scrollHeight - vh - y);
         const widen = Math.max(0, mediaRange + scrubConfig.edgeInset - remaining);
         // Reveal starts edgeInset px above the viewport bottom so content is hidden before the toolbar.
         const bottom = y + vh - scrubConfig.edgeInset + widen;
@@ -1100,7 +1113,7 @@ export function IntroSequence() {
           let next = item.current + (target - item.current) * k;
           if (Math.abs(target - next) < 0.002) next = target;
           item.current = next;
-          gsap.set(element, revealProperties(element, next));
+          applyReveal(element, next);
           // The side rail stays put once shown; it never fades back out on scroll.
           if (element === rail && next === 1) revealedTargets.add(rail);
         }
@@ -1110,31 +1123,23 @@ export function IntroSequence() {
       const revealSection = (event: Event) => {
         const section = document.getElementById((event as CustomEvent<string>).detail);
         if (!section) return;
-        const sectionTop = section.getBoundingClientRect().top;
-        // Re-opening replays the reveal: everything inside goes back to hidden first.
+        // Re-opening replays the reveal: everything inside fades in once, opacity only. All of
+        // it is marked revealed and never handed to the scroll scrub: the scrub's cached tops
+        // were measured before the section expanded, so handed-off lines froze half-faded.
         const inside = [...targets, ...textLines].filter(element => section.contains(element) && element !== section && !element.closest(".wiki-section-toggle"));
         inside.forEach(element => {
-          revealedTargets.delete(element);
-          revealedLines.delete(element);
+          (element.classList.contains("wiki-reveal-line") ? revealedLines : revealedTargets).add(element);
           const item = scrubState.get(element);
-          if (item) item.current = 0;
+          if (item) item.current = 1;
           gsap.killTweensOf(element);
-          gsap.set(element, revealProperties(element, 0));
         });
-        const pending = inside.filter(element => element.getBoundingClientRect().top - sectionTop < window.innerHeight);
-        pending.forEach(element => (element.classList.contains("wiki-reveal-line") ? revealedLines : revealedTargets).add(element));
-        const timeline = gsap.timeline({
-          delay: 0.04,
-          // Hand back to the scroll scrub so these lines also reverse when scrolled away.
-          onComplete: () => pending.forEach(element => {
-            (element.classList.contains("wiki-reveal-line") ? revealedLines : revealedTargets).delete(element);
-            const item = scrubState.get(element);
-            if (item) item.current = 1;
-          }),
+        const step = Math.min(0.018, 0.5 / Math.max(1, inside.length));
+        const timeline = gsap.timeline({ delay: 0.04 });
+        visualOrder(inside).forEach((element, index) => {
+          timeline.fromTo(element, revealProperties(element, 0), { ...revealProperties(element, 1), duration: 0.4, ease: "power2.out" }, index * step);
         });
-        visualOrder(pending).forEach((element, index) => {
-          timeline.to(element, { ...revealProperties(element, 1), duration: 0.7, ease: "power3.out" }, index * 0.018);
-        });
+        // Positions below the section changed: refresh the scrub's cache.
+        queueReveal();
       };
 
       let frame = 0;
@@ -1186,6 +1191,7 @@ export function IntroSequence() {
       window.addEventListener("alexpedia-loader-handoff", showBrandForHandoff);
       return () => {
         gsap.ticker.remove(scrubTick);
+        gsap.ticker.remove(readScroll);
         layoutObserver.disconnect();
         window.clearTimeout(measureFrame);
         window.removeEventListener("resize", onLayout);
@@ -1279,12 +1285,11 @@ export function SmoothAnchorScroll() {
     const lenis = reduceMotion.matches
       ? null
       : new Lenis({ lerp: 0.09, smoothWheel: true, wheelMultiplier: 0.85, touchMultiplier: 1 });
-    let lenisFrame: number | null = null;
-    const tick = (time: number) => {
-      lenis?.raf(time);
-      lenisFrame = requestAnimationFrame(tick);
-    };
-    if (lenis) lenisFrame = requestAnimationFrame(tick);
+    // Lenis runs on the GSAP ticker so scroll and the reveal scrub share one frame: with its own
+    // rAF loop the scrub could read the previous frame's scroll and visibly hitch behind it.
+    const tick = (time: number) => { lenis?.raf(time * 1000); };
+    // Prioritized, so it scrolls before the reveal samples scrollY and before tweens render.
+    if (lenis) gsap.ticker.add(tick, false, true);
     // The search sheet cancels any in-flight smooth-scroll glide by pinning Lenis's target to
     // the current position. (lenis.stop() is avoided: it animates back to a stale target.)
     const lockScroll = () => lenis?.scrollTo(window.scrollY, { immediate: true, force: true });
@@ -1383,7 +1388,7 @@ export function SmoothAnchorScroll() {
     return () => {
       document.removeEventListener("click", handleClick);
       if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current);
-      if (lenisFrame !== null) cancelAnimationFrame(lenisFrame);
+      gsap.ticker.remove(tick);
       window.removeEventListener("alexpedia-scroll-lock", lockScroll);
       window.removeEventListener("alexpedia-scroll-unlock", unlockScroll);
       window.removeEventListener("alexpedia-scroll-to", scrollToRequest);

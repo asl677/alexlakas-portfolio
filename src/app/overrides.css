@@ -17,11 +17,6 @@ html body .wiki-shell .wiki-article-body :is(p, li, dd) a:is(:link, :visited) {
   color: var(--wiki-ink) !important;
 }
 
-/* Scrubbed reveal slide (4px from the top). `translate` composes with any transform. */
-.wiki-reveal-line,
-.wiki-slide {
-  translate: 0 var(--wiki-slide, 0px);
-}
 
 /* Case study titles: white links, dim on hover */
 html body .wiki-shell .wiki-article-body h3 a:is(:link, :visited) {
@@ -32,10 +27,7 @@ html body .wiki-shell .wiki-article-body :is(h3, p, li, dd) a:is(:link, :visited
   color: var(--wiki-link-blue-hover) !important;
 }
 
-/* Keep fading/sliding media on the compositor */
-.wiki-slide:is(figure, .article-list-item), .infobox {
-  will-change: opacity, translate;
-}
+/* No will-change on media: a standing layer left list thumbnails pixelated. */
 
 /* iOS Safari zooms the page when a focused input is under 16px */
 @media (max-width: 560px) {
@@ -105,4 +97,29 @@ html body .wiki-shell .wiki-categories { gap: 2px 10px !important; padding-left:
   html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure { clear: both; }
   html body .wiki-shell :is(#career, #early-life) .career-feature--right.career-feature--thumb figure { float: right !important; margin: 4px 0 16px 20px !important; }
   html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure :is(img, video) { width: 100% !important; aspect-ratio: 4 / 3; object-fit: cover; height: auto !important; }
+}
+
+/* Load-reveal variables are tweened every frame on big containers (.wiki-section, .article-toc,
+   the rail). Unregistered custom properties inherit, so each tick re-styled every descendant
+   (hundreds of split lines). Registered as non-inherited, a tick only re-styles the element. */
+@property --wiki-divider-opacity { syntax: "<number>"; inherits: false; initial-value: 1; }
+@property --rail-surface-opacity { syntax: "<number>"; inherits: false; initial-value: 1; }
+
+/* The header dividers are drawn by ::after, which needs the owner's value explicitly. */
+html body .wiki-shell .wiki-article-header :is(.wiki-title-row, .wiki-tabs)::after {
+  --wiki-divider-opacity: inherit;
+}
+
+/* Contents "Top" link: plain text, no background. */
+html body .wiki-shell .wiki-contents .contents-top,
+html body .wiki-shell .wiki-contents.is-scrolled .contents-top { background: transparent !important; }
+
+/* Profile status: dot left of the label, green when online, gray when offline. */
+.wiki-status { display: inline-flex; align-items: center; gap: 6px; }
+.wiki-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #8a8a8a; flex: none; }
+.wiki-status.is-online::before { background: #22c55e; }
+
+/* Mobile: stacked images get breathing room before the text below. */
+@media (max-width: 767px) {
+  html body .wiki-shell :is(#career, #early-life) .career-feature figure { margin-bottom: 20px !important; }
 }

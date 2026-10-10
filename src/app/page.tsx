@@ -1,6 +1,7 @@
 "use client";
 
 import { Languages, MailOpen, PenLine, Search, Star } from "lucide-react";
+import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
 import { ArticleTabs, ContentsScrollSpy, HoverPortrait, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
 
@@ -29,7 +30,7 @@ const references = [
 
 const articles = [
   { title: "Designing Area Code", date: "Fiveonefour", dek: "A starter kit for analytics.", href: "https://alexslakas.medium.com/designing-area-code-a-starter-kit-for-modern-analytics-apps-ed421767d667", image: "https://miro.medium.com/v2/1*Jju41LNCrQ95PzA6hxR1LA.jpeg" },
-  { title: "Prototyping AI with AI", date: "Fiveonefour", dek: "Turning ideas into AI prototypes.", href: "https://alexslakas.medium.com/prototyping-ai-with-ai-f3b8a40e07d9", image: "https://miro.medium.com/v2/1*VEYmGjbbTYVI3ufEStNGsg.png" },
+  { title: "Agentic UX is the new black", date: "Fiveonefour", dek: "Open your mind (to AI).", href: "https://alexslakas.medium.com/agentic-ux-is-the-new-black-2fbc62cdba91", image: "https://miro.medium.com/v2/resize:fit:1100/format:webp/1*L9l8mtSBtjG7wiWsTT_zEg.png" },
   { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "LinkedIn", dek: "Reimagining a professional social network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/1*2fUEA_2VQcdnZ6JBWo2D0Q.png" },
   { title: "Know before you go with Google's Live Popular Times", date: "Google", dek: "Real-time crowds in Maps.", href: "https://alexslakas.medium.com/know-before-you-go-with-googles-live-popular-times-bcfc7320ecaa", image: "https://miro.medium.com/v2/1*tvnPllmUzgIvJVdPxyPVPg.png" },
   { title: "Search faster on Google Maps", date: "Google", dek: "Local discovery with less typing.", href: "https://alexslakas.medium.com/search-faster-on-google-maps-d6b8597c4a07", image: "https://miro.medium.com/v2/1*AMLLrIjOr9igNelp0fGGmg.jpeg" },
@@ -78,14 +79,14 @@ export default function Home() {
               <summary><strong>Contents</strong><span className="contents-toggle" aria-hidden="true" /></summary>
               <a className="contents-top" href="#top">Top</a>
               <nav>
-                <a href="#early-life">Early life and education</a>
+                <a href="#early-life">Early life</a>
                 <a href="#career">Career</a>
                 <a href="#style">Style</a>
-                <a href="#media">In the media</a>
-                <a href="#publications">Case studies</a>
+                <a href="#media">Press</a>
+                <a href="#publications">Cases</a>
                 <a href="#stack">Stack</a>
                 <a href="#references">References</a>
-                <a href="#external-links">External links</a>
+                <a href="#external-links">External</a>
               </nav>
             </details>
           </aside>
@@ -116,7 +117,7 @@ export default function Home() {
             </header>
 
             <section className="wiki-talk-page" aria-label="Talk page">
-              <p className="wiki-talk-latest">Latest comment: <a href="#start-discussion">1 year ago</a> in topic <a href="#start-discussion">Information on the page not publicly verifiable and does not follow neutral pov</a></p>
+              <p className="wiki-talk-latest">Latest update: <a href="#start-discussion"><TimeAgo /></a> in topic <a href="#start-discussion">Added early life and career images, refreshed career copy</a></p>
               <div className="wiki-talk-notice">
                 <p>This article must adhere to the <a href="#start-discussion">biographies of living persons</a> policy. Contentious material about living people that is unsourced or poorly sourced should be removed promptly from the article and its talk page.</p>
                 <p>If you are the subject of this article, or are acting on behalf of one, use this page to raise a specific concern or propose a sourced change.</p>
@@ -128,7 +129,7 @@ export default function Home() {
                 <div><strong>United States</strong><a href="#start-discussion">[show]</a></div>
               </div>
               <section className="wiki-talk-thread" id="start-discussion">
-                <h2>Information on the page not publicly verifiable and does not follow neutral pov <span>[edit]</span></h2>
+                <h2>Info on this page is verifiable by the author and public records <span>[edit]</span></h2>
                 <p className="wiki-talk-meta">Latest comment: <a href="#start-discussion">1 year ago</a> <span>|</span> 1 comment <span>|</span> 1 person in discussion</p>
                 <p>Unsourced material and subjective characterizations should be replaced with verifiable references. Discussion here should focus on specific claims, reliable sources, and neutral language.</p>
               </section>
@@ -139,6 +140,7 @@ export default function Home() {
               <h2>Alex</h2>
               <HoverPortrait />
               <dl>
+                <dt>Status</dt><dd><OnlineStatus /></dd>
                 <dt>Based in</dt><dd>Los Angeles, CA</dd>
                 <dt>Occupation</dt><dd>Sr. staff designer, art director, product designer</dd>
                 <dt>Known for</dt><dd>&ldquo;Incredibly talented designer&rdquo;, &ldquo;Simple, clear aesthetic&rdquo;, &ldquo;Good people&rdquo;</dd>
@@ -152,18 +154,18 @@ export default function Home() {
             <nav className="toc article-toc" aria-label="Table of contents">
               <h2>Contents</h2>
               <ol>
-                <li><a href="#early-life">Early life and education</a></li>
+                <li><a href="#early-life">Early life</a></li>
                 <li><a href="#career">Career</a></li>
                 <li><a href="#style">Style</a></li>
-                <li><a href="#media">In the media</a></li>
-                <li><a href="#publications">Case studies</a></li>
+                <li><a href="#media">Press</a></li>
+                <li><a href="#publications">Cases</a></li>
                 <li><a href="#stack">Stack</a></li>
                 <li><a href="#references">References</a></li>
-                <li><a href="#external-links">External links</a></li>
+                <li><a href="#external-links">External</a></li>
               </ol>
             </nav>
 
-            <WikiSection id="early-life" title="Early life and education">
+            <WikiSection id="early-life" title="Early life">
               <div className="career-feature career-feature--right career-feature--thumb">
                 <figure>
                   <img src="/early-life-sketch.jpg" alt="Alex sketching on a tablet" />
@@ -177,7 +179,7 @@ export default function Home() {
                 <figure>
                   <img src="/career-on-set.webp" alt="A film crew setting up a shot" />
                 </figure>
-                <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work followed by roles at Google, LinkedIn, Peanut, Culprit, and Fiveonefour. This includes early agency and ecommerce work for 0-1 startups, etailers and FAANG companies with roles at Google, LinkedIn, Culprit and more.<Ref n={1} /><Ref n={3} /></p>
+                <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work for 0-1 startups, etailers and FAANG companies, followed by roles at Google, LinkedIn, Peanut, Culprit, and Fiveonefour.<Ref n={1} /><Ref n={3} /></p>
               </div>
               <div id="social-games-and-ecommerce" className="career-feature">
                 <h3>Social games and ecommerce</h3>
@@ -233,10 +235,10 @@ export default function Home() {
             </WikiSection>
 
             <WikiSection id="style" title="Style"><p>Alex describes himself as a generalist with a focus on visual design and prototyping. His published work often uses restrained typography, black-and-white palettes, kinetic transitions, image-led case studies, and direct editorial writing. LinkedIn recommendations describe a collaborator who brings clarity to complex problems, pairs a strong visual point of view with practical product judgment, and makes teams feel heard throughout the process. His Dribbble profile describes his practice as art direction and design.<Ref n={2} /><Ref n={3} /></p></WikiSection>
-            <WikiSection id="media" title="In the media">
+            <WikiSection id="media" title="Press">
               <p>Alex&apos;s work has appeared in coverage of independent product, travel, and technology projects. <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a> featured Peanut in reporting on travel planning, while <a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a> covered LinkedIn work involving polls and live video-based events, as well as the modernization of LinkedIn&apos;s homepage and sharing experience.<Ref n={10} /><Ref n={12} /><Ref n={14} /></p>
               <p>His Google Live Popular Times work was featured on <a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">The Tonight Show Starring Jimmy Fallon</a>, alongside publication coverage of Fiveonefour&apos;s data-infrastructure practice and other independent creative projects.<Ref n={16} /></p>
-              <p>In 2022, following the acquisition of Peanut, he appeared on Insured Nomads&apos; <a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">As Told By Nomads</a> podcast with Brady Simpson, discussing how Peanut was built remotely as a side business while working full time.<Ref n={20} /></p>
+              <p>In 2022, following the acquisition of Peanut, he appeared on Tayo Rockson&apos;s <a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">As Told By Nomads</a> podcast with Brady Simpson, discussing how Peanut was built remotely as a side business while working full time.<Ref n={20} /></p>
               <ul className="wiki-link-list media-links">
                 <li><a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour announces its $17M raise</a>. <i>PR Newswire</i>.</li>
                 <li><a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">Building a side hustle remotely while working a 9-to-5</a>. <i>As Told By Nomads podcast</i>.</li>
@@ -249,12 +251,12 @@ export default function Home() {
                 <li><a href="https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/" target="_blank" rel="noreferrer">LinkedIn is gearing up for a redesign</a>. <i>TechCrunch</i>.</li>
               </ul>
             </WikiSection>
-            <WikiSection id="publications" title="Case studies">
+            <WikiSection id="publications" title="Cases">
               <div className="article-list">
                 {articles.slice(0, 7).map((article) => (
                   <article id={`publication-${article.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`} className="article-list-item" key={article.href}>
                     <a className="article-list-image" href={article.href} target="_blank" rel="noreferrer" aria-label={`Read ${article.title}`}>
-                      <img src={article.image} alt="" />
+                      {/* Medium serves 2000px originals; a 12x downscale aliases badly. Request sizes near display size. */}<img src={article.image.includes("resize:") ? article.image : article.image.replace("/v2/", "/v2/resize:fit:480/")} srcSet={article.image.includes("resize:") ? undefined : `${article.image.replace("/v2/", "/v2/resize:fit:320/")} 1x, ${article.image.replace("/v2/", "/v2/resize:fit:480/")} 2x, ${article.image.replace("/v2/", "/v2/resize:fit:720/")} 3x`} alt="" />
                     </a>
                     <div>
                       <p className="article-list-meta">{article.date}</p>
@@ -271,7 +273,7 @@ export default function Home() {
               const patentLinks = reference.links ?? [];
               return <li id={"ref-" + (index + 1)} key={reference.label}><a className="reference-backlink" href={"#cite-" + (index + 1)} aria-label={`Back to citation ${index + 1}`}>^</a>{patentLinks.length ? <><span>{reference.label}: </span>{patentLinks.map((patent, patentIndex) => <span key={patent.href}><a href={patent.href}>{patent.label}</a>{patentIndex < patentLinks.length - 1 ? ", " : ""}</span>)}</> : <a href={reference.href ?? "#references"}>{reference.label}</a>}. <i>{reference.source}</i>.</li>;
             })}</ol></WikiSection>
-            <WikiSection id="external-links" title="External links"><ul className="wiki-link-list"><li><a className="external-link" href="https://dribbble.com/alex2pt0" target="_blank" rel="noreferrer">Alex on Dribbble</a></li><li><a className="external-link" href="https://x.com/axlakas" target="_blank" rel="noreferrer">Alex on X</a></li><li><a className="external-link" href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">Alex on LinkedIn</a></li><li><a className="external-link" href="https://alexslakas.medium.com/" target="_blank" rel="noreferrer">Alex on Medium</a></li></ul></WikiSection>
+            <WikiSection id="external-links" title="External"><ul className="wiki-link-list"><li><a className="external-link" href="https://dribbble.com/alex2pt0" target="_blank" rel="noreferrer">Alex on Dribbble</a></li><li><a className="external-link" href="https://x.com/axlakas" target="_blank" rel="noreferrer">Alex on X</a></li><li><a className="external-link" href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">Alex on LinkedIn</a></li><li><a className="external-link" href="https://alexslakas.medium.com/" target="_blank" rel="noreferrer">Alex on Medium</a></li></ul></WikiSection>
             <nav className="wiki-categories" aria-label="Categories">
               <span>Categories:</span>
               <a href="#top">American designers</a>
@@ -287,4 +289,34 @@ export default function Home() {
       </div>
     </main>
   );
+}
+
+// "1 day ago" from the build timestamp; computed after mount so server and client markup match.
+function TimeAgo() {
+  const [label, setLabel] = useState("today");
+  useEffect(() => {
+    const days = Math.floor((Date.now() - Number(process.env.BUILD_TIME)) / 86400000);
+    if (days >= 365) setLabel(`${Math.floor(days / 365)} year${days >= 730 ? "s" : ""} ago`);
+    else if (days >= 30) setLabel(`${Math.floor(days / 30)} month${days >= 60 ? "s" : ""} ago`);
+    else if (days >= 1) setLabel(`${days} day${days > 1 ? "s" : ""} ago`);
+    else setLabel("today");
+  }, []);
+  return <>{label}</>;
+}
+
+// Online Mon-Fri, 9am-5pm Pacific; checked after mount and every minute.
+function OnlineStatus() {
+  const [online, setOnline] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(new Date());
+      const weekday = parts.find(part => part.type === "weekday")?.value ?? "";
+      const hour = Number(parts.find(part => part.type === "hour")?.value);
+      setOnline(!["Sat", "Sun"].includes(weekday) && hour >= 9 && hour < 17);
+    };
+    check();
+    const timer = setInterval(check, 60000);
+    return () => clearInterval(timer);
+  }, []);
+  return <span className={"wiki-status" + (online ? " is-online" : "")}>{online ? "Online" : "Offline"}</span>;
 }
