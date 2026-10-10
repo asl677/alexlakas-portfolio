@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { BookMarked, BriefcaseBusiness, ChevronDown, Code2, FileText, GraduationCap, History, Link, Newspaper, Palette, Quote, Search, X } from "lucide-react";
 import { gsap, SplitText } from "gsap/all";
 import Lenis from "lenis";
@@ -79,27 +80,15 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
   const searchRef = useRef<HTMLFormElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const resultsContentRef = useRef<HTMLUListElement>(null);
-
-  useEffect(() => {
-    const wrapper = resultsRef.current;
-    const content = resultsContentRef.current;
-    if (!wrapper || !content || results.length === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // Touch sheet scrolls natively; a second Lenis (rooted on <html>) also strips the page Lenis's classes on destroy.
-    if (wrapper.closest(".wiki-mobile-search-sheet")) return;
-
-    const lenis = new Lenis({ wrapper, content, lerp: 0.12, smoothWheel: true, wheelMultiplier: 0.85, touchMultiplier: 1 });
-    let frame: number | null = null;
-    const tick = (time: number) => {
-      lenis.raf(time);
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-
-    return () => {
-      if (frame !== null) cancelAnimationFrame(frame);
-      lenis.destroy();
-    };
-  }, [results.length]);
+  // Desktop dropdown is portaled to <body> and fixed under the input, so no header's stacking,
+  // transforms or backdrop blur can clip or cover it. The mobile sheet keeps its in-place list.
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [inSheet, setInSheet] = useState(true);
+  // Re-checked every render (cheap) so a fast refresh can't leave a stale value.
+  useLayoutEffect(() => {
+    const sheet = !!searchRef.current?.closest(".wiki-mobile-search-sheet");
+    if (sheet !== inSheet) setInSheet(sheet);
+  });
 
   useEffect(() => {
     if (!results.length && !showRecent) return;
@@ -108,14 +97,65 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
       const target = event.target as Node;
       // Inside the mobile sheet (e.g. its drag handle) is not "outside" the search.
       const sheet = searchRef.current?.closest(".wiki-mobile-search-sheet-panel");
-      if (searchRef.current?.contains(target) || sheet?.contains(target)) return;
+      if (searchRef.current?.contains(target) || sheet?.contains(target) || dropdownRef.current?.contains(target)) return;
+      // The mobile sheet keeps its query and results when dismissed, so reopening shows them again.
+      if (sheet || searchRef.current?.closest(".wiki-mobile-search-sheet")) return;
       setResults([]);
-      if (!sheet) setShowRecent(false);
+      setShowRecent(false);
     };
 
     document.addEventListener("pointerdown", closeOnOutsideClick);
     return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
   }, [results.length, showRecent]);
+
+  const dropdownOpen = !inSheet && (results.length > 0 || (showRecent && !query));
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    // Runs on the GSAP ticker after Lenis moves the page, writing styles directly (no React
+    // re-render), so the list tracks its field in the same frame instead of lagging a frame behind.
+    const place = () => {
+      const dropdown = dropdownRef.current;
+      const form = searchRef.current;
+      const field = form?.querySelector<HTMLElement>(".wiki-search-input");
+      if (!dropdown || !form || !field) return;
+      const formBox = form.getBoundingClientRect();
+      const fieldBox = field.getBoundingClientRect();
+      // Follow the field's own visibility: fade with the header hand-off, and fade out as the
+      // top bar search scrolls off, so the list leaves with its field instead of popping.
+      let opacity = 1;
+      for (let node: HTMLElement | null = form; node && opacity > 0.01; node = node.parentElement) opacity *= Number(getComputedStyle(node).opacity);
+      opacity *= Math.min(1, Math.max(0, fieldBox.bottom / Math.max(1, fieldBox.height)));
+      dropdown.style.top = `${fieldBox.bottom}px`;
+      dropdown.style.left = `${formBox.left}px`;
+      dropdown.style.width = `${formBox.width}px`;
+      dropdown.style.opacity = opacity.toFixed(3);
+      dropdown.style.visibility = opacity < 0.02 ? "hidden" : "visible";
+      dropdown.style.pointerEvents = opacity < 0.5 ? "none" : "auto";
+    };
+    gsap.ticker.add(place);
+    return () => gsap.ticker.remove(place);
+  }, [dropdownOpen]);
+
+  // The top bar and sticky header searches share one state: typing in either fills both,
+  // so the list carries over when the header hands off on scroll.
+  const broadcast = (detail: { query?: string; close?: boolean }) => {
+    if (inSheet) return;
+    window.dispatchEvent(new CustomEvent("alexpedia-search-sync", { detail: { source: inputId, ...detail } }));
+  };
+  const syncRef = useRef<(detail: { source: string; query?: string; close?: boolean }) => void>(() => undefined);
+  syncRef.current = (detail) => {
+    if (inSheet || detail.source === inputId) return;
+    if (detail.close) { setShowRecent(false); setResults([]); return; }
+    const value = detail.query ?? "";
+    setQuery(value);
+    setShowRecent(!value);
+    updateResults(value);
+  };
+  useEffect(() => {
+    const onSync = (event: Event) => syncRef.current((event as CustomEvent<{ source: string; query?: string; close?: boolean }>).detail);
+    window.addEventListener("alexpedia-search-sync", onSync);
+    return () => window.removeEventListener("alexpedia-search-sync", onSync);
+  }, []);
 
   const updateResults = (value: string) => {
     const term = value.trim();
@@ -142,7 +182,8 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
           : item.classList.contains("career-feature")
             ? item.querySelector("h3")?.textContent?.trim() || "Career feature"
             : item.querySelector("h2")?.textContent?.trim() || "Section";
-        const text = (item.textContent ?? "").replace(/\s+/g, " ").trim();
+        // innerText keeps the gaps between block elements (textContent ran "Fiveonefour" into the title).
+        const text = (item.innerText || item.textContent || "").replace(/\s+/g, " ").trim();
         const matchingBlock = Array.from(item.querySelectorAll<HTMLElement>("p, li"))
           .map((block) => (block.textContent ?? "").replace(/\s+/g, " ").trim())
           .find((block) => wordMatch ? wordMatch.test(block) : block.toLocaleLowerCase().includes(normalizedTerm));
@@ -203,7 +244,7 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
       const top = window.scrollY + scrollTarget.getBoundingClientRect().top - stickyOffset - 12;
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     }, 0);
-    setResults([]);
+    if (!inSheet) setResults([]);
   };
 
   const highlightMatch = (text: string) => {
@@ -217,39 +258,8 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
     );
   };
 
-  return (
-    <form ref={searchRef} className="wiki-search" onSubmit={searchPage} role="search">
-      <label className="sr-only" htmlFor={inputId}>Search this page</label>
-      <span className="search-decoration" aria-hidden="true"><Search size={20} strokeWidth={2} /></span>
-      <div className="wiki-search-input">
-        <input
-          id={inputId}
-          autoFocus={autoFocus}
-          value={query}
-          onFocus={() => { if (!query) setShowRecent(true); }}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setShowRecent(!event.target.value);
-            updateResults(event.target.value);
-          }}
-          placeholder="Search"
-        />
-        {query && (
-          <button
-            type="button"
-            className="search-clear"
-            aria-label="Clear search"
-            onClick={() => {
-              setQuery("");
-              setResults([]);
-              setStatus("");
-              setShowRecent(true);
-              document.getElementById(inputId)?.focus();
-            }}
-          >
-            <X size={16} />
-          </button>
-        )}
+  const lists = (
+    <>
         {showRecent && !query && results.length === 0 && (
           <div className="wiki-search-results wiki-search-recent" data-lenis-prevent>
           <ul aria-label="Recent searches">
@@ -263,6 +273,7 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
                     setQuery(term);
                     setShowRecent(false);
                     updateResults(term);
+                    broadcast({ query: term });
                   }}
                 >
                   <span className="wiki-search-result-icon" aria-hidden="true"><History size={20} strokeWidth={2} /></span>
@@ -280,7 +291,7 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
           <ul ref={resultsContentRef} aria-label="Search results">
             {results.map((result) => (
               <li key={result.id}>
-                <button type="button" onClick={() => selectResult(result)}>
+                <button type="button" onPointerDown={(event) => event.preventDefault()} onClick={() => selectResult(result)}>
                   {result.video ? (
                     <video className="wiki-search-result-video" src={result.video} poster={result.thumbnail} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />
                   ) : result.thumbnail ? <img src={result.thumbnail} alt="" /> : <span className="wiki-search-result-icon" aria-hidden="true"><SearchResultIcon id={result.id} /></span>}
@@ -294,9 +305,66 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
           </ul>
           </div>
         )}
+    </>
+  );
+
+  return (
+    <form ref={searchRef} className="wiki-search" onSubmit={searchPage} role="search">
+      <label className="sr-only" htmlFor={inputId}>Search this page</label>
+      <span className="search-decoration" aria-hidden="true"><Search size={20} strokeWidth={2} /></span>
+      <div className="wiki-search-input">
+        <input
+          id={inputId}
+          autoFocus={autoFocus}
+          value={query}
+          onFocus={() => { if (!query) setShowRecent(true); broadcast({ query }); }}
+          // Desktop: leaving the field closes its dropdown, so a search whose header scrolled
+          // away (or faded out) can't leave a list floating on the page.
+          onBlur={() => {
+            if (inSheet) return;
+            window.setTimeout(() => {
+              if (dropdownRef.current?.contains(document.activeElement)) return;
+              // Scrolling hands focus nowhere, so this only fires on a real click-away.
+              setShowRecent(false);
+              setResults([]);
+              broadcast({ close: true });
+            }, 120);
+          }}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setShowRecent(!event.target.value);
+            updateResults(event.target.value);
+            broadcast({ query: event.target.value });
+          }}
+          placeholder="Search"
+        />
+        {query && (
+          <button
+            type="button"
+            className="search-clear"
+            aria-label="Clear search"
+            onClick={() => {
+              setQuery("");
+              setResults([]);
+              setStatus("");
+              setShowRecent(true);
+              broadcast({ query: "" });
+              document.getElementById(inputId)?.focus();
+            }}
+          >
+            <X size={16} />
+          </button>
+        )}
+        {inSheet && lists}
       </div>
       <button type="submit" className="search-submit">Search</button>
       <span className="sr-only" aria-live="polite">{status}</span>
+      {dropdownOpen && createPortal(
+        <div ref={dropdownRef} className="wiki-search-dropdown" style={{ visibility: "hidden" }} data-lenis-prevent>
+          {lists}
+        </div>,
+        document.body,
+      )}
     </form>
   );
 }
