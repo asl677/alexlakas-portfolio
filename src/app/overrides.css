@@ -1,0 +1,87 @@
+/* Dark stack chips: slightly brighter */
+:root[data-theme="dark"] .stack-tags li {
+  border-color: #333;
+  background: #222;
+}
+
+/* Article type: muted body, ink headings + inline links */
+html body .wiki-shell .wiki-article-body {
+  color: var(--wiki-muted);
+}
+
+html body .wiki-shell .wiki-article-body :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--wiki-ink) !important;
+}
+
+html body .wiki-shell .wiki-article-body :is(p, li, dd) a:is(:link, :visited) {
+  color: var(--wiki-ink) !important;
+}
+
+/* Scrubbed reveal slide (4px from the top). `translate` composes with any transform. */
+.wiki-reveal-line,
+.wiki-slide {
+  translate: 0 var(--wiki-slide, 0px);
+}
+
+/* Case study titles: white links, dim on hover */
+html body .wiki-shell .wiki-article-body h3 a:is(:link, :visited) {
+  color: var(--wiki-ink) !important;
+}
+
+html body .wiki-shell .wiki-article-body :is(h3, p, li, dd) a:is(:link, :visited):is(:hover, :focus-visible) {
+  color: var(--wiki-link-blue-hover) !important;
+}
+
+/* Keep fading/sliding media on the compositor */
+.wiki-slide:is(figure, .article-list-item), .infobox {
+  will-change: opacity, translate;
+}
+
+/* iOS Safari zooms the page when a focused input is under 16px */
+@media (max-width: 560px) {
+  .wiki-mobile-search-sheet .wiki-search input {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile search sheet: results flow inside the panel's padding, never wider than it */
+@media (max-width: 560px) {
+  html body .wiki-mobile-search-sheet-panel {
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  html body .wiki-mobile-search-sheet .wiki-search-results {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  html body .wiki-mobile-search-sheet .wiki-search-results button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  html body .wiki-mobile-search-sheet .wiki-search-result-copy {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Touch: a tap leaves :hover stuck on whatever lands under the finger (looks preselected) */
+@media (hover: none) {
+  html body .wiki-mobile-search-sheet .wiki-search-results button:hover {
+    background: transparent !important;
+    color: inherit !important;
+  }
+}
+
+/* Line masks: the slide is clipped by the line box; keep descenders from clipping */
+.wiki-reveal-line-mask {
+  display: block;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}

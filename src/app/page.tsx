@@ -28,16 +28,16 @@ const references = [
 ];
 
 const articles = [
-  { title: "Designing Area Code", date: "Fiveonefour", dek: "A starter kit for analytics.", href: "https://alexslakas.medium.com/designing-area-code-a-starter-kit-for-modern-analytics-apps-ed421767d667", image: "https://miro.medium.com/v2/resize:fit:1100/format:webp/1*Jju41LNCrQ95PzA6hxR1LA.jpeg" },
-  { title: "Prototyping AI with AI", date: "Fiveonefour", dek: "Turning ideas into AI prototypes.", href: "https://alexslakas.medium.com/prototyping-ai-with-ai-f3b8a40e07d9", image: "https://miro.medium.com/v2/resize:fill:320:214/1*VEYmGjbbTYVI3ufEStNGsg.png" },
-  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "LinkedIn", dek: "Reimagining a professional social network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/resize:fit:640/format:webp/1*2fUEA_2VQcdnZ6JBWo2D0Q.png" },
-  { title: "Know before you go with Google's Live Popular Times", date: "Google", dek: "Real-time crowds in Maps.", href: "https://alexslakas.medium.com/know-before-you-go-with-googles-live-popular-times-bcfc7320ecaa", image: "https://miro.medium.com/v2/resize:fit:1100/format:webp/1*tvnPllmUzgIvJVdPxyPVPg.png" },
-  { title: "Search faster on Google Maps", date: "Google", dek: "Local discovery with less typing.", href: "https://alexslakas.medium.com/search-faster-on-google-maps-d6b8597c4a07", image: "https://miro.medium.com/v2/resize:fill:320:214/1*AMLLrIjOr9igNelp0fGGmg.jpeg" },
-  { title: "Reservations made easy with Google", date: "Google", dek: "Booking local services in Search.", href: "https://alexslakas.medium.com/reservations-made-easy-with-google-7b7d35888ad9", image: "https://miro.medium.com/v2/resize:fill:320:214/1*GvbV2bdeQMN2a5rXXA34Fw.jpeg" },
-  { title: "Why we built Peanut", date: "Peanut", dek: "Building a better travel tool.", href: "https://alexslakas.medium.com/why-we-built-peanut-6cac9182d1f8", image: "https://miro.medium.com/v2/resize:fit:1100/format:webp/1*_8brVFCI957xxa_Tc2BLlA.jpeg" },
-  { title: "A Journey Into Type", date: "Dec 2023", dek: "Logo font in 72 hours.", href: "https://alexslakas.medium.com/a-journey-into-type-73d56899b172", image: "https://miro.medium.com/v2/resize:fill:320:214/1*7NKBidFv3IA6XTLrtFUwlA.png" },
-  { title: "Data With Depth: Designing 514", date: "Dec 2023", dek: "Humanizing data-intensive apps.", href: "https://alexslakas.medium.com/data-with-depth-designing-514-44698c3e5390", image: "https://miro.medium.com/v2/resize:fill:320:214/1*hS--7nKr8dUW7yeKvlYzuQ.png" },
-  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "Jul 2021", dek: "Reimagining a professional social network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/resize:fill:320:214/1*J9oOQMv0N12QmSq7vbCiCQ.png" },
+  { title: "Designing Area Code", date: "Fiveonefour", dek: "A starter kit for analytics.", href: "https://alexslakas.medium.com/designing-area-code-a-starter-kit-for-modern-analytics-apps-ed421767d667", image: "https://miro.medium.com/v2/1*Jju41LNCrQ95PzA6hxR1LA.jpeg" },
+  { title: "Prototyping AI with AI", date: "Fiveonefour", dek: "Turning ideas into AI prototypes.", href: "https://alexslakas.medium.com/prototyping-ai-with-ai-f3b8a40e07d9", image: "https://miro.medium.com/v2/1*VEYmGjbbTYVI3ufEStNGsg.png" },
+  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "LinkedIn", dek: "Reimagining a professional social network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/1*2fUEA_2VQcdnZ6JBWo2D0Q.png" },
+  { title: "Know before you go with Google's Live Popular Times", date: "Google", dek: "Real-time crowds in Maps.", href: "https://alexslakas.medium.com/know-before-you-go-with-googles-live-popular-times-bcfc7320ecaa", image: "https://miro.medium.com/v2/1*tvnPllmUzgIvJVdPxyPVPg.png" },
+  { title: "Search faster on Google Maps", date: "Google", dek: "Local discovery with less typing.", href: "https://alexslakas.medium.com/search-faster-on-google-maps-d6b8597c4a07", image: "https://miro.medium.com/v2/1*AMLLrIjOr9igNelp0fGGmg.jpeg" },
+  { title: "Reservations made easy with Google", date: "Google", dek: "Booking local services in Search.", href: "https://alexslakas.medium.com/reservations-made-easy-with-google-7b7d35888ad9", image: "https://miro.medium.com/v2/1*GvbV2bdeQMN2a5rXXA34Fw.jpeg" },
+  { title: "Why we built Peanut", date: "Peanut", dek: "Building a better travel tool.", href: "https://alexslakas.medium.com/why-we-built-peanut-6cac9182d1f8", image: "https://miro.medium.com/v2/1*_8brVFCI957xxa_Tc2BLlA.jpeg" },
+  { title: "A Journey Into Type", date: "Dec 2023", dek: "Logo font in 72 hours.", href: "https://alexslakas.medium.com/a-journey-into-type-73d56899b172", image: "https://miro.medium.com/v2/1*7NKBidFv3IA6XTLrtFUwlA.png" },
+  { title: "Data With Depth: Designing 514", date: "Dec 2023", dek: "Humanizing data-intensive apps.", href: "https://alexslakas.medium.com/data-with-depth-designing-514-44698c3e5390", image: "https://miro.medium.com/v2/1*hS--7nKr8dUW7yeKvlYzuQ.png" },
+  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "Jul 2021", dek: "Reimagining a professional social network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/1*J9oOQMv0N12QmSq7vbCiCQ.png" },
 ];
 
 function Ref({ n }: { n: number }) {
@@ -99,7 +99,6 @@ export default function Home() {
                   <div className="wiki-scroll-search"><PageSearch inputId="sticky-page-search" /></div>
                 </div>
                 <div className="wiki-title-action">
-                  <div className="wiki-language">So many languages</div>
                   <div className="wiki-sticky-actions">
                     {/* Mobile: opens the same search sheet as the top bar icon. */}
                     <button type="button" className="wiki-sticky-search" aria-label="Search" title="Search" onClick={() => document.querySelector<HTMLButtonElement>(".wiki-topbar .wiki-nav-search")?.click()}><Search size={20} strokeWidth={2} /></button>
@@ -150,7 +149,7 @@ export default function Home() {
               </dl>
             </aside>
 
-            <p className="lead"><b>Alexander Stephanos Lakas</b> is a Los Angeles-based designer and art director whose work spans product and interaction design, identity, prototyping, and generative AI. He has worked across local search at <a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>, the flagship experience at <a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>, and data infra at <a href="https://www.514.ax/" target="_blank" rel="noreferrer">Fiveonefour</a>, with work featured in <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a>, <a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a>, and on The Tonight Show.<Ref n={1} /><Ref n={2} /><Ref n={5} /><Ref n={10} /><Ref n={16} /></p>
+            <p className="lead"><b>Alexander Stephanos Lakas</b> is a Los Angeles-based designer and art director with over 15 years of experience whose work spans product and interaction design, identity, prototyping, and generative AI. He&rsquo;s collaborated on small and large scale projects with folks like <span style={{ whiteSpace: "nowrap" }}><a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>,</span> Zippo, Converse, Culprit, Nintendo and more. His work has been featured in <span style={{ whiteSpace: "nowrap" }}><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a>,</span> and on The Tonight Show.<Ref n={1} /><Ref n={2} /><Ref n={5} /><Ref n={10} /><Ref n={16} /></p>
 
             <nav className="toc article-toc" aria-label="Table of contents">
               <h2>Contents</h2>
@@ -179,7 +178,7 @@ export default function Home() {
                 <h3>Branching out</h3>
                 <figure>
                   <img src="https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp" alt="Alex Lakas" />
-                  <figcaption>Alex, early 2010s</figcaption>
+                  <figcaption>Photography, mixed media</figcaption>
                 </figure>
                 <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
                 <p>These projects treated websites and prototypes as complete experiences rather than static portfolios: each combined narrative, interface, and behavior. The work formed the foundation for Alex&apos;s later focus on clear systems and useful digital tools.</p>
@@ -187,7 +186,7 @@ export default function Home() {
               <div id="local-search-for-merchants-and-consumers" className="career-feature career-feature--left career-feature--landscape">
                 <h3>Local search for merchants and consumers</h3>
                 <figure>
-                  <img src="https://miro.medium.com/v2/resize:fill:320:214/1*J9oOQMv0N12QmSq7vbCiCQ.png" alt="A product design project" />
+                  <img src="https://miro.medium.com/v2/1*J9oOQMv0N12QmSq7vbCiCQ.png" alt="A product design project" />
                   <figcaption>Local discovery and booking work at Google</figcaption>
                 </figure>
                 <p>At <a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>, Alex worked across Google My Business, Local Search, and Maps. His visual design, prototyping and systems thinking helped shape local discovery, Live Popular Times, visit-duration information, and booking flows that connect people with nearby businesses and services.<Ref n={1} /><Ref n={8} /><Ref n={9} /></p>
@@ -196,7 +195,7 @@ export default function Home() {
               <div id="modernizing-social-media-for-professionals" className="career-feature career-feature--right career-feature--square career-feature--team">
                 <h3>Modernizing social media for professionals</h3>
                 <figure>
-                  <img src="https://miro.medium.com/v2/resize:fit:700/1*nacLVsr2ifTQvHN_qQknYw.png" alt="Alex with the LinkedIn Sharing team" />
+                  <img src="https://miro.medium.com/v2/1*nacLVsr2ifTQvHN_qQknYw.png" alt="Alex with the LinkedIn Sharing team" />
                   <figcaption>The Sharing Team: I&apos;m the one in the hat</figcaption>
                 </figure>
                 <p>As a Senior Product Designer at <a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>, Alex helped re-shape and design the home experience and sharing tools, including polls, posting, comment controls, a modernization overhaul, and more, as the platform expanded how professional communities could participate and connect. The work spanned design systems, product design, and prototyping.<Ref n={3} /><Ref n={6} /><Ref n={10} /></p>
@@ -210,12 +209,12 @@ export default function Home() {
                   </div>
                   <figcaption>Peanut</figcaption>
                 </figure>
-                <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut</a>, a browser-based Chrome extension that surfaced critical travel info during your online booking process. It partnered with Insured Nomads, a travel-insurance company, before it was acquired by the company. His work there spanned art direction, design systems, product design, prototyping, research, and marketing. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a>, extending his work across brand, social, and product experiences.<Ref n={1} /><Ref n={11} /></p>
+                <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut</a>, a Chrome extension that surfaced travel info during online booking, later acquired by Insured Nomads. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a> on a stealth social media app spanning VFX, design, and product, working with <a href="https://dinetz.com/" target="_blank" rel="noreferrer">David Dinetz</a>, <a href="https://www.cabral.design/" target="_blank" rel="noreferrer">Andre Cabral</a>, <a href="https://www.imdb.com/name/nm5680415/" target="_blank" rel="noreferrer">Jo Murayama</a>, and <a href="https://povio.com/" target="_blank" rel="noreferrer">Povio</a>.<Ref n={1} /><Ref n={11} /></p>
                 <figure className="career-video">
                   <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
                   <figcaption>AI video gen</figcaption>
                 </figure>
-                <p>Built by a lean founding team, Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Peanut, the product brought useful travel choices into the browsing moment, reducing the distance between research and action. At Culprit, Alex applied the same product thinking to creative direction, building systems that could carry a clear point of view across platforms and campaigns.<Ref n={7} /></p>
+                <p>Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Culprit, Alex carried the same product thinking into creative direction.<Ref n={7} /></p>
                 <p className="career-ai-note">This later led to conceptual and public work using AI, video and motion to explore new mediums, including Midjourney, Claude and MCPs.</p>
                             </div>
               <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape">
@@ -224,7 +223,7 @@ export default function Home() {
                   <SeamlessVideo />
                   <figcaption>AI Agents</figcaption>
                 </figure>
-                <p>As Head of Design at <a href="https://www.514.ax/" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex shaped a Vercel-inspired data-infra suite powered by AI, helping folks like F45 and District Cannabis rethink their data.<Ref n={5} /></p>
+                <p>As Head of Design at <a href="https://www.514.ax/" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex shaped a Vercel-inspired data-infra suite powered by AI, helping folks like F45 and District Cannabis rethink their data.<Ref n={5} /> The company is backed by firms like Stage 2 Capital and Dimension, having raised nearly $17M, and Alex joined another 0-1 team of industry experts.<Ref n={14} /></p>
                 <p>The work focused on making technical systems easier to understand and operate: interfaces that reveal what data is doing, workflows that support faster decisions, and a shared design language that can scale across a growing product. The team also built AI agents that ingest, stream, and transform data in just a few clicks. The F45 and District Cannabis projects carried that discipline into consumer-facing experiences.</p>
               </div>
             </WikiSection>
