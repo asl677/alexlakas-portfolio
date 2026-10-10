@@ -999,8 +999,9 @@ export function IntroSequence() {
     const context = gsap.context(() => {
       // The logo shows "Designer" as server-rendered; the preloader types that word and hands
       // off to it, so the logo has no typing cycle of its own.
-      // Phones run every reveal a bit slower (1.4x): the same motion reads rushed on a small screen.
-      const pace = window.matchMedia("(max-width: 768px)").matches ? 1.4 : 1;
+      // Phones run every reveal slower (1.7x), and scroll reveals play over a longer stretch of
+      // scrolling: the same motion reads rushed on a small screen.
+      const pace = window.matchMedia("(max-width: 768px)").matches ? 1.7 : 1;
       const fade = { duration: 0.6 * pace, stagger: 0.08 * pace, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
@@ -1206,7 +1207,7 @@ export function IntroSequence() {
       const scrubTick = (_time: number, deltaTime: number) => {
         if (!revealReady) return;
         const vh = window.innerHeight;
-        const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac));
+        const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac)) * pace;
         const range = clampRange(scrubConfig.text);
         const mediaRange = clampRange(scrubConfig.media);
         const y = frameScrollY;
