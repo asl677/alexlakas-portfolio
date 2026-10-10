@@ -229,7 +229,7 @@ export default function Home() {
                 <figure>
                   <SeamlessVideo />
                 </figure>
-                <p>As Head of Design at <a href="https://www.514.ax/" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex shaped a Vercel-inspired data-infra suite powered by AI, helping folks like F45 and District Cannabis rethink their data.<Ref n={5} /> The company is backed by firms like Stage 2 Capital and Dimension, having raised nearly $17M, and Alex joined another 0-1 team of industry experts.<Ref n={14} /></p>
+                <p>As Head of Design at <a href="https://www.514.ax/" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex joined another 0-1 team, shaping a Vercel-inspired data-infra suite built on shadcn-style components and AI agents, used by F45 and District Cannabis.<Ref n={5} /> Fiveonefour has raised nearly $17M from firms including Stage 2 Capital and Dimension.<Ref n={14} /></p>
                 <p>The work focused on making technical systems easier to understand and operate: interfaces that reveal what data is doing, workflows that support faster decisions, and a shared design language that can scale across a growing product. The team also built AI agents that ingest, stream, and transform data in just a few clicks. The F45 and District Cannabis projects carried that discipline into consumer-facing experiences.</p>
               </div>
             </WikiSection>
