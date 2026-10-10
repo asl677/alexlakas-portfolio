@@ -1128,9 +1128,8 @@ export function IntroSequence() {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
           const wipe = element.classList.contains("wiki-wipe");
-          // Load only: text lines also rise 20px up through their line mask as they fade (scroll
-          // reveals stay fade-only).
-          const rise = element.classList.contains("wiki-reveal-line");
+          // Text fades only (no slide).
+          const rise = false;
           timeline.fromTo(element, { ...revealProperties(element, 0), ...(rise ? { y: 20 } : {}) }, {
             ...revealProperties(element, 1),
             ...(rise ? { y: 0, force3D: true, clearProps: "transform" } : {}),
