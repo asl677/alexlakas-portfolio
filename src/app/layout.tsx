@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
@@ -64,24 +63,25 @@ export default function RootLayout({
             __html: `(() => { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; const done = new Set(); const finished = el => { const url = el.currentSrc || el.src || el.href; if (el.tagName === 'VIDEO') return el.readyState >= 2; if (el.tagName === 'IMG' && el.complete) return true; return !!url && performance.getEntriesByName(url).length > 0; }; let shown = 0; const tick = () => { const items = document.querySelectorAll('script[src]:not([nomodule]), link[rel="stylesheet"], img, video'); items.forEach(el => { if (!done.has(el) && finished(el)) done.add(el); }); const ready = document.readyState === 'complete' ? 1 : 0; const progress = ready ? 100 : Math.min(99, ((done.size + ready) / (items.length + 1)) * 100); window.__wikiProgress = progress; const counter = document.querySelector('.wiki-loader-counter'); const wordmark = document.querySelector('.wiki-wordmark-text'); if (counter && wordmark && counter.style.visibility !== 'visible') { const type = getComputedStyle(wordmark); const box = wordmark.getBoundingClientRect(); const frame = counter.parentElement.getBoundingClientRect(); counter.style.font = type.font; counter.style.letterSpacing = type.letterSpacing; counter.style.color = type.color; counter.style.left = (box.left - frame.left) + 'px'; counter.style.top = (box.top - frame.top) + 'px'; counter.style.height = box.height + 'px'; counter.style.visibility = 'visible'; requestAnimationFrame(() => { counter.style.opacity = '1'; }); } const now = performance.now(); const w = window; w.__wikiText = w.__wikiText ?? ''; w.__wikiOps = w.__wikiOps || []; w.__wikiMilestone = w.__wikiMilestone ?? 0; const milestones = ['Loading', 'Loading', 'Designer']; const jitter = (min, max) => { w.__wikiSeed = ((w.__wikiSeed || 7) * 9301 + 49297) % 233280; return min + (w.__wikiSeed / 233280) * (max - min); }; if (!w.__wikiOps.length && w.__wikiMilestone < milestones.length) { const next = milestones[w.__wikiMilestone]; const gate = next === 'Loading' ? 0 : 100; if (progress >= gate) { const old = w.__wikiText; const text = next; w.__wikiOps.push(['wait', w.__wikiMilestone === 0 ? jitter(180, 240) : jitter(260, 330)]); for (let i = old.length; i > 0; i--) w.__wikiOps.push(['del', i === old.length ? 0 : i === old.length - 1 ? jitter(160, 200) : jitter(45, 60)]); w.__wikiOps.push(['wait', jitter(60, 90)]); const pauseAfter = text === 'Loading' ? 4 : text === 'Designer' ? 3 : -1; const fast = text === 'Designer'; [...text].forEach((ch, i) => w.__wikiOps.push(['add', (fast ? jitter(80, 130) : jitter(110, 190)) + (i === pauseAfter ? (fast ? jitter(75, 130) : jitter(130, 230)) : 0), ch])); w.__wikiMilestone += 1; w.__wikiNextAt = now + w.__wikiOps[0][1]; } } if (w.__wikiOps.length && now >= (w.__wikiNextAt || 0)) { const op = w.__wikiOps.shift(); if (op[0] === 'del') w.__wikiText = w.__wikiText.slice(0, -1); if (op[0] === 'add') w.__wikiText += op[2]; const nextOp = w.__wikiOps[0]; w.__wikiNextAt = now + (nextOp ? nextOp[1] : 0); if (counter) counter.textContent = w.__wikiText; } w.__wikiDone = w.__wikiMilestone >= milestones.length && !w.__wikiOps.length && w.__wikiText === 'Designer'; if (!w.__wikiDone) requestAnimationFrame(tick); }; requestAnimationFrame(tick); })();`,
           }}
         />
+        {/* Google tag (gtag.js), placed in <head> exactly as GA4's install instructions show, so
+            it's in the served HTML (GA's "Test your website" check reads the raw page). */}
+        {enableGoogleAnalytics && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${gaMeasurementId}');`,
+              }}
+            />
+          </>
+        )}
       </head>
       <body>
         {children}
         <Analytics />
-        {enableGoogleAnalytics && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', '${gaMeasurementId}');`}
-            </Script>
-          </>
-        )}
       </body>
     </html>
   );
