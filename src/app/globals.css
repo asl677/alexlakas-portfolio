@@ -5837,3 +5837,34 @@ html body .wiki-mobile-search-sheet .wiki-search-results .wiki-search-result-cop
     background: transparent !important;
   }
 }
+
+/* Mobile: search results use the mobile body type (desktop keeps its proportionally smaller
+   sizes). Titles 16px bold like body headings, excerpts exactly like body copy. */
+@media (max-width: 48rem) {
+  html body .wiki-mobile-search-sheet .wiki-search-results .wiki-search-result-copy strong {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+  html body .wiki-mobile-search-sheet .wiki-search-results .wiki-search-result-copy > span {
+    font-size: 16px !important;
+    line-height: 1.58 !important;
+    color: var(--wiki-muted) !important;
+  }
+  html body .wiki-mobile-search-sheet .wiki-search-results:not(.wiki-search-recent) :is(img, video, .wiki-search-result-icon) {
+    flex: 0 0 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    width: 72px !important;
+    height: 52px !important;
+  }
+  html body .wiki-mobile-search-sheet .wiki-search-results button { gap: 14px !important; padding-top: 10px !important; padding-bottom: 10px !important; }
+}
+
+/* Talk: the notice and status cards span the full column, matching the text above and below. */
+html body .wiki-shell .wiki-talk-page :is(.wiki-talk-notice, .wiki-talk-status) {
+  max-width: none !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box;
+}

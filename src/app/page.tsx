@@ -1,6 +1,6 @@
 "use client";
 
-import { Languages, MailOpen, PenLine, Search, Star } from "lucide-react";
+import { Languages, MailOpen, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
 import { ArticleTabs, ContentsScrollSpy, HoverPortrait, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
@@ -112,7 +112,6 @@ export default function Home() {
               <div className="wiki-mobile-tools" aria-label="Article tools">
                 <button type="button" aria-label="Languages"><Languages size={24} strokeWidth={2} /></button>
                 <button type="button" aria-label="Add to watchlist"><Star size={24} strokeWidth={2} /></button>
-                <button type="button" aria-label="Edit article"><PenLine size={24} strokeWidth={2} /></button>
               </div>
             </header>
 
@@ -123,13 +122,13 @@ export default function Home() {
                 <p>If you are the subject of this article, or are acting on behalf of one, use this page to raise a specific concern or propose a sourced change.</p>
               </div>
               <div className="wiki-talk-status">
-                <div className="wiki-talk-rating"><span aria-hidden="true" className="wiki-talk-rating-mark">A</span><span>This article is rated <strong>A-class</strong> on this page&apos;s content assessment scale.</span><a href="#start-discussion">[hide]</a></div>
-                <div><strong>Biography: Arts and Entertainment</strong><a href="#start-discussion">[show]</a></div>
-                <div><strong>Graphic design</strong><span className="wiki-talk-priority">Insane-importance</span><a href="#start-discussion">[show]</a></div>
-                <div><strong>United States</strong><a href="#start-discussion">[show]</a></div>
+                <div className="wiki-talk-rating"><span aria-hidden="true" className="wiki-talk-rating-mark">A</span><span>This article is rated <strong>A-class</strong> on this page&apos;s content assessment scale.</span></div>
+                <div><strong>Biography: Arts and Entertainment</strong></div>
+                <div><strong>Graphic design</strong><span className="wiki-talk-priority">Insane-importance</span></div>
+                <div><strong>United States</strong></div>
               </div>
               <section className="wiki-talk-thread" id="start-discussion">
-                <h2>Info on this page is verifiable by the author and public records <span>[edit]</span></h2>
+                <h2>Info on this page is verifiable by the author and public records</h2>
                 <p className="wiki-talk-meta">Latest comment: <a href="#start-discussion">1 year ago</a> <span>|</span> 1 comment <span>|</span> 1 person in discussion</p>
                 <p>Unsourced material and subjective characterizations should be replaced with verifiable references. Discussion here should focus on specific claims, reliable sources, and neutral language.</p>
               </section>

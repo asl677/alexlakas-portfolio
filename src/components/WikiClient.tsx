@@ -993,7 +993,7 @@ export function IntroSequence() {
     const context = gsap.context(() => {
       // The logo shows "Designer" as server-rendered; the preloader types that word and hands
       // off to it, so the logo has no typing cycle of its own.
-      const fade = { duration: 0.8, stagger: 0.03, ease: wikiEase };
+      const fade = { duration: 1.2, stagger: 0.045, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
@@ -1175,7 +1175,8 @@ export function IntroSequence() {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
-          const target = scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
+          // The sticky Contents rail never scrubs out: its cached top goes stale as it sticks.
+          const target = element.closest(".wiki-contents") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
           if (item.current === target) continue;
           // Light time-based easing toward the scroll target gives the reveal its glide.
           let next = item.current + (target - item.current) * k;
@@ -1204,7 +1205,7 @@ export function IntroSequence() {
         const step = Math.min(0.018, 0.5 / Math.max(1, inside.length));
         const timeline = gsap.timeline({ delay: 0.04 });
         visualOrder(inside).forEach((element, index) => {
-          timeline.fromTo(element, revealProperties(element, 0), { ...revealProperties(element, 1), duration: 0.4, ease: "power2.out" }, index * step);
+          timeline.fromTo(element, revealProperties(element, 0), { ...revealProperties(element, 1), duration: 0.8, ease: "power2.out" }, index * step);
         });
         // Positions below the section changed: refresh the scrub's cache.
         queueReveal();
