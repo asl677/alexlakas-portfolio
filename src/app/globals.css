@@ -6010,3 +6010,26 @@ html body .wiki-shell .wiki-article-header { top: env(safe-area-inset-top, 0px) 
 @media (prefers-reduced-motion: reduce) {
   .wiki-wipe-media > :not(figcaption) { translate: none; scale: none; }
 }
+
+/* Profile card: the details list is exactly as wide as the portrait above it (same width
+   rule, centered), so its left and right edges line up with the photo. The label/value grid
+   and its gap are unchanged. */
+html body .wiki-shell .infobox dl {
+  width: 82% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+@media (max-width: 56.25rem) {
+  html body .wiki-shell .infobox dl { width: min(18rem, 82%) !important; }
+}
+
+/* Desktop: the profile card's "Alex" heading sits on the first line of the lead paragraph. */
+@media (min-width: 56.3125rem) {
+  html body .wiki-shell .wiki-article-body > .infobox { margin-top: -13px !important; }
+}
+
+/* Sticky profile card: the "Alex" heading rests 18px under the article header (the card's own
+   12px padding was stacking on top of an 18px offset). */
+@media (min-width: 56.3125rem) {
+  html body .wiki-shell .wiki-article-body > .infobox { top: calc(var(--wiki-article-header-height, 6rem) + 5px) !important; }
+}

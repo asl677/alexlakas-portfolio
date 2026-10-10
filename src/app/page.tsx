@@ -142,7 +142,7 @@ export default function Home() {
                 <dt>Status</dt><dd><OnlineStatus /></dd>
                 <dt>Based in</dt><dd>Los Angeles, CA</dd>
                 <dt>Occupation</dt><dd>Sr. staff designer, art director, product designer</dd>
-                <dt>Known for</dt><dd>&ldquo;Incredibly talented designer&rdquo;, &ldquo;Simple, clear aesthetic&rdquo;, &ldquo;Good people&rdquo;</dd>
+                <dt>Known for</dt><dd>&ldquo;Incredibly talented designer&rdquo;, &ldquo;Good people&rdquo;</dd>
                 <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">linkedin.com/in/latenights</a></dd>
                 <dt>Interests</dt><dd>Cars, design, engineering, comedy, AI, systems</dd>
               </dl>

@@ -997,7 +997,7 @@ export function IntroSequence() {
     const context = gsap.context(() => {
       // The logo shows "Designer" as server-rendered; the preloader types that word and hands
       // off to it, so the logo has no typing cycle of its own.
-      const fade = { duration: 0.9, stagger: 0.08, ease: wikiEase };
+      const fade = { duration: 0.6, stagger: 0.08, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
@@ -1132,13 +1132,15 @@ export function IntroSequence() {
           const rise = element.classList.contains("wiki-reveal-line");
           timeline.fromTo(element, { ...revealProperties(element, 0), ...(rise ? { y: 10 } : {}) }, {
             ...revealProperties(element, 1),
-            ...(rise ? { y: 0, clearProps: "transform" } : {}),
+            ...(rise ? { y: 0, force3D: true, clearProps: "transform" } : {}),
             // One curve (easeInOutQuart) for everything. A wipe covers then uncovers, so it runs
             // twice as long and starts half a fade early: its content appears exactly when a
             // plain fade at the same slot would.
-            duration: wipe ? fade.duration * 2 : fade.duration,
-            ease
-          }, wipe ? Math.max(0, index * step - fade.duration / 2) : index * step);
+            duration: wipe ? 1.2 : fade.duration,
+            // Strip wipes keep a symmetric curve (cover, then uncover) and start 0.6s early so
+            // their content shows when a text fade in the same slot would.
+            ease: wipe ? "power3.inOut" : ease
+          }, wipe ? Math.max(0, index * step - 0.6) : index * step);
         });
       };
       const isInRevealArea = (element: HTMLElement) => {
@@ -1152,13 +1154,17 @@ export function IntroSequence() {
       const revealedTargets = new Set<HTMLElement>();
       const startInitialReveal = () => {
         // Sample after the loader clears, when header and profile layout have settled.
-        const initiallyVisible = targets.filter(isInRevealArea);
+        // Skip anything already shown (the logo is revealed at the loader hand-off): fading it
+        // again from 0 made "Designer" flash out and back in right after typing finished.
+        const initiallyVisible = targets.filter(target => !revealedTargets.has(target) && isInRevealArea(target));
         const initiallyVisibleLines = textLines.filter(isInRevealArea);
         initiallyVisible.forEach(target => revealedTargets.add(target));
         initiallyVisibleLines.forEach(line => revealedLines.add(line));
         // Opening reveal starts visibly at once (no slow start), so content flows in as the
         // loader's "Designer" lands; scroll reveals keep the site curve.
-        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, wikiEase);
+        // 0.6s fades 80ms apart (cascade capped ~1.2s) on power3.out: expo.out's long tail kept
+        // the 10px rise creeping for the last few pixels, which read as lag.
+        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, "power3.out");
         revealReady = true;
       };
       let revealCancelled = false;
@@ -1167,8 +1173,9 @@ export function IntroSequence() {
       // bottom (power3.out), and a time-based damper eases opacity + slide toward it every frame,
       // so scroll/drag drives the cascade smoothly with one shared curve. Positions are cached
       // (re-measured on resize/accordion changes) so the per-frame loop does no layout reads.
-      // easeInOutQuart, the same curve as the load reveal.
-      const scrubEase = (t: number) => t < 0.5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2;
+      // Ease-out (cubic) for scroll-linked progress: an in-out curve here held content near
+      // invisible, then snapped it in mid-scroll. Out-curves track the scroll smoothly.
+      const scrubEase = (t: number) => 1 - Math.pow(1 - t, 3);
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
       // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
@@ -1209,9 +1216,11 @@ export function IntroSequence() {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
-          // The sticky Contents rail never scrubs out: its cached top goes stale as it sticks.
-          const target = element.closest(".wiki-contents") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
-          if (item.current === target) continue;
+          // The sticky Contents rail and the top bar (logo, search, icons) never scrub out once
+          // shown: their cached tops go stale as they stick or scroll away.
+          const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
+          // One-way: scrolling back up never fades content out again.
+          if (target <= item.current) continue;
           // Light time-based easing toward the scroll target gives the reveal its glide.
           let next = item.current + (target - item.current) * k;
           if (Math.abs(target - next) < 0.002) next = target;
