@@ -181,12 +181,12 @@ export default function Home() {
                 <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work for 0-1 startups, etailers and FAANG companies, followed by roles at Google, LinkedIn, Peanut, Culprit, and Fiveonefour.<Ref n={1} /><Ref n={3} /></p>
               </div>
               <div id="social-games-and-ecommerce" className="career-feature">
-                <h3>Social games and ecommerce</h3>
+                <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Social games and ecommerce</span></span></h3>
                 <p>Beginning in 2009, Alex worked with <a href="https://www.cubix.co/" target="_blank" rel="noreferrer">Cubix Labs</a> and <a href="https://virid.com/" target="_blank" rel="noreferrer">Virid</a> on digital experiences spanning social games and ecommerce. The work combined product thinking, interaction design, and campaign systems at a time when social platforms were becoming a primary place for brands to meet people.</p>
                 <p>That period included work connected to Converse, Nintendo, Journeys and Zippo, translating established brands into playful, participatory web experiences. It established an early interest in designing systems that balance clear utility with character, motion, and a strong visual point of view.<Ref n={1} /></p>
               </div>
               <div id="branching-out" className="career-feature career-feature--right career-feature--thumb">
-                <h3>Branching out</h3>
+                <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Branching out</span></span></h3>
                 <figure>
                   <img src="https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp" alt="Alex Lakas" />
                 </figure>
@@ -194,7 +194,7 @@ export default function Home() {
                 <p>These projects treated websites and prototypes as complete experiences rather than static portfolios: each combined narrative, interface, and behavior. The work formed the foundation for Alex&apos;s later focus on clear systems and useful digital tools.</p>
               </div>
               <div id="local-search-for-merchants-and-consumers" className="career-feature career-feature--right career-feature--landscape career-feature--thumb">
-                <h3>Local search for merchants and consumers</h3>
+                <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Local search for merchants and consumers</span></span></h3>
                 <figure>
                   <img src="https://miro.medium.com/v2/1*J9oOQMv0N12QmSq7vbCiCQ.png" alt="A product design project" />
                 </figure>
@@ -202,7 +202,7 @@ export default function Home() {
                 <p>Those experiences turned complex local data into timely signals people could act on: whether a place was busy, when to visit, and how to make a reservation without leaving Search or Maps. For small businesses, the same tools made practical information and conversion paths easier to maintain and find. The role also gave him the chance to work with agencies such as <a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a> and <a href="https://www.method.com/" target="_blank" rel="noreferrer">Method</a> on a range of projects.</p>
               </div>
               <div id="modernizing-social-media-for-professionals" className="career-feature career-feature--thumb career-feature--right career-feature--square career-feature--team">
-                <h3>Modernizing social media for professionals</h3>
+                <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Modernizing social media for professionals</span></span></h3>
                 <figure>
                   <img src="https://miro.medium.com/v2/1*nacLVsr2ifTQvHN_qQknYw.png" alt="Alex with the LinkedIn Sharing team" />
                 </figure>
@@ -210,7 +210,7 @@ export default function Home() {
                 <p>The goal was to make professional participation feel less formal and more immediate. Streamlined sharing, lightweight polls, and live formats gave members more ways to contribute, while preserving the context and utility people expect from a professional network.</p>
               </div>
               <div id="freelance-and-0-1" className="career-feature career-feature--right career-feature--wide career-feature--peanut career-feature--thumb">
-                <h3>Freelance, 0-1, Gen AI</h3>
+                <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Freelance, 0-1, Gen AI</span></span></h3>
                 <figure>
                   <div className="peanut-still">
                     <img src="/peanut-travel-on.png" alt="Peanut: Travel on." />
@@ -224,7 +224,7 @@ export default function Home() {
                 <p className="career-ai-note">This later led to conceptual and public work using AI, video and motion to explore new mediums, including Midjourney, Claude and MCPs.</p>
                             </div>
               <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape career-feature--thumb">
-                <h3>New territory — Data Infra &amp; AI</h3>
+                <h3><span className="wiki-wipe"><span className="wiki-wipe-content">New territory — Data Infra &amp; AI</span></span></h3>
                 <figure>
                   <SeamlessVideo />
                 </figure>

@@ -4,7 +4,8 @@
 
 :root {
   /* Site-wide motion curve for transitions and accordions. */
-  --wiki-ease: cubic-bezier(0.76, 0.019, 0.483, 0.989);
+  /* easeInOutQuart (easings.net): the one curve used across the site. */
+  --wiki-ease: cubic-bezier(0.76, 0, 0.24, 1);
   --wiki-page: #fff;
   --wiki-ink: #171717;
   --wiki-muted: #737373;
@@ -5686,7 +5687,7 @@ html body .wiki-shell .wiki-categories { gap: 2px 10px !important; padding-left:
 
 /* Shared right-floated thumbnail for every Early life and Career image: one width. */
 @media (min-width: 768px) {
-  html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure { width: 218px !important; }
+  html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure { width: 178px !important; }
   html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure { clear: both; }
   html body .wiki-shell :is(#career, #early-life) .career-feature--right.career-feature--thumb figure { float: right !important; margin: 4px 0 16px 20px !important; }
   html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure :is(img, video) { width: 100% !important; aspect-ratio: 4 / 3; object-fit: cover; height: auto !important; }
@@ -5873,8 +5874,139 @@ html body .wiki-shell .wiki-talk-page :is(.wiki-talk-notice, .wiki-talk-status) 
 /* Mobile: section images are left-aligned thumbnails, not full-bleed. */
 @media (max-width: 767px) {
   html body .wiki-shell :is(#career, #early-life) .career-feature figure {
-    width: min(100%, 240px) !important;
+    width: min(100%, 200px) !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
+}
+
+/* Text link hover: an underline in the link's own color slides in from the left on hover and
+   out to the right on leave. Built from a background line so it follows wrapped links. */
+html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .wiki-contents, .references, .wiki-link-list) a:not(.article-list-image):not(.wiki-tab) {
+  text-decoration: none !important;
+  background-image: linear-gradient(currentColor, currentColor) !important;
+  background-repeat: no-repeat !important;
+  background-position: 100% 100% !important;
+  background-size: 0% 1px !important;
+  transition: background-size 0.45s cubic-bezier(0.65, 0, 0.35, 1) !important;
+}
+@media (hover: hover) {
+  html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .wiki-contents, .references, .wiki-link-list) a:not(.article-list-image):not(.wiki-tab):is(:hover, :focus-visible) {
+    background-position: 0% 100% !important;
+    background-size: 100% 1px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .wiki-contents, .references, .wiki-link-list) a { transition: none !important; }
+}
+
+/* Block wipe reveal for section headings and Career images (after annnimate's reveal, in
+   site neutrals). Nothing shows at rest. Driven by --wiki-wipe from 0 to 1, set by the load
+   sequence and the scroll scrub:
+   0 to 0.5: a block in the page background color draws in from the left over hidden content.
+   0.5 to 1: the block retracts to the right while the content fades in (no slide). */
+.wiki-wipe {
+  --wiki-wipe: 1;
+  --wiki-wipe-grow: clamp(0, calc(var(--wiki-wipe) * 2), 1);
+  --wiki-wipe-shrink: clamp(0, calc(var(--wiki-wipe) * 2 - 1), 1);
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+.wiki-wipe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--wiki-page);
+  clip-path: inset(0 calc((1 - var(--wiki-wipe-grow)) * 100%) 0 calc(var(--wiki-wipe-shrink) * 100%));
+  pointer-events: none;
+}
+.wiki-wipe > .wiki-wipe-content,
+.wiki-wipe-media > :not(figcaption) {
+  display: block;
+  opacity: var(--wiki-wipe-shrink);
+}
+.wiki-wipe-media { display: block; }
+@media (prefers-reduced-motion: reduce) {
+  .wiki-wipe::after { display: none; }
+  .wiki-wipe > .wiki-wipe-content, .wiki-wipe-media > * { opacity: 1; }
+}
+
+/* A link or reference glued to its trailing punctuation never breaks between them. */
+.wiki-nowrap { white-space: nowrap; }
+
+/* Mobile search sheet fills the screen (small-viewport height, so it never hides under the
+   browser toolbar). */
+@media (max-width: 48rem) {
+  html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
+    height: 100svh !important;
+    max-height: 100svh !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* Search field border: the same color as the page dividers, white (ink) while focused. */
+html body .wiki-search .wiki-search-input input {
+  border: 1px solid var(--wiki-border) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+html body .wiki-search .wiki-search-input input:focus {
+  border-color: var(--wiki-ink) !important;
+}
+
+/* Mobile sheet results line up with the search field: thumbnails start at its left edge and
+   copy ends at its right edge (rows had an extra 12px inset on both sides). */
+@media (max-width: 48rem) {
+  html body .wiki-mobile-search-sheet .wiki-search-results ul { padding: 4px 0 !important; }
+  html body .wiki-mobile-search-sheet .wiki-search-results button {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* No tap flash or tapped/expanded outline on buttons and links (touch especially). */
+html body .wiki-shell :is(a, button, summary) { -webkit-tap-highlight-color: transparent; }
+html body .wiki-shell .wiki-nav-search:is(:focus, :focus-visible, :active, [aria-expanded="true"]) {
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Search fields have no magnifier icon: text starts at a normal inset. */
+html body .wiki-search .wiki-search-input input { padding-left: 12px !important; }
+
+/* iOS status bar area. The viewport uses viewport-fit=cover, so page content scrolls up
+   behind the status bar and peeks out above the sticky header. A fixed strip in the page
+   color covers that safe area, and the sticky header sticks just below it. Elsewhere
+   env(safe-area-inset-top) is 0, so nothing changes. */
+html body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--wiki-page);
+  z-index: 305;
+  pointer-events: none;
+}
+html body .wiki-shell .wiki-article-header { top: env(safe-area-inset-top, 0px) !important; }
+
+
+
+/* Images: no slide; a scale-down from 1.1 to 1 plus the fade, inside the mask. */
+.wiki-wipe-media > :not(figcaption) {
+  opacity: var(--wiki-wipe-shrink);
+  /* Scale over the visible (uncover) half only, on a smoothstep ease-in-out: across the whole
+     reveal it finished while the image was still hidden under the strip. */
+  --wiki-wipe-smooth: calc(var(--wiki-wipe-shrink) * var(--wiki-wipe-shrink) * (3 - 2 * var(--wiki-wipe-shrink)));
+  scale: calc(1.1 - var(--wiki-wipe-smooth) * 0.1);
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wiki-wipe-media > :not(figcaption) { translate: none; scale: none; }
 }

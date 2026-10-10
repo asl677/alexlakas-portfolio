@@ -26,7 +26,8 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
     return sample(y1, y2, Math.min(1, Math.max(0, t)));
   };
 }
-export const wikiEase = cubicBezier(0.76, 0.019, 0.483, 0.989);
+// easeInOutQuart (easings.net), matching --wiki-ease in CSS.
+export const wikiEase = cubicBezier(0.76, 0, 0.24, 1);
 
 const hoverPortraitFrames = [
   // First frame is a product shot, not a face. Local 640px square crops: the originals are
@@ -311,7 +312,6 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
   return (
     <form ref={searchRef} className="wiki-search" onSubmit={searchPage} role="search">
       <label className="sr-only" htmlFor={inputId}>Search this page</label>
-      <span className="search-decoration" aria-hidden="true"><Search size={20} strokeWidth={2} /></span>
       <div className="wiki-search-input">
         <input
           id={inputId}
@@ -738,7 +738,7 @@ export function WikiSection({
         }}
       >
         <span className="wiki-section-chevron" aria-hidden="true"><ChevronDown size={24} strokeWidth={2} /></span>
-        <h2>{title}</h2>
+        <h2><span className="wiki-wipe"><span className="wiki-wipe-content">{title}</span></span></h2>
       </button>
       <div id={contentId} ref={bodyRef} className="wiki-section-body" aria-hidden={!open}>
         <div className="wiki-section-content">
@@ -973,17 +973,21 @@ export function IntroSequence() {
       ".infobox dd",
       ".article-toc > h2",
       ".article-toc > ol > li",
-      ".wiki-section-toggle",
       ".wiki-section-content > ul > li",
       ".wiki-section-content > ol > li",
-      ".wiki-section-content .article-list-item",
+      // Case study rows: the thumbnail gets the media wipe, the text block fades.
+      ".wiki-section-content .article-list-item > .article-list-image",
+      ".wiki-section-content .article-list-item > div",
       ".wiki-section-content .references > li",
       ".wiki-section-content .wiki-link-list > li",
       ".wiki-section-content .work-links > li",
       ".wiki-section-content .medium-card",
       ".wiki-section-content .career-feature > figure",
       ".wiki-categories > *",
-      ".wiki-talk-page > *"
+      ".wiki-talk-page > *",
+      // Section headings reveal with a wipe (two blocks shrinking right), driven by the same
+      // load sequence and scroll scrub as everything else via --wiki-wipe.
+      ".wiki-wipe"
     ].join(", ")))
       .sort((a, b) => {
         const aRect = a.getBoundingClientRect();
@@ -993,7 +997,7 @@ export function IntroSequence() {
     const context = gsap.context(() => {
       // The logo shows "Designer" as server-rendered; the preloader types that word and hands
       // off to it, so the logo has no typing cycle of its own.
-      const fade = { duration: 1.2, stagger: 0.045, ease: wikiEase };
+      const fade = { duration: 0.9, stagger: 0.08, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
@@ -1006,13 +1010,28 @@ export function IntroSequence() {
       const revealedLines = new Set<HTMLElement>();
       let revealReady = false;
       const scrubState = new Map<HTMLElement, { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number }>();
+      // Keep punctuation that follows a link or reference on the same line as it: otherwise
+      // SplitText treats ", and" as its own word and can wrap the comma to the next line.
+      const gluePunctuation = (root: HTMLElement) => {
+        root.querySelectorAll<HTMLElement>("a, sup").forEach(element => {
+          const next = element.nextSibling;
+          if (!next || next.nodeType !== Node.TEXT_NODE) return;
+          const match = /^[,.;:!?)\]\u2019\u201d]+/.exec(next.textContent ?? "");
+          if (!match || element.parentElement?.classList.contains("wiki-nowrap")) return;
+          const glue = document.createElement("span");
+          glue.className = "wiki-nowrap";
+          element.replaceWith(glue);
+          glue.append(element, match[0]);
+          next.textContent = (next.textContent ?? "").slice(match[0].length);
+        });
+      };
       const textSplits = Array.from(document.querySelectorAll<HTMLElement>([
         ".wiki-article-body > p",
         ".wiki-section-content > p",
         ".wiki-section-content > h3",
-        ".wiki-section-content .career-feature > h3",
         ".wiki-section-content .career-feature > p"
       ].join(", "))).map(target => {
+        gluePunctuation(target);
         let previousLines: HTMLElement[] = [];
         return new SplitText(target, {
         type: "lines",
@@ -1068,6 +1087,8 @@ export function IntroSequence() {
         divider.classList.add("wiki-reveal-divider");
         targets.push(divider);
       });
+      // Every image and video (Career, profile portrait, case studies) uses the same block wipe.
+      targets.forEach(target => { if (target.matches(".career-feature > figure, .infobox-portrait, .article-list-image")) target.classList.add("wiki-wipe", "wiki-wipe-media"); });
       targets.forEach(target => {
         if (target !== rail && !dividers.has(target) && target.closest(".wiki-article-body, .wiki-talk-page, .wiki-categories") && !target.closest(".wiki-article-header")) {
           target.classList.add("wiki-slide");
@@ -1075,11 +1096,12 @@ export function IntroSequence() {
       });
       const revealProperties = (element: HTMLElement, opacity: number): gsap.TweenVars => {
         if (element === rail) return { "--rail-surface-opacity": opacity };
+        if (element.classList.contains("wiki-wipe")) return { "--wiki-wipe": opacity };
         if (dividers.has(element)) return { "--wiki-divider-opacity": opacity };
         // Header controls whose opacity CSS also drives (scroll-linked hand-off): reveal through
         // a variable that CSS multiplies in, so the load fade and the hand-off combine.
         if (element.matches(".wiki-title-row > .wiki-title-action, .wiki-title-row > .wiki-scroll-actions, .wiki-contents .contents-top")) return { "--wiki-reveal": opacity };
-        // Opacity only: the slide (line yPercent / 4px block offset) was dropped on purpose.
+        // Opacity only for text: the line slide was removed (owner's call).
         return { opacity };
       };
       // Per-frame writer for the scrub loop. gsap.set builds a tween per call, and each one
@@ -1087,7 +1109,7 @@ export function IntroSequence() {
       // scrolling. Writing the same values straight to the inline style reads nothing.
       const applyReveal = (element: HTMLElement, value: number) => {
         const props = revealProperties(element, value);
-        if (element === rail || dividers.has(element) || "--wiki-reveal" in props) {
+        if (element === rail || dividers.has(element) || "--wiki-reveal" in props || "--wiki-wipe" in props) {
           const name = Object.keys(props)[0];
           element.style.setProperty(name, String(value));
           return;
@@ -1099,14 +1121,24 @@ export function IntroSequence() {
       });
       const fadeIn = (elements: HTMLElement[], delay = 0, ease: string | ((t: number) => number) = fade.ease) => {
         const timeline = gsap.timeline({ delay });
+        // Up to 80ms between items, each a 0.6s expo.out fade, with the whole cascade held to
+        // ~1.2s: per-line items made a fixed 80ms step crawl down a full screen of text.
+        const step = Math.min(fade.stagger, 1.2 / Math.max(1, elements.length));
         visualOrder(elements).forEach((element, index) => {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
-          timeline.fromTo(element, revealProperties(element, 0), {
+          const wipe = element.classList.contains("wiki-wipe");
+          // Load only: text lines also rise 10px as they fade (scroll reveals stay fade-only).
+          const rise = element.classList.contains("wiki-reveal-line");
+          timeline.fromTo(element, { ...revealProperties(element, 0), ...(rise ? { y: 10 } : {}) }, {
             ...revealProperties(element, 1),
-            duration: fade.duration,
+            ...(rise ? { y: 0, clearProps: "transform" } : {}),
+            // One curve (easeInOutQuart) for everything. A wipe covers then uncovers, so it runs
+            // twice as long and starts half a fade early: its content appears exactly when a
+            // plain fade at the same slot would.
+            duration: wipe ? fade.duration * 2 : fade.duration,
             ease
-          }, index * fade.stagger);
+          }, wipe ? Math.max(0, index * step - fade.duration / 2) : index * step);
         });
       };
       const isInRevealArea = (element: HTMLElement) => {
@@ -1126,7 +1158,7 @@ export function IntroSequence() {
         initiallyVisibleLines.forEach(line => revealedLines.add(line));
         // Opening reveal starts visibly at once (no slow start), so content flows in as the
         // loader's "Designer" lands; scroll reveals keep the site curve.
-        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, "power2.out");
+        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, wikiEase);
         revealReady = true;
       };
       let revealCancelled = false;
@@ -1135,7 +1167,8 @@ export function IntroSequence() {
       // bottom (power3.out), and a time-based damper eases opacity + slide toward it every frame,
       // so scroll/drag drives the cascade smoothly with one shared curve. Positions are cached
       // (re-measured on resize/accordion changes) so the per-frame loop does no layout reads.
-      const scrubEase = (t: number) => 1 - Math.pow(1 - t, 3);
+      // easeInOutQuart, the same curve as the load reveal.
+      const scrubEase = (t: number) => t < 0.5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2;
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
       // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
@@ -1152,7 +1185,7 @@ export function IntroSequence() {
         const y = window.scrollY;
         scrollHeight = document.documentElement.scrollHeight;
         scrubItems = [...targets, ...textLines].map(element => {
-          const item = scrubState.get(element) ?? { element, top: 0, hidden: false, media: element.matches("figure, .article-list-item, .infobox"), current: 0 };
+          const item = scrubState.get(element) ?? { element, top: 0, hidden: false, media: element.matches("figure, .article-list-item, .article-list-image, .infobox"), current: 0 };
           scrubState.set(element, item);
           item.top = element.getBoundingClientRect().top + y;
           item.hidden = !!element.closest(".wiki-section-body[aria-hidden='true']");
@@ -1167,9 +1200,10 @@ export function IntroSequence() {
         const mediaRange = clampRange(scrubConfig.media);
         const y = frameScrollY;
         const remaining = Math.max(0, scrollHeight - vh - y);
-        const widen = Math.max(0, mediaRange + scrubConfig.edgeInset - remaining);
-        // Reveal starts edgeInset px above the viewport bottom so content is hidden before the toolbar.
-        const bottom = y + vh - scrubConfig.edgeInset + widen;
+        // The inset clears the mobile browser toolbar; desktop reveals right at the viewport bottom.
+        const edgeInset = window.innerWidth <= 768 ? scrubConfig.edgeInset : 0;
+        const widen = Math.max(0, mediaRange + edgeInset - remaining);
+        const bottom = y + vh - edgeInset + widen;
         const k = 1 - Math.exp(-deltaTime / 1000 * scrubConfig.damping);
         for (const item of scrubItems) {
           const { element } = item;
@@ -1205,7 +1239,7 @@ export function IntroSequence() {
         const step = Math.min(0.018, 0.5 / Math.max(1, inside.length));
         const timeline = gsap.timeline({ delay: 0.04 });
         visualOrder(inside).forEach((element, index) => {
-          timeline.fromTo(element, revealProperties(element, 0), { ...revealProperties(element, 1), duration: 0.8, ease: "power2.out" }, index * step);
+          timeline.fromTo(element, revealProperties(element, 0), { ...revealProperties(element, 1), duration: 0.8, ease: wikiEase }, index * step);
         });
         // Positions below the section changed: refresh the scrub's cache.
         queueReveal();
@@ -1275,7 +1309,7 @@ export function IntroSequence() {
         window.removeEventListener("resize", onLayout);
         textSplits.forEach(split => split.revert());
         dividers.forEach(divider => divider.classList.remove("wiki-reveal-divider"));
-        targets.forEach(target => target.classList.remove("wiki-slide"));
+        targets.forEach(target => { target.classList.remove("wiki-slide", "wiki-wipe-media"); if (target.matches("figure, .infobox-portrait, .article-list-image")) target.classList.remove("wiki-wipe"); });
       };
 
     });
