@@ -987,7 +987,9 @@ export function IntroSequence() {
       ".wiki-talk-page > *",
       // Section headings reveal with a wipe (two blocks shrinking right), driven by the same
       // load sequence and scroll scrub as everything else via --wiki-wipe.
-      ".wiki-wipe"
+      ".wiki-wipe",
+      // Accordion carets join the same stagger (fade) beside their headings.
+      ".wiki-section-chevron"
     ].join(", ")))
       .sort((a, b) => {
         const aRect = a.getBoundingClientRect();
