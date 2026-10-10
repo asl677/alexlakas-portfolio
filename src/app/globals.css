@@ -2,18 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --grey-100 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #555;
+}
+
+@property --white-100 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #fff;
+}
+
+@property --black-100 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000;
+}
+
 /* ============================================
    CSS VARIABLES
    ============================================ */
 :root {
-  --grey-100: #888;
+  --color-dark: #000;
+  --color-light: #f5f5f5;
+  --color-ink: #171717;
+  --color-muted-dark: #151515;
+  --color-muted-light: #dedede;
+  --color-sheet-handle: #666;
+  --color-sheet-overlay-mobile: var(--color-muted-dark);
+  --color-scrim: rgb(0 0 0 / 58%);
+  --grey-100: var(--color-muted-dark);
+  color-scheme: dark;
   --white-100: white;
-  --black-100: #000;
+  --black-100: var(--color-dark);
   --red-100: red;
   --white-0: transparent;
   --g-none: 0vw;
   --g-xsmall: 0.5vw;
   --g-small: 1vw;
+  --page-edge: clamp(0.9rem, 1.6vw, 1.4rem);
   --g-medium: 2vw;
   --g-large: 5vw;
   --g-xlarge: 10vw;
@@ -24,6 +52,65 @@
   --t-xlarge: 1.2rem;
   --h-large: 1.2rem;
   --h-xlarge: 1.5rem;
+  --sheet-motion-duration: 1.15s;
+  --sheet-motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --marquee-toggle-duration: 0.9s;
+  --marquee-toggle-ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+html[data-theme="light"] {
+  --grey-100: var(--color-muted-light);
+  --white-100: var(--color-ink);
+  --black-100: var(--color-light);
+  color-scheme: light;
+  --color-scrim: rgb(0 0 0 / 58%);
+}
+
+@media (prefers-color-scheme: light) {
+  html:not([data-theme]) {
+    --grey-100: var(--color-muted-light);
+    --white-100: var(--color-ink);
+    --black-100: var(--color-light);
+    color-scheme: light;
+  }
+}
+
+body > .theme-switch {
+  position: fixed;
+  z-index: 14;
+  right: var(--page-edge);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.theme-dot {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.theme-dot::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-light);
+}
+
+.theme-dot-dark::before {
+  background: var(--color-ink);
+}
+.theme-dot:focus-visible::before {
+  outline: 1px solid var(--white-100);
+  outline-offset: 3px;
 }
 
 /* ============================================
@@ -33,15 +120,38 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 html {
+  background-color: var(--black-100);
+  transition:
+    --grey-100 0.6s ease,
+    --white-100 0.6s ease,
+    --black-100 0.6s ease;
   overflow: visible;
   overflow-x: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none !important;
   height: auto;
   cursor: default !important;
+}
+
+/* Safari paints outside its changing visual viewport from the root canvas.
+   Keep that canvas on the sheet surface while the drawer is mounted; the
+   page wrapper below retains the base theme color for the recessed layer. */
+html[data-sheet-open="true"] {
+  background-color: var(--color-light);
+}
+
+html[data-theme="light"][data-sheet-open="true"] {
+  background-color: var(--color-dark);
 }
 
 html::-webkit-scrollbar {
@@ -56,9 +166,27 @@ body {
   font-weight: 400;
   font-family: 'PP Neue Montreal', sans-serif;
   letter-spacing: var(--t-xsmall);
-  background-color: var(--grey-100);
+  background-color: var(--black-100);
   color: var(--white-100);
   overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--color-light);
+  opacity: 0;
+}
+
+body[data-sheet-open="true"]::before {
+  opacity: 1;
+}
+
+html[data-theme="light"] body::before {
+  background-color: var(--color-dark);
 }
 
 ::selection {
@@ -152,19 +280,8 @@ html.lenis { height: auto; }
   font-family: var(--font-inconsolata), Inconsolata, monospace; */
   font-weight: 400;
   text-align: center;
-  font-size: var(--t-small);
-  line-height: var(--t-medium);
-}
-
-/* Press headlines */
-.base.wagon {
-  font-family: 'Wagon', Georgia, serif !important;
-  font-size: var(--g-medium) !important;
-  line-height: var(--g-medium) !important;
-  font-weight: 600 !important;
-  font-style: italic !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
+  font-size: 1vw;
+  line-height: 1.3;
 }
 
 /* ============================================
@@ -173,9 +290,12 @@ html.lenis { height: auto; }
    ============================================ */
 .body-wrapper {
   z-index: 0;
+  isolation: isolate;
+  background-color: var(--black-100);
   perspective: 1000px;
   perspective-origin: 0% 50%;
   transform-origin: 0% 50%;
+  width: 100vw;
   flex-flow: column;
   justify-content: center;
   align-items: flex-start;
@@ -203,21 +323,41 @@ html.lenis { height: auto; }
   transform-style: preserve-3d;
 }
 
+.body-wrapper {
+  background-color: var(--black-100);
+  transform-origin: center top;
+  transform: scale(1) translate3d(0, 0, 0);
+  will-change: transform;
+  border-radius: 0 !important;
+  transition-property: transform, border-radius;
+  transition-duration: var(--sheet-motion-duration) !important;
+  transition-timing-function: var(--sheet-motion-ease) !important;
+}
+
+[data-vaul-drawer-wrapper] {
+  background-color: var(--black-100) !important;
+  isolation: isolate;
+}
+
+body:has([data-vaul-drawer].vaul-dragging) .body-wrapper {
+  transition: none !important;
+}
+
 /* ============================================
    LEFT NAV
    ============================================ */
 .nav-left {
   z-index: 4;
-  padding: var(--g-small);
+  padding: 0;
   flex-flow: column;
   justify-content: space-between;
   align-items: flex-start;
-  height: 100svh;
+  height: calc(100svh - (var(--page-edge) * 2));
   display: flex;
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
+  top: var(--page-edge);
+  left: var(--page-edge);
+  bottom: var(--page-edge);
   opacity: 0;
 }
 
@@ -227,18 +367,25 @@ html.lenis { height: auto; }
   display: flex;
 }
 
+.nav-left-cases {
+  position: fixed;
+  top: 50svh;
+  left: var(--page-edge);
+  transform: translateY(-50%);
+}
+
 /* ============================================
    RIGHT NAV — "Let's Go" top-right
    ============================================ */
 .nav-right {
   z-index: 4;
-  padding: var(--g-small);
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--g-small);
   position: absolute;
-  top: 0;
-  right: 0;
+  top: var(--page-edge);
+  right: var(--page-edge);
   opacity: 0;
 }
 
@@ -247,11 +394,11 @@ html.lenis { height: auto; }
    ============================================ */
 .nav-life {
   z-index: 13;
-  padding: var(--g-small);
+  padding: 0;
   display: flex;
-  position: absolute;
-  bottom: 0;
-  right: 0;
+  position: fixed;
+  bottom: max(var(--page-edge), env(safe-area-inset-bottom, 0px));
+  right: max(var(--page-edge), env(safe-area-inset-right, 0px));
   opacity: 0;
 }
 
@@ -319,6 +466,7 @@ overflow: hidden;
   right: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
   /* No CSS transform — GSAP controls all strip movement */
 }
 
@@ -330,12 +478,12 @@ overflow: hidden;
 
 /* ============================================
    MARQUEE TOP
-   Centered clip window. Speed: 5s.
+   Centered clip window. Intentionally slower than the 55px/s image rail.
    Direction: -50% → 0% (original).
    ============================================ */
 .marquee-fixed {
   position: absolute;
-  top: 0vw;
+  top: var(--page-edge);
   left: 0;
   right: 0;
   z-index: 5;
@@ -347,26 +495,71 @@ overflow: hidden;
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: var(--g-small);
+  align-items: flex-start;
+  padding: 0 var(--page-edge);
 }
 
 .marquee-clip {
+  pointer-events: auto;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  transform-origin: center top;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   width: 15vw;
   overflow: hidden;
   position: relative;
+  line-height: 1.3;
+  display: flex;
+  align-items: flex-start;
 }
 
 .marquee-track {
   display: inline-block;
+  vertical-align: top;
   white-space: nowrap;
-  animation: marqueeRun 5s linear infinite;
+  animation: marqueeRun 8s linear infinite;
   font-size: 1vw;
+  line-height: 1.3;
   color: var(--white-100);
   font-family: 'PP Neue Montreal', sans-serif;
   font-weight: 400;
   letter-spacing: var(--t-xsmall);
 
+}
+
+.nav-left > .inner-nav, .nav-right, .marquee-fixed, .nav-life, .theme-switch {
+  filter: blur(0);
+  will-change: filter, opacity;
+  transition:
+    filter var(--marquee-toggle-duration) var(--marquee-toggle-ease),
+    opacity var(--marquee-toggle-duration) var(--marquee-toggle-ease);
+}
+
+body[data-marquee-expanded="true"] .nav-left > .inner-nav,
+body[data-marquee-expanded="true"] :is(.nav-right, .marquee-fixed, .nav-life, .theme-switch) {
+  filter: blur(5px);
+  opacity: 0.72 !important;
+  pointer-events: none;
+}
+
+body[data-marquee-expanded="true"] .theme-switch {
+  filter: blur(8px);
+  opacity: 0 !important;
+}
+
+.nav-left > .nav-left-cases {
+  transition:
+    transform var(--marquee-toggle-duration) var(--marquee-toggle-ease),
+    filter var(--marquee-toggle-duration) var(--marquee-toggle-ease),
+    opacity var(--marquee-toggle-duration) var(--marquee-toggle-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-clip, .nav-left > .inner-nav, .nav-right, .slider-section, .nav-life, .theme-switch {
+    transition: none;
+  }
 }
 
 @keyframes marqueeRun {
@@ -379,7 +572,6 @@ overflow: hidden;
    GSAP drives the loop animation (no CSS animation).
    ============================================ */
 .slider-section {
-  z-index: 0;
   background-color: var(--grey-100);
   display: flex;
   justify-content: center;
@@ -391,15 +583,25 @@ overflow: hidden;
 }
 
 .slider-wrap {
-  filter: grayscale(1) contrast(0.8);
-  transition: filter 0.6s cubic-bezier(0.596, 0.096, 0.25, 1);
+  --slider-expanded-scale: 2.2;
+  cursor: pointer;
+  transform: translateZ(0);
+  transform-origin: center;
+  backface-visibility: hidden;
+  will-change: transform;
+  transition: transform var(--marquee-toggle-duration) var(--marquee-toggle-ease);
 }
 
-.slider-wrap:hover {
+.slider-wrap:hover .slider-inner,
+.slider-wrap[aria-expanded="true"] .slider-inner {
   filter: grayscale(0) contrast(1);
 }
 
 .slider-inner {
+  filter: grayscale(1) contrast(0.8);
+  backface-visibility: hidden;
+  will-change: filter;
+  transition: filter var(--marquee-toggle-duration) var(--marquee-toggle-ease);
   width: 25vw;
   height: auto;
   overflow: hidden;
@@ -411,9 +613,14 @@ overflow: hidden;
   overflow: hidden;
 }
 
+.slider-wrap[aria-expanded="true"] {
+  transform: translateZ(0) scale(var(--slider-expanded-scale));
+}
+
 .slider-track {
   display: flex;
   flex-direction: row;
+  width: max-content;
   gap: 0;
   will-change: transform;
 }
@@ -424,38 +631,6 @@ overflow: hidden;
   flex-shrink: 0;
   display: block;
   object-fit: cover;
-}
-
-/* ============================================
-   PRESS SECTION
-   ============================================ */
-/* Webflow source: .section-a.main.swipe.black — z-index:-4 */
-.press-section {
-  z-index: -4;
-  background-color: var(--black-100);
-  flex: 1;
-  width: 100%;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--g-medium);
-  position: relative;
-  overflow: hidden;
-}
-
-.press-features {
-  z-index: -8;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  width: 100%;
-  padding: 4vw;
-  position: relative;
-  opacity: 1;
-  top: calc(10vh - 7rem);
 }
 
 /* ============================================
@@ -521,69 +696,310 @@ overflow: hidden;
    BIO SHEET
    ============================================ */
 .sheet-inner {
-  z-index: 0;
-  background-color: var(--black-100);
-  opacity: 0;
-  pointer-events: none;
-  display: grid;
+  --sheet-surface: var(--color-light);
+  --sheet-foreground: var(--color-ink);
+  --sheet-link-block-padding: 0.8em;
+  --black-100: var(--sheet-surface);
+  --white-100: var(--sheet-foreground);
+  z-index: 20;
+  background-color: var(--sheet-surface);
+  color: var(--sheet-foreground);
+  opacity: 1;
+  display: block;
   grid-template-columns: minmax(14rem, 24vw) minmax(0, 1fr);
   place-content: center;
   place-items: center stretch;
   width: 100%;
-  height: 100svh;
+  height: min(82svh, 52rem);
+  height: min(82dvh, 52rem);
   padding: 4vw;
   position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0;
+  touch-action: none;
+  cursor: default !important;
+  will-change: transform;
+}
+
+/* Keep the sheet color extending below Safari's dynamic viewport without
+   changing the drawer height Vaul uses to calculate its closed position. */
+.sheet-inner::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 200%;
+  background: inherit;
+  pointer-events: none;
+}
+
+html[data-theme="light"] .sheet-inner {
+  --sheet-surface: var(--color-dark);
+  --sheet-foreground: #fff;
+  color-scheme: dark;
+}
+
+html:not([data-theme="light"]) .sheet-inner {
+  color-scheme: light;
+}
+
+/* Keep Vaul's geometry and transitions intact while removing the rounded default. */
+[data-vaul-drawer].sheet-inner {
+  border-radius: 0 !important;
+  touch-action: none !important;
+  animation-duration: var(--sheet-motion-duration) !important;
+  transition-duration: var(--sheet-motion-duration) !important;
+  animation-timing-function: var(--sheet-motion-ease) !important;
+  transition-timing-function: var(--sheet-motion-ease) !important;
+}
+
+body:has(.sheet-inner[data-state="closed"]) {
+  --sheet-motion-duration: 1.05s;
+}
+
+[data-vaul-drawer].sheet-inner[data-state="closed"] {
+  pointer-events: none;
+  visibility: hidden;
+  transition-property: transform, visibility !important;
+  transition-duration: var(--sheet-motion-duration), 0s !important;
+  transition-delay: 0s, var(--sheet-motion-duration) !important;
+}
+
+[data-vaul-drawer].sheet-inner[data-state="open"] {
+  visibility: visible;
+  transition-delay: 0s !important;
+}
+
+[data-vaul-handle].sheet-handle {
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+  z-index: 2;
+  box-sizing: content-box !important;
+  width: 28px !important;
+  height: 3px !important;
+  padding: 16px 28px !important;
+  background: var(--color-sheet-handle) !important;
+  background-clip: content-box !important;
+  touch-action: none;
+  cursor: default !important;
+}
+
+[data-vaul-handle].sheet-handle [data-vaul-handle-hitarea] {
+  cursor: default !important;
+}
+
+[data-vaul-overlay].sheet-overlay {
+  position: fixed;
   inset: 0;
-  /* opacity + pointer-events driven by GSAP in BioSheet.tsx */
+  z-index: 15;
+  background-color: var(--color-scrim) !important;
+  opacity: 1;
+  animation-duration: var(--sheet-motion-duration) !important;
+  animation-timing-function: var(--sheet-motion-ease) !important;
 }
 
 .bio-text-wrap {
   --bio-scroll-y: 0vw;
   --bio-scroll-opacity: 1;
+  --bio-font-size: 1vw;
+  --bio-line-height: 1.3;
   position: absolute;
-  top: 50%;
-  left: calc(8vw + ((100vw - 8vw - min(42vw, 34rem)) / 2));
-  transform: translateY(calc(-50% + var(--bio-scroll-y)));
+  inset: 3rem 0;
+  margin: auto;
+  height: fit-content;
+  transform: translateY(var(--bio-scroll-y));
   width: min(42vw, 34rem);
   max-width: 100%;
+  max-height: calc(100% - 6rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   opacity: var(--bio-scroll-opacity);
-  will-change: transform, opacity;
+  pointer-events: auto;
+  outline: none;
 }
 
 .bio-text-scroll {
+  --bio-media-column: 6.5em;
+  --bio-grid-gap: 1em;
   width: 100%;
+}
+
+.bio-intro {
+  display: grid;
+  grid-template-columns: var(--bio-media-column) minmax(0, 1fr);
+  gap: var(--bio-grid-gap);
+  align-items: stretch;
+  font-size: var(--bio-font-size);
+}
+
+.bio-mark {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  align-self: start;
+  border-radius: 0;
+  object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.bio-projects {
+  list-style: none;
+  margin: 1.5em 0 0;
+  padding: 0;
+  font-size: var(--bio-font-size);
+  line-height: var(--bio-line-height);
+  color: var(--white-100);
+}
+
+.bio-project {
+  display: grid;
+  grid-template-columns: var(--bio-media-column) minmax(0, 1fr);
+  gap: var(--bio-grid-gap);
+  padding: var(--sheet-link-block-padding) 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.bio-project:first-child {
+  border-top: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.bio-project > span:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  text-align: left;
+}
+
+.bio-project > span:last-child,
+.bio-project > a {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.bio-project > a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.bio-project > a:is(:hover, :focus-visible) {
+  text-decoration: none;
+}
+
+.bio-sheet-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 1.1em;
+  font-size: var(--bio-font-size);
+  line-height: var(--bio-line-height);
+  pointer-events: auto;
+}
+
+
+.bio-sheet-link.link.enabled {
+  display: inline-block;
+  align-self: flex-start;
+  width: fit-content;
+  line-height: var(--bio-line-height);
+  padding: 0.05em 0;
+  margin: -0.05em 0;
+  background-color: transparent;
+}
+
+.bio-sheet-link .base {
+  display: block;
+  font-size: inherit;
+  line-height: var(--bio-line-height);
+  margin: 0;
 }
 
 .sheet-inner .base.white {
   width: 100%;
   max-width: 100%;
+  text-align: justify;
+  text-align-last: left;
+  text-justify: auto;
+  text-indent: 0;
+  font-size: var(--bio-font-size);
+  line-height: var(--bio-line-height);
+}
+
+.bio-line-mask {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bio-split-line {
+  display: block !important;
+  box-sizing: border-box;
+  width: 100% !important;
+  white-space: nowrap;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: auto;
+  text-indent: 0;
+}
+
+.bio-split-line-first {
+  padding-left: 1em;
+}
+
+.bio-split-line-last {
   text-align: left;
+  text-align-last: left;
 }
 
 /* ============================================
    TABLET & MOBILE RESPONSIVE
    ============================================ */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
+  .bio-text-scroll {
+    --bio-media-column: 64px;
+  }
+
+  .bio-intro {
+    align-items: start;
+  }
+
+  .bio-mark {
+    width: 64px;
+    height: 64px;
+  }
+
+  .slider-wrap {
+    --slider-expanded-scale: 1.35;
+  }
+
   .base {
-    font-size: 3vw;
+    font-size: 3.5vw;
     font-weight: 400;
     font-family: 'PP Neue Montreal', sans-serif;
   }
 
   .base.white {
-    font-size: 2.5vw;
+    font-size: 3.5vw;
   }
 
   .marquee-track {
-    font-size: 3vw;
+    font-size: 3.5vw;
   }
 
   .marquee-fixed {
-    top: var(--g-small);
+    top: var(--page-edge);
   }
 
   .marquee-clip {
-    width: 50vw;
+    width: 35vw;
   }
 
   .slider-inner {
@@ -595,31 +1011,20 @@ overflow: hidden;
   }
 
   .link {
-    font-size: 3vw;
+    font-size: 3.5vw;
     font-weight: 400;
     font-family: 'PP Neue Montreal', sans-serif;
   }
 
-  .inner-nav {
-  }
-
   .nav-left {
-    padding: var(--g-small);
+    padding: 0;
     gap: 2vw;
-    left: var(--g-small);
   }
 
   .nav-right {
-    padding: var(--g-small);
+    padding: 0;
     gap: 2vw;
-    right: var(--g-small);
-    top: var(--g-small);
     align-items: flex-end;
-  }
-
-  .nav-life {
-    right: var(--g-small);
-    bottom: var(--g-small);
   }
 
   .upper-wrap {
@@ -630,42 +1035,70 @@ overflow: hidden;
 
   .sheet-inner {
     padding: 3vw;
+    height: min(82svh, 52rem);
     grid-template-columns: minmax(8.5rem, 30vw) minmax(0, 1fr) minmax(1rem, 6vw);
     place-items: center stretch;
   }
 
   .bio-text-wrap {
-    grid-column: 2 !important;
-    position: static;
-    transform: translateY(var(--bio-scroll-y));
-    width: min(100%, 27rem);
+    --bio-font-size: 3.5vw;
+    --bio-line-height: 1.18;
+    width: min(82vw, 27rem);
     max-width: 100%;
-    justify-self: center;
   }
 
   .sheet-inner .base.white {
     width: 100%;
     max-width: 100%;
-    text-align: left;
-    font-size: clamp(0.66rem, 2.35vw, 0.78rem);
-    line-height: 1.25;
   }
 
-  .press-section {
-    display: none !important;
+}
+
+@media (max-width: 767px) {
+  html[data-sheet-open="true"] {
+    background-color: var(--black-100);
+  }
+
+  body[data-sheet-open="true"]::before {
+    opacity: 0;
+  }
+
+  [data-vaul-overlay].sheet-overlay {
+    background-color: var(--color-sheet-overlay-mobile) !important;
+  }
+
+  .sheet-inner {
+    --sheet-surface: var(--color-muted-dark);
+    --sheet-foreground: #fff;
+    --sheet-link-block-padding: 0.62em;
+    height: 100dvh;
+    max-height: 100dvh;
+    color-scheme: dark;
   }
 }
 
 @media (max-width: 480px) {
-  html, body {
+  .slider-wrap {
+    --slider-expanded-scale: 1.15;
+  }
+
+  html {
     overflow: hidden;
-    height: 100svh;
+    height: 100%;
+    min-height: 100lvh;
+    width: 100%;
+  }
+
+  body {
+    overflow: hidden;
+    height: 100lvh;
     position: fixed;
+    inset: 0;
     width: 100%;
   }
 
   .base {
-    font-size: 4vw;
+    font-size: 3.5vw;
     font-weight: 400;
     font-family: 'PP Neue Montreal', sans-serif;
   }
@@ -675,15 +1108,12 @@ overflow: hidden;
   }
 
   .marquee-track {
-    font-size: 4vw;
+    font-size: 3.5vw;
   }
 
-  .marquee-fixed {
-    display: none;
-  }
 
   .marquee-clip {
-    width: 50vw;
+    width: 35vw;
   }
 
   .slider-inner {
@@ -695,35 +1125,25 @@ overflow: hidden;
   }
 
   .link {
-    font-size: 4vw;
+    font-size: 3.5vw;
     font-weight: 400;
     font-family: 'PP Neue Montreal', sans-serif;
   }
 
-  .inner-nav {
-  }
-
   .nav-left {
-    padding: var(--g-small);
+    padding: 0;
     gap: 2.5vw;
   }
 
   .nav-right {
-    padding: var(--g-small);
+    padding: 0;
     gap: 2.5vw;
-    right: var(--g-small);
-    top: var(--g-small);
     align-items: flex-end;
   }
 
-  .nav-life {
-    right: var(--g-small);
-    bottom: var(--g-small);
-  }
-
   .slider-section {
-    left: var(--g-small);
-    right: var(--g-small);
+    left: var(--page-edge);
+    right: var(--page-edge);
     width: auto;
   }
 
@@ -737,21 +1157,47 @@ overflow: hidden;
 
   .sheet-inner {
     padding: 4vw;
+    padding-bottom: calc(4vw + env(safe-area-inset-bottom, 0px));
+    height: 100dvh;
+    max-height: 100dvh;
+    bottom: 0;
     grid-template-columns: minmax(6.5rem, 28vw) minmax(0, 1fr) minmax(0.75rem, 5vw);
   }
 
   .bio-text-wrap {
-    width: min(100%, 23rem);
+    --bio-font-size: 3.5vw;
+    --bio-line-height: 1.18;
+    width: min(84vw, 23.5rem);
     max-width: 100%;
   }
 
-  .sheet-inner .base.white {
-    font-size: clamp(0.6rem, 2.45vw, 0.7rem);
-    line-height: 1.22;
+}
+
+@media (max-width: 767px) {
+  body > .theme-switch {
+    display: none !important;
   }
 
+  .nav-left-cases {
+    transition:
+      transform var(--marquee-toggle-duration) var(--marquee-toggle-ease),
+      filter var(--marquee-toggle-duration) var(--marquee-toggle-ease),
+      opacity var(--marquee-toggle-duration) var(--marquee-toggle-ease);
+  }
 
-  .press-section {
+  body[data-marquee-expanded="true"] .nav-left > .nav-left-cases {
+    filter: blur(5px);
+    opacity: 0 !important;
+    transform: translate(-10px, -50%);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .link-strip {
     display: none !important;
+  }
+
+  .slider-wrap:hover:not([aria-expanded="true"]) .slider-inner {
+    filter: grayscale(1) contrast(0.8);
   }
 }

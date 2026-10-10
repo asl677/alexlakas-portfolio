@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 const BASE = "https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/";
@@ -24,9 +24,39 @@ const images = [
 ];
 
 const looped = [...images, ...images];
+const LOOP_SPEED_PX_PER_SECOND = 55;
 
 export default function Slider() {
   const trackRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  const setExpandedState = useCallback((next: boolean) => {
+    if (next) {
+      document.body.dataset.marqueeExpanded = "true";
+    } else {
+      delete document.body.dataset.marqueeExpanded;
+    }
+    setExpanded(next);
+  }, []);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const close = (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setExpandedState(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpandedState(false);
+    };
+    document.addEventListener("click", close, true);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      delete document.body.dataset.marqueeExpanded;
+      document.removeEventListener("click", close, true);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [expanded, setExpandedState]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -34,18 +64,32 @@ export default function Slider() {
 
     let tween: gsap.core.Tween | null = null;
 
-    const startLoop = () => {
-      const halfWidth = track.scrollWidth / 2;
-      if (!halfWidth) return;
+    const startLoop = async () => {
+      const trackImages = Array.from(track.querySelectorAll("img"));
+      await Promise.all(
+        trackImages.map((image) => {
+          if (image.complete && image.naturalWidth) return Promise.resolve();
+          return new Promise<void>((resolve) => {
+            image.addEventListener("load", () => resolve(), { once: true });
+            image.addEventListener("error", () => resolve(), { once: true });
+          });
+        })
+      );
 
-      // Start at the midpoint (second set), animate back to 0 = rightward movement
-      gsap.set(track, { x: -halfWidth });
+      const firstImage = trackImages[0];
+      const duplicateFirstImage = trackImages[images.length];
+      const duplicateStart =
+        duplicateFirstImage.getBoundingClientRect().left -
+        firstImage.getBoundingClientRect().left;
+      if (!duplicateStart) return;
 
+      gsap.set(track, { x: -duplicateStart, autoAlpha: 1 });
       tween = gsap.to(track, {
-        x: 0,
-        duration: 50,
+        x: `+=${duplicateStart}`,
+        duration: duplicateStart / LOOP_SPEED_PX_PER_SECOND,
         ease: "none",
         repeat: -1,
+        force3D: true,
       });
     };
 
@@ -63,9 +107,17 @@ export default function Slider() {
 
   return (
     <div className="slider-section">
-      <div className="slider-wrap">
+      <div className="slider-wrap" role="button" tabIndex={0}
+        aria-label="Enlarge image carousel" aria-expanded={expanded}
+        onClick={() => setExpandedState(!expanded)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setExpandedState(!expanded);
+          }
+        }}>
         <div className="slider-inner">
-          <div className="slider-track" ref={trackRef}>
+          <div className="slider-track" ref={trackRef} style={{ visibility: "hidden" }}>
             {looped.map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img

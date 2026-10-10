@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Drawer } from "vaul";
 gsap.registerPlugin(SplitText, ScrollTrigger);
 
 interface BioSheetProps {
@@ -11,144 +13,312 @@ interface BioSheetProps {
   onClose: () => void;
 }
 
-const bioText = "Starting in illustration, animation, web dev, and interactive design before moving into Bay Area tech. Early work included social games and commerce for brands and etailers. In 2013, I joined Google, merging Google+ and Maps to form the first SMB ecosystem, spanning domestic and emerging markets. I've collaborated with world-class teams and agency partners like Method and UENO, modernized Local Search at Google, and led Content Experience at LinkedIn with products like the home feed, Polls, Live Popular Times, and Bookings. Recognized for strong storytelling and humor. Let's go.";
+const bioText = "I like weird stuff that works. With East Coast roots in illustration, animation, and interactive design, I've built products at Google and LinkedIn. I've collabed with teams and agencies, small and large - like UENO, Povio and a handful of startups across emerging markets, industries and platforms - bringing a focus on storytelling, craft, and humor, heavily inspired by Swiss principles, motion design, and details.";
+
+function BioSheetLink({
+  href,
+  children,
+  external,
+}: {
+  href: string;
+  children: string;
+  external?: boolean;
+}) {
+  const linkRef = useRef<HTMLAnchorElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = () => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    const strip = stripRef.current;
+    if (!strip) return;
+
+    gsap.fromTo(
+      strip,
+      { x: 0, xPercent: -105 },
+      { x: 0, xPercent: 0, duration: 0.9, ease: "power2.inOut", overwrite: true }
+    );
+  };
+
+  const handleMouseLeave = () => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    const strip = stripRef.current;
+    if (!strip) return;
+
+    gsap.to(strip, {
+      x: 0,
+      xPercent: 105,
+      duration: 0.9,
+      ease: "power2.inOut",
+      overwrite: true,
+    });
+  };
+
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+
+    gsap.set(strip, { x: 0, xPercent: 105 });
+  }, []);
+
+  return (
+    <a
+      ref={linkRef}
+      href={href}
+      className="link enabled bio-sheet-link"
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <p className="base">{children}</p>
+      <div ref={stripRef} className="link-strip" />
+    </a>
+  );
+}
 
 export default function BioSheet({ active, onClose }: BioSheetProps) {
+  const [drawerOpen, setDrawerOpen] = useState(active);
+  const [portalMounted, setPortalMounted] = useState(active);
   const sheetRef = useRef<HTMLDivElement>(null);
   const textWrapRef = useRef<HTMLDivElement>(null);
   const textScrollRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
-  const splitRef = useRef<any>(null);
+  const splitRef = useRef<SplitText | null>(null);
   const bioTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const revealTweenRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
+  const openRevealFrameRef = useRef<number | null>(null);
+  const openRevealStartRef = useRef(0);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTransitionCleanupRef = useRef<(() => void) | null>(null);
 
-  // Create/update SplitText and timeline on mount or text changes
-  useEffect(() => {
-    if (!textRef.current) return;
+  const clearCloseTimer = () => {
+    closeTransitionCleanupRef.current?.();
+    closeTransitionCleanupRef.current = null;
+    if (!closeTimerRef.current) return;
+    clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = null;
+  };
 
-    if (splitRef.current) splitRef.current.revert();
-    splitRef.current = new SplitText(textRef.current, { type: "lines" });
+  const schedulePortalUnmount = () => {
+    if (closeTimerRef.current) return;
 
-    // Wrap each line in overflow: hidden for masked reveal
-    splitRef.current.lines.forEach((line: HTMLElement) => {
+    const wrapper = document.querySelector<HTMLElement>(".body-wrapper");
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      wrapper?.removeEventListener("transitionend", handleTransitionEnd);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+      closeTransitionCleanupRef.current = null;
+      setPortalMounted(false);
+    };
+    const handleTransitionEnd = (event: TransitionEvent) => {
+      if (event.target === wrapper && event.propertyName === "transform") finish();
+    };
+
+    wrapper?.addEventListener("transitionend", handleTransitionEnd);
+    closeTransitionCleanupRef.current = () =>
+      wrapper?.removeEventListener("transitionend", handleTransitionEnd);
+    closeTimerRef.current = setTimeout(finish, 1800);
+  };
+
+  const cancelOpenRevealSync = () => {
+    if (openRevealFrameRef.current === null) return;
+    window.cancelAnimationFrame(openRevealFrameRef.current);
+    openRevealFrameRef.current = null;
+  };
+
+  const getSheetOpenProgress = () => {
+    const sheet = sheetRef.current;
+    if (!sheet) return 0;
+
+    const transform = window.getComputedStyle(sheet).transform;
+    const values = transform.match(/matrix(3d)?\((.+)\)/)?.[2]
+      ?.split(",")
+      .map((value) => Number.parseFloat(value.trim()));
+    const translateY = values ? (values.length === 16 ? values[13] : values[5]) || 0 : 0;
+    const height = Math.min(sheet.getBoundingClientRect().height || window.innerHeight, window.innerHeight);
+
+    return gsap.utils.clamp(0, 1, 1 - translateY / Math.max(1, height));
+  };
+
+  const syncRevealWithSheetMotion = (target: "open" | "close") => {
+    const timeline = bioTimelineRef.current;
+    if (!timeline) return;
+
+    revealTweenRef.current?.kill();
+    const tick = () => {
+      const rawProgress = getSheetOpenProgress();
+      const elapsed = performance.now() - openRevealStartRef.current;
+      const progress = elapsed < 80 && rawProgress > 0.98 ? 0 : rawProgress;
+      timeline.progress(progress).pause();
+
+      if ((target === "open" && progress >= 0.995) || (target === "close" && progress <= 0.005)) {
+        timeline.progress(target === "open" ? 1 : 0).pause();
+        openRevealFrameRef.current = null;
+        return;
+      }
+
+      openRevealFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    cancelOpenRevealSync();
+    tick();
+  };
+
+  const animateRevealTo = (progress: number) => {
+    const timeline = bioTimelineRef.current;
+    if (!timeline) return;
+
+    revealTweenRef.current?.kill();
+    revealTweenRef.current = gsap.to(timeline, {
+      progress: gsap.utils.clamp(0, 1, progress),
+      duration: 1.4 * Math.abs(progress - timeline.progress()),
+      ease: "none",
+      overwrite: true,
+      onUpdate: () => {
+        if (progress === 0 && timeline.progress() <= 0.65) {
+          setDrawerOpen(false);
+          schedulePortalUnmount();
+        }
+      },
+      onComplete: () => {
+        if (progress === 0) {
+          setDrawerOpen(false);
+          schedulePortalUnmount();
+        }
+      },
+    });
+  };
+
+  const animateRevealOut = () => {
+    cancelOpenRevealSync();
+    animateRevealTo(0);
+  };
+
+  const prepareBioReveal = () => {
+    const text = textRef.current;
+    if (!text) return null;
+
+    revealTweenRef.current?.kill();
+    bioTimelineRef.current?.kill();
+    splitRef.current?.revert();
+    splitRef.current = new SplitText(text, { type: "lines" });
+
+    const lines = splitRef.current.lines as HTMLElement[];
+    lines.forEach((line, index) => {
       const wrapper = document.createElement("div");
-      wrapper.style.display = "block";
-      wrapper.style.overflow = "hidden";
+      wrapper.className = "bio-line-mask";
+      line.classList.add("bio-split-line");
+      line.classList.toggle("bio-split-line-first", index === 0);
+      line.classList.toggle("bio-split-line-last", index === lines.length - 1);
       line.parentNode?.insertBefore(wrapper, line);
       wrapper.appendChild(line);
     });
 
-    // Kill old timeline if exists
-    if (bioTimelineRef.current) bioTimelineRef.current.kill();
+    const links = Array.from(
+      textScrollRef.current?.querySelectorAll<HTMLElement>(
+        ".bio-mark, .bio-projects > .bio-project, .bio-sheet-links > .bio-sheet-link"
+      ) ?? []
+    );
 
-    // Create timeline once with paused: true
+    gsap.set(text, { autoAlpha: 1 });
     const tl = gsap.timeline({ paused: true });
-    tl.fromTo(
-      splitRef.current.lines,
-      { y: "3vw", opacity: 0 },
+    tl.set(lines, { y: 5, opacity: 0 });
+    tl.set(links, { y: 5, opacity: 0 });
+    tl.to(
+      [...lines, ...links],
       {
         y: 0,
         opacity: 1,
-        duration: 1,
-        delay: 0.3,
-        stagger: { each: 0.02, from: "end" },
-        ease: "power3.out",
+        duration: 0.95,
+        stagger: { amount: 0.45, from: "end" },
+        ease: "power2.inOut",
       },
-      0.8
+      0.2
     );
-    
-    bioTimelineRef.current = tl;
-  }, []);
 
-  // Play/reverse timeline based on active state
+    bioTimelineRef.current = tl;
+    tl.progress(0).pause();
+    ScrollTrigger.refresh();
+    return tl;
+  };
+
+  // Both directions traverse the same timeline at the same rate.
   useEffect(() => {
-    if (!bioTimelineRef.current) return;
-    
     if (active) {
-      bioTimelineRef.current.play();
-      ScrollTrigger.refresh();
-    } else {
-      bioTimelineRef.current.reverse();
+      const theme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+      document.documentElement.dataset.sheetOpen = "true";
+      document.body.dataset.sheetOpen = "true";
+      document
+        .querySelector<HTMLMetaElement>("meta[name='theme-color']")
+        ?.setAttribute("content", theme === "dark" ? "#000000" : "#f5f5f5");
     }
+
+    if (!active) {
+      cancelOpenRevealSync();
+      animateRevealOut();
+      clearCloseTimer();
+      return;
+    }
+
+    clearCloseTimer();
+    setPortalMounted(true);
+    setDrawerOpen(true);
+    openRevealStartRef.current = performance.now();
+    if (textRef.current) gsap.set(textRef.current, { autoAlpha: 0 });
+    let attempts = 0;
+    const prepareWhenMounted = () => {
+      attempts += 1;
+      if (prepareBioReveal()) {
+        animateRevealTo(1);
+        return;
+      }
+
+      if (attempts < 6) {
+        openRevealFrameRef.current = window.requestAnimationFrame(prepareWhenMounted);
+      }
+    };
+
+    openRevealFrameRef.current = window.requestAnimationFrame(prepareWhenMounted);
+    return () => {
+      cancelOpenRevealSync();
+      clearCloseTimer();
+    };
+    // The reveal sync reads refs/live Vaul transform state; rerunning it on helper identity changes restarts the animation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
+
+  useEffect(() => {
+    if (portalMounted) return;
+
+    const theme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+    delete document.documentElement.dataset.sheetOpen;
+    delete document.body.dataset.sheetOpen;
+    document
+      .querySelector<HTMLMetaElement>("meta[name='theme-color']")
+      ?.setAttribute("content", theme === "dark" ? "#000000" : "#f5f5f5");
+  }, [portalMounted]);
 
   useEffect(() => {
     const textWrap = textWrapRef.current;
     if (!textWrap) return;
 
-    let frame = 0;
+    textWrap.style.setProperty("--bio-scroll-y", "0vw");
+    textWrap.style.setProperty("--bio-scroll-opacity", "1");
+  }, [active]);
 
-    const updateBioScroll = () => {
-      frame = 0;
-      const viewportHeight = window.innerHeight || 1;
-      const progress = gsap.utils.clamp(0, 1, window.scrollY / (viewportHeight * 0.28));
-
-      textWrap.style.setProperty("--bio-scroll-y", `${progress * -12}vw`);
-      textWrap.style.setProperty("--bio-scroll-opacity", `${1 - progress * 0.6}`);
-    };
-
-    const requestUpdate = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(updateBioScroll);
-    };
-
-    updateBioScroll();
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
-    gsap.ticker.add(updateBioScroll);
-    return () => {
-      gsap.ticker.remove(updateBioScroll);
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  // Handle resize: recreate SplitText to preserve line breaks
+  // Rebuild the live split lines after a resize while the sheet is open.
   useEffect(() => {
     let resizeTimeout: ReturnType<typeof setTimeout>;
     
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        if (splitRef.current && textRef.current) {
-          splitRef.current.revert();
-          splitRef.current = new SplitText(textRef.current, { type: "lines" });
-          
-          // Wrap each line in overflow: hidden container for masked reveal
-          splitRef.current.lines.forEach((line: HTMLElement) => {
-            const wrapper = document.createElement("div");
-            wrapper.style.display = "block";
-            wrapper.style.overflow = "hidden";
-            line.parentNode?.insertBefore(wrapper, line);
-            wrapper.appendChild(line);
-          });
-          
-          // Recreate timeline with new lines
-          if (bioTimelineRef.current) {
-            bioTimelineRef.current.kill();
-          }
-          
-          const tl = gsap.timeline({ paused: true });
-          tl.fromTo(
-            splitRef.current.lines,
-            { y: "3vw", opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 0.6,
-              delay: 0.5,
-              stagger: { each: 0.03, from: "end" },
-              ease: "power3.out",
-            },
-            0
-          );
-          
-          bioTimelineRef.current = tl;
-          
-          if (active) {
-            bioTimelineRef.current.play();
-          }
-        }
+        if (active && prepareBioReveal()) animateRevealTo(1);
       }, 250);
     };
 
@@ -157,23 +327,93 @@ export default function BioSheet({ active, onClose }: BioSheetProps) {
       window.removeEventListener("resize", handleResize);
       clearTimeout(resizeTimeout);
     };
+    // Rebuilding only follows active-state changes; helper identities are intentionally live.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
   useEffect(() => {
     return () => {
-      if (splitRef.current) splitRef.current.revert();
+      cancelOpenRevealSync();
+      clearCloseTimer();
+      revealTweenRef.current?.kill();
+      bioTimelineRef.current?.kill();
+      splitRef.current?.revert();
     };
   }, []);
 
   return (
-    <div ref={sheetRef} className="sheet-inner" onClick={onClose}>
-      <div ref={textWrapRef} className="bio-text-wrap">
-        <div ref={textScrollRef} className="bio-text-scroll">
-          <p ref={textRef} className="base white">
-            {bioText}
-          </p>
-        </div>
-      </div>
-    </div>
+    <Drawer.Root
+      open={drawerOpen}
+      shouldScaleBackground
+      onOpenChange={(open) => {
+        if (open) {
+          clearCloseTimer();
+          setDrawerOpen(true);
+          return;
+        }
+
+        onClose();
+      }}
+      onDrag={(_, percentageDragged) => {
+        const timeline = bioTimelineRef.current;
+        if (!timeline) return;
+
+        cancelOpenRevealSync();
+        revealTweenRef.current?.kill();
+        timeline.progress(gsap.utils.clamp(0, 1, 1 - percentageDragged)).pause();
+      }}
+      onRelease={(_, open) => {
+        if (open) {
+          animateRevealTo(1);
+          return;
+        }
+
+        animateRevealOut();
+      }}
+      closeThreshold={0.25}
+      dismissible
+    >
+      {portalMounted && (
+        <Drawer.Portal>
+          <Drawer.Overlay className="sheet-overlay" />
+          <Drawer.Content ref={sheetRef} className="sheet-inner" aria-label="Life">
+            <Drawer.Handle className="sheet-handle" />
+            <div ref={textWrapRef} className="bio-text-wrap" tabIndex={0}>
+              <div ref={textScrollRef} className="bio-text-scroll">
+              <div className="bio-intro">
+                <Image
+                  src="/me.png"
+                  alt="Portrait of Alex Lakas as a child"
+                  width={1254}
+                  height={1254}
+                  unoptimized
+                  className="bio-mark"
+                />
+                <p ref={textRef} className="base white" style={{ visibility: "hidden" }}>
+                  {bioText}
+                </p>
+              </div>
+              <ul className="bio-projects" aria-label="Highlighted projects">
+                <li className="bio-project"><span>2024</span><BioSheetLink href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" external>F45, District Cannabis AI infra</BioSheetLink></li>
+                <li className="bio-project"><span>2022</span><span>Stealth social network</span></li>
+                <li className="bio-project"><span>2021</span><BioSheetLink href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" external>Peanut travel app acquisition</BioSheetLink></li>
+                <li className="bio-project"><span>2019</span><BioSheetLink href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" external>LinkedIn polls in under 30s</BioSheetLink></li>
+                <li className="bio-project"><span>2017</span><BioSheetLink href="https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/" external>Book Mindbody, Resy on Google</BioSheetLink></li>
+                <li className="bio-project"><span>2016</span><BioSheetLink href="https://www.youtube.com/watch?v=QIbPZgH1zRY" external>Google Live Popular Times</BioSheetLink></li>
+                <li className="bio-project"><span>2013</span><span>Google+ Maps for business</span></li>
+                <li className="bio-project"><span>2011</span><span>Ecommerce for Zippo, Journeys</span></li>
+                <li className="bio-project"><span>2009</span><span>Social games, Converse, Nintendo</span></li>
+              </ul>
+              <div className="bio-sheet-links">
+                <BioSheetLink href="https://dribbble.com/alex2pt0" external>Dribbble</BioSheetLink>
+                <BioSheetLink href="https://www.linkedin.com/in/latenights/" external>Linkedin</BioSheetLink>
+                <BioSheetLink href="https://x.com/axlakas" external>Twitter</BioSheetLink>
+              </div>
+              </div>
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      )}
+    </Drawer.Root>
   );
 }
