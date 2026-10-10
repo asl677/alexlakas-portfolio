@@ -53,7 +53,7 @@ export default function Home() {
 
   return (
     <main className="wiki-shell is-loading">
-      <div className="wiki-loader" aria-hidden="true"><span className="wiki-loader-counter" suppressHydrationWarning></span></div>
+      <div className="wiki-loader" aria-hidden="true">{/* The head script types into this span before hydration; innerHTML keeps React from diffing its text. */}<span className="wiki-loader-counter" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: "" }} /></div>
       <IntroSequence />
       <SmoothAnchorScroll />
       <ContentsScrollSpy />
@@ -138,10 +138,8 @@ export default function Home() {
             <aside className="infobox">
               <h2>Alex</h2>
               <HoverPortrait />
-              <p className="caption">Elementary school yearbook</p>
               <dl>
-                <dt>Born</dt><dd>United States</dd>
-                <dt>Based in</dt><dd>Los Angeles, California</dd>
+                <dt>Based in</dt><dd>Los Angeles, CA</dd>
                 <dt>Occupation</dt><dd>Sr. staff designer, art director, product designer</dd>
                 <dt>Known for</dt><dd>&ldquo;Incredibly talented designer&rdquo;, &ldquo;Simple, clear aesthetic&rdquo;, &ldquo;Good people&rdquo;</dd>
                 <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">linkedin.com/in/latenights</a></dd>
@@ -165,63 +163,69 @@ export default function Home() {
               </ol>
             </nav>
 
-            <WikiSection id="early-life" title="Early life and education"><p>Alex grew up on the East Coast and got into design through illustration, animation, and the web. He studied art and computer science at the University of Maryland, College Park, under <a href="https://www.jamesthorpedesign.com/about" target="_blank" rel="noreferrer">James Thorpe</a>, <a href="https://www.coplanar.org/" target="_blank" rel="noreferrer">Brandon Morse</a>, and <a href="https://design.ncsu.edu/people/hsarmstr/" target="_blank" rel="noreferrer">Helen Armstrong</a>. He later moved to the Bay Area to join the tech movement, then to Los Angeles to freelance and live by the beach.<Ref n={1} /><Ref n={8} /></p></WikiSection>
+            <WikiSection id="early-life" title="Early life and education">
+              <div className="career-feature career-feature--right career-feature--thumb">
+                <figure>
+                  <img src="/early-life-sketch.jpg" alt="Alex sketching on a tablet" />
+                </figure>
+                <p>Alex grew up on the East Coast and got into design through illustration, animation, and the web. He studied art and computer science at the University of Maryland, College Park, under <a href="https://www.jamesthorpedesign.com/about" target="_blank" rel="noreferrer">James Thorpe</a>, <a href="https://www.coplanar.org/" target="_blank" rel="noreferrer">Brandon Morse</a>, and <a href="https://design.ncsu.edu/people/hsarmstr/" target="_blank" rel="noreferrer">Helen Armstrong</a>.</p>
+                <p>Fueled by software and creativity, Alex has spent years understanding theory, trends and research sitting atop a background in studio work. He later moved to the Bay Area to join the tech movement, then to Los Angeles to freelance and live by the beach.<Ref n={1} /><Ref n={8} /></p>
+              </div></WikiSection>
 
             <WikiSection id="career" title="Career">
-              <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work followed by roles at Google, LinkedIn, Peanut, Culprit, and Fiveonefour.<Ref n={1} /><Ref n={3} /></p>
+              <div className="career-feature career-feature--right career-feature--thumb">
+                <figure>
+                  <img src="/career-on-set.webp" alt="A film crew setting up a shot" />
+                </figure>
+                <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work followed by roles at Google, LinkedIn, Peanut, Culprit, and Fiveonefour. This includes early agency and ecommerce work for 0-1 startups, etailers and FAANG companies with roles at Google, LinkedIn, Culprit and more.<Ref n={1} /><Ref n={3} /></p>
+              </div>
               <div id="social-games-and-ecommerce" className="career-feature">
                 <h3>Social games and ecommerce</h3>
                 <p>Beginning in 2009, Alex worked with <a href="https://www.cubix.co/" target="_blank" rel="noreferrer">Cubix Labs</a> and <a href="https://virid.com/" target="_blank" rel="noreferrer">Virid</a> on digital experiences spanning social games and ecommerce. The work combined product thinking, interaction design, and campaign systems at a time when social platforms were becoming a primary place for brands to meet people.</p>
                 <p>That period included work connected to Converse, Nintendo, Journeys and Zippo, translating established brands into playful, participatory web experiences. It established an early interest in designing systems that balance clear utility with character, motion, and a strong visual point of view.<Ref n={1} /></p>
               </div>
-              <div id="branching-out" className="career-feature career-feature--right career-feature--portrait">
+              <div id="branching-out" className="career-feature career-feature--right career-feature--thumb">
                 <h3>Branching out</h3>
                 <figure>
                   <img src="https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp" alt="Alex Lakas" />
-                  <figcaption>Photography, mixed media</figcaption>
                 </figure>
                 <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
                 <p>These projects treated websites and prototypes as complete experiences rather than static portfolios: each combined narrative, interface, and behavior. The work formed the foundation for Alex&apos;s later focus on clear systems and useful digital tools.</p>
               </div>
-              <div id="local-search-for-merchants-and-consumers" className="career-feature career-feature--left career-feature--landscape">
+              <div id="local-search-for-merchants-and-consumers" className="career-feature career-feature--right career-feature--landscape career-feature--thumb">
                 <h3>Local search for merchants and consumers</h3>
                 <figure>
                   <img src="https://miro.medium.com/v2/1*J9oOQMv0N12QmSq7vbCiCQ.png" alt="A product design project" />
-                  <figcaption>Local discovery and booking work at Google</figcaption>
                 </figure>
                 <p>At <a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>, Alex worked across Google My Business, Local Search, and Maps. His visual design, prototyping and systems thinking helped shape local discovery, Live Popular Times, visit-duration information, and booking flows that connect people with nearby businesses and services.<Ref n={1} /><Ref n={8} /><Ref n={9} /></p>
                 <p>Those experiences turned complex local data into timely signals people could act on: whether a place was busy, when to visit, and how to make a reservation without leaving Search or Maps. For small businesses, the same tools made practical information and conversion paths easier to maintain and find. The role also gave him the chance to work with agencies such as <a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a> and <a href="https://www.method.com/" target="_blank" rel="noreferrer">Method</a> on a range of projects.</p>
               </div>
-              <div id="modernizing-social-media-for-professionals" className="career-feature career-feature--right career-feature--square career-feature--team">
+              <div id="modernizing-social-media-for-professionals" className="career-feature career-feature--thumb career-feature--right career-feature--square career-feature--team">
                 <h3>Modernizing social media for professionals</h3>
                 <figure>
                   <img src="https://miro.medium.com/v2/1*nacLVsr2ifTQvHN_qQknYw.png" alt="Alex with the LinkedIn Sharing team" />
-                  <figcaption>The Sharing Team: I&apos;m the one in the hat</figcaption>
                 </figure>
                 <p>As a Senior Product Designer at <a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>, Alex helped re-shape and design the home experience and sharing tools, including polls, posting, comment controls, a modernization overhaul, and more, as the platform expanded how professional communities could participate and connect. The work spanned design systems, product design, and prototyping.<Ref n={3} /><Ref n={6} /><Ref n={10} /></p>
                 <p>The goal was to make professional participation feel less formal and more immediate. Streamlined sharing, lightweight polls, and live formats gave members more ways to contribute, while preserving the context and utility people expect from a professional network.</p>
               </div>
-              <div id="freelance-and-0-1" className="career-feature career-feature--left career-feature--wide career-feature--peanut">
+              <div id="freelance-and-0-1" className="career-feature career-feature--right career-feature--wide career-feature--peanut career-feature--thumb">
                 <h3>Freelance, 0-1, Gen AI</h3>
                 <figure>
                   <div className="peanut-still">
                     <img src="/peanut-travel-on.png" alt="Peanut: Travel on." />
                   </div>
-                  <figcaption>Peanut</figcaption>
                 </figure>
                 <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut</a>, a Chrome extension that surfaced travel info during online booking, later acquired by Insured Nomads. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a> on a stealth social media app spanning VFX, design, and product, working with <a href="https://dinetz.com/" target="_blank" rel="noreferrer">David Dinetz</a>, <a href="https://www.cabral.design/" target="_blank" rel="noreferrer">Andre Cabral</a>, <a href="https://www.imdb.com/name/nm5680415/" target="_blank" rel="noreferrer">Jo Murayama</a>, and <a href="https://povio.com/" target="_blank" rel="noreferrer">Povio</a>.<Ref n={1} /><Ref n={11} /></p>
                 <figure className="career-video">
                   <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
-                  <figcaption>AI video gen</figcaption>
                 </figure>
                 <p>Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Culprit, Alex carried the same product thinking into creative direction.<Ref n={7} /></p>
                 <p className="career-ai-note">This later led to conceptual and public work using AI, video and motion to explore new mediums, including Midjourney, Claude and MCPs.</p>
                             </div>
-              <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape">
+              <div id="new-territory-ai-data-infra" className="career-feature career-feature--right career-feature--landscape career-feature--thumb">
                 <h3>New territory — Data Infra &amp; AI</h3>
                 <figure>
                   <SeamlessVideo />
-                  <figcaption>AI Agents</figcaption>
                 </figure>
                 <p>As Head of Design at <a href="https://www.514.ax/" target="_blank" rel="noreferrer">Fiveonefour</a>, Alex shaped a Vercel-inspired data-infra suite powered by AI, helping folks like F45 and District Cannabis rethink their data.<Ref n={5} /> The company is backed by firms like Stage 2 Capital and Dimension, having raised nearly $17M, and Alex joined another 0-1 team of industry experts.<Ref n={14} /></p>
                 <p>The work focused on making technical systems easier to understand and operate: interfaces that reveal what data is doing, workflows that support faster decisions, and a shared design language that can scale across a growing product. The team also built AI agents that ingest, stream, and transform data in just a few clicks. The F45 and District Cannabis projects carried that discipline into consumer-facing experiences.</p>

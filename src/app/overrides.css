@@ -85,3 +85,24 @@ html body .wiki-shell .wiki-article-body :is(h3, p, li, dd) a:is(:link, :visited
   padding-bottom: 0.14em;
   margin-bottom: -0.14em;
 }
+
+/* Caption under the portrait was removed: keep its spacing before the details list. */
+html body .wiki-shell .infobox dl { margin-top: 18px !important; }
+
+/* Single-column layouts: cards have no surface, so their contents align with the body text. */
+@media (max-width: 1023px) {
+  html body .wiki-shell .wiki-article-body > .infobox,
+  html body .wiki-shell .article-toc { padding-left: 0 !important; padding-right: 0 !important; }
+}
+
+/* Categories footer: no pipe dividers, just spacing. */
+html body .wiki-shell .wiki-categories a::before { content: none !important; }
+html body .wiki-shell .wiki-categories { gap: 2px 10px !important; padding-left: 0 !important; padding-right: 0 !important; }
+
+/* Shared right-floated thumbnail for every Early life and Career image: one width. */
+@media (min-width: 768px) {
+  html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure { width: 218px !important; }
+  html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure { clear: both; }
+  html body .wiki-shell :is(#career, #early-life) .career-feature--right.career-feature--thumb figure { float: right !important; margin: 4px 0 16px 20px !important; }
+  html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure :is(img, video) { width: 100% !important; aspect-ratio: 4 / 3; object-fit: cover; height: auto !important; }
+}

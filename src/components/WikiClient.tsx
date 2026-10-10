@@ -925,9 +925,9 @@ export function IntroSequence() {
     const context = gsap.context(() => {
       // The logo shows "Designer" as server-rendered; the preloader types that word and hands
       // off to it, so the logo has no typing cycle of its own.
-      const fade = { duration: 1, stagger: 0.022, ease: wikiEase };
+      const fade = { duration: 0.8, stagger: 0.03, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position, with a small slide.
-      const SLIDE = 10;
+      const SLIDE = 4;
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
         const first = a.getBoundingClientRect();
@@ -937,6 +937,8 @@ export function IntroSequence() {
       let textLines: HTMLElement[] = [];
       let queueReveal = () => {};
       const revealedLines = new Set<HTMLElement>();
+      let revealReady = false;
+      const scrubState = new Map<HTMLElement, { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number }>();
       const textSplits = Array.from(document.querySelectorAll<HTMLElement>([
         ".wiki-article-body > p",
         ".wiki-section-content > p",
@@ -977,6 +979,15 @@ export function IntroSequence() {
             if (wasRevealed) revealedLines.add(line);
             gsap.set(line, { opacity: wasRevealed ? 1 : 0 });
           });
+          // Rewraps must not replay: lines already on or above screen start fully shown.
+          if (revealReady) {
+            const limit = window.innerHeight;
+            previousLines.forEach(line => {
+              if (revealedLines.has(line) || line.getBoundingClientRect().top > limit) return;
+              scrubState.set(line, { element: line, top: 0, hidden: false, media: false, current: 1 });
+              gsap.set(line, revealProperties(line, 1));
+            });
+          }
           queueReveal();
         }
       });
@@ -1005,7 +1016,12 @@ export function IntroSequence() {
         if (element.classList.contains("wiki-reveal-line") || element.classList.contains("wiki-slide")) {
           // Split lines travel a full line height so the line mask visibly clips them.
           const lineSlide = element.classList.contains("wiki-reveal-line");
-          return { opacity, "--wiki-slide": lineSlide ? `${((opacity - 1) * 100).toFixed(2)}%` : `${((opacity - 1) * SLIDE).toFixed(2)}px` };
+          // Lines travel 30% of their height, other content 4px: enough to feel, not to notice.
+          // Direct transforms (GPU-composited) instead of a CSS variable, which forced a style
+          // recalculation on every animated element each frame.
+          return lineSlide
+            ? { opacity, yPercent: (opacity - 1) * 30, force3D: true }
+            : { opacity, y: (opacity - 1) * SLIDE, force3D: true };
         }
         return { opacity };
       };
@@ -1031,7 +1047,6 @@ export function IntroSequence() {
       // Fade each visible element once; fading its container too multiplies opacity.
       stage([...targets, ...textLines]);
       const revealedTargets = new Set<HTMLElement>();
-      let revealReady = false;
       const startInitialReveal = () => {
         // Sample after the loader clears, when header and profile layout have settled.
         const initiallyVisible = targets.filter(isInRevealArea);
@@ -1040,7 +1055,7 @@ export function IntroSequence() {
         initiallyVisibleLines.forEach(line => revealedLines.add(line));
         // Opening reveal starts visibly at once (no slow start), so content flows in as the
         // loader's "Designer" lands; scroll reveals keep the site curve.
-        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, "power3.out");
+        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, "power2.out");
         revealReady = true;
       };
       let revealCancelled = false;
@@ -1051,7 +1066,6 @@ export function IntroSequence() {
       // (re-measured on resize/accordion changes) so the per-frame loop does no layout reads.
       const scrubEase = (t: number) => 1 - Math.pow(1 - t, 3);
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
-      const scrubState = new Map<HTMLElement, ScrubItem>();
       let scrubItems: ScrubItem[] = [];
       // Re-measure (also re-collects text lines, which SplitText recreates on rewrap).
       const measure = () => {
@@ -1064,7 +1078,7 @@ export function IntroSequence() {
           return item;
         });
       };
-      const scrubTick = (_time: number, deltaTime: number) => {
+      const scrubTick = () => {
         if (!revealReady) return;
         const vh = window.innerHeight;
         const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac));
@@ -1075,17 +1089,19 @@ export function IntroSequence() {
         const widen = Math.max(0, mediaRange + scrubConfig.edgeInset - remaining);
         // Reveal starts edgeInset px above the viewport bottom so content is hidden before the toolbar.
         const bottom = y + vh - scrubConfig.edgeInset + widen;
-        const k = 1 - Math.exp(-deltaTime / 1000 * scrubConfig.damping);
         for (const item of scrubItems) {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
           const target = scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
           if (item.current === target) continue;
-          let next = item.current + (target - item.current) * k;
-          if (Math.abs(target - next) < 0.002) next = target;
+          // Lenis already smooths the scroll; a second damper here lagged behind it and felt like
+          // two motions fighting. Progress maps straight to the smoothed scroll position.
+          const next = target;
           item.current = next;
           gsap.set(element, revealProperties(element, next));
+          // The side rail stays put once shown; it never fades back out on scroll.
+          if (element === rail && next === 1) revealedTargets.add(rail);
         }
       };
       const reveal = () => { measure(); };
@@ -1121,12 +1137,16 @@ export function IntroSequence() {
       };
 
       let frame = 0;
-      const onScroll = () => {
+      // Scrolling itself does no work here: the scrub ticker reads cached positions every frame.
+      // Re-measuring on scroll forced layout on hundreds of nodes per frame and made it choppy.
+      const onScroll = () => {};
+      // Layout-affecting events (resize, accordion reveal, rewraps) re-measure once per frame.
+      const onLayout = () => {
         if (!revealReady) return;
         cancelAnimationFrame(frame);
         frame = requestAnimationFrame(reveal);
       };
-      queueReveal = onScroll;
+      queueReveal = onLayout;
       // Any layout change (accordion height transitions, image loads, rewraps) re-measures the
       // cached positions every frame it changes, so nothing is left hidden at a stale offset.
       // Throttled: re-measuring every frame of an accordion height transition forces layout on
@@ -1138,8 +1158,8 @@ export function IntroSequence() {
       });
       layoutObserver.observe(document.body);
       loaderDone.then(() => { if (!revealCancelled) { measure(); gsap.ticker.add(scrubTick); } });
-      window.addEventListener("resize", onScroll);
-      window.addEventListener("alexpedia-reveal", onScroll);
+      window.addEventListener("resize", onLayout);
+      window.addEventListener("alexpedia-reveal", onLayout);
       window.addEventListener("alexpedia-accordion-reveal", revealSection);
       // Tab switch: everything in the shown view appears at once, already revealed.
       const revealViewInstantly = (event: Event) => {
@@ -1167,8 +1187,8 @@ export function IntroSequence() {
         gsap.ticker.remove(scrubTick);
         layoutObserver.disconnect();
         window.clearTimeout(measureFrame);
-        window.removeEventListener("resize", onScroll);
-        window.removeEventListener("alexpedia-reveal", onScroll);
+        window.removeEventListener("resize", onLayout);
+        window.removeEventListener("alexpedia-reveal", onLayout);
         window.removeEventListener("alexpedia-accordion-reveal", revealSection);
         window.removeEventListener("alexpedia-view-instant", revealViewInstantly);
         window.removeEventListener("alexpedia-loader-handoff", showBrandForHandoff);
@@ -1176,7 +1196,7 @@ export function IntroSequence() {
         revealCancelled = true;
         cancelAnimationFrame(frame);
         window.removeEventListener("scroll", onScroll);
-        window.removeEventListener("resize", onScroll);
+        window.removeEventListener("resize", onLayout);
         textSplits.forEach(split => split.revert());
         dividers.forEach(divider => divider.classList.remove("wiki-reveal-divider"));
         targets.forEach(target => target.classList.remove("wiki-slide"));
