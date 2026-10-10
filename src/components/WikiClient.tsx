@@ -1078,7 +1078,7 @@ export function IntroSequence() {
           return item;
         });
       };
-      const scrubTick = () => {
+      const scrubTick = (_time: number, deltaTime: number) => {
         if (!revealReady) return;
         const vh = window.innerHeight;
         const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac));
@@ -1089,15 +1089,16 @@ export function IntroSequence() {
         const widen = Math.max(0, mediaRange + scrubConfig.edgeInset - remaining);
         // Reveal starts edgeInset px above the viewport bottom so content is hidden before the toolbar.
         const bottom = y + vh - scrubConfig.edgeInset + widen;
+        const k = 1 - Math.exp(-deltaTime / 1000 * scrubConfig.damping);
         for (const item of scrubItems) {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
           const target = scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
           if (item.current === target) continue;
-          // Lenis already smooths the scroll; a second damper here lagged behind it and felt like
-          // two motions fighting. Progress maps straight to the smoothed scroll position.
-          const next = target;
+          // Light time-based easing toward the scroll target gives the reveal its glide.
+          let next = item.current + (target - item.current) * k;
+          if (Math.abs(target - next) < 0.002) next = target;
           item.current = next;
           gsap.set(element, revealProperties(element, next));
           // The side rail stays put once shown; it never fades back out on scroll.
