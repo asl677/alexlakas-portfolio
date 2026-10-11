@@ -6477,12 +6477,10 @@ html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .w
 @media (min-width: 769px) {
   html body .wiki-shell header.wiki-topbar > nav {
     position: fixed !important;
-    top: var(--wiki-nav-top, 13px) !important;
+    top: 13px !important;
     right: var(--wiki-nav-right, 20px) !important;
     z-index: 60 !important;
   }
   html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) { filter: none !important; }
-  /* Holds the icons' place in the bar so the search box keeps its position. */
-  html body .wiki-shell header.wiki-topbar::after { content: ""; grid-area: nav; width: 118px; height: 34px; justify-self: end; align-self: center; }
   html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { display: none !important; }
 }
