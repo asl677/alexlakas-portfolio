@@ -6483,6 +6483,6 @@ html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .w
   }
   html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) { filter: none !important; }
   /* Holds the icons' place in the bar so the search box keeps its position. */
-  html body .wiki-shell header.wiki-topbar::after { content: ""; grid-area: 1 / 3; width: 118px; height: 34px; justify-self: end; align-self: center; }
+  html body .wiki-shell header.wiki-topbar::after { content: ""; grid-area: nav; width: 118px; height: 34px; justify-self: end; align-self: center; }
   html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { display: none !important; }
 }
