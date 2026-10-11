@@ -118,7 +118,7 @@ export default function Home() {
             </header>
 
             <section className="wiki-talk-page" aria-label="Talk page">
-              <p className="wiki-talk-latest">Latest update: <a href="#start-discussion"><TimeAgo /></a> in topic <a href="#start-discussion">Added early life and career images, refreshed career copy</a></p>
+              <p className="wiki-talk-latest">Latest update: <a href="#start-discussion"><TimeAgo /></a> in topic <a href="#start-discussion">{process.env.LAST_UPDATE_TOPIC}</a></p>
               <div className="wiki-talk-notice">
                 <p>This article must adhere to the <a href="#start-discussion">biographies of living persons</a> policy. Contentious material about living people that is unsourced or poorly sourced should be removed promptly from the article and its talk page.</p>
                 <p>If you are the subject of this article, or are acting on behalf of one, use this page to raise a specific concern or propose a sourced change.</p>

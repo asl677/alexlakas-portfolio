@@ -36,7 +36,9 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
 // easeInOutQuart (easings.net), matching --wiki-ease in CSS.
 export const wikiEase = cubicBezier(0.76, 0, 0.24, 1);
 // Text reveal curve (owner's pick): fast start, long soft settle. Used on load and scroll.
-const revealEase = cubicBezier(0.3, 0.592, 0.011, 0.986);
+// power2.out-like: quick start, short clean settle. The previous curve (0.3, 0.592, 0.011,
+// 0.986) spent its last ~40% of the time creeping through the final pixel, which read as lag.
+const revealEase = cubicBezier(0.33, 1, 0.68, 1);
 
 const hoverPortraitFrames = [
   // Hover/press opens on the yearbook portrait, then cycles the work frames.
@@ -1264,6 +1266,8 @@ export function IntroSequence() {
         const widen = Math.max(0, mediaRange + edgeInset - remaining);
         const bottom = y + vh - edgeInset + widen;
         const k = 1 - Math.exp(-deltaTime / 1000 * scrubConfig.damping / pace);
+        // Images catch up ~0.2s slower than text, so a fast scroll can't snap them in.
+        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / scrubConfig.damping + 0.2));
         for (const item of scrubItems) {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
@@ -1274,7 +1278,7 @@ export function IntroSequence() {
           // One-way: scrolling back up never fades content out again.
           if (target <= item.current) continue;
           // Light time-based easing toward the scroll target gives the reveal its glide.
-          let next = item.current + (target - item.current) * k;
+          let next = item.current + (target - item.current) * (item.media ? kMedia : k);
           if (Math.abs(target - next) < 0.002) next = target;
           item.current = next;
           applyReveal(element, next);
@@ -1428,6 +1432,16 @@ export function ArticleTabs() {
     // Switching tabs shows the other view instantly (no fade); skipped on the initial mount.
     const isSwitch = previousViewRef.current !== null && previousViewRef.current !== view;
     previousViewRef.current = view;
+    // Switching tabs opens the other view at its top (the article header sits just above it).
+    if (isSwitch) {
+      const article = document.querySelector<HTMLElement>(".wiki-article");
+      const top = article ? Math.max(0, article.getBoundingClientRect().top + window.scrollY) : 0;
+      if (window.scrollY > top) {
+        window.scrollTo({ top, behavior: "instant" as ScrollBehavior });
+        // Pin Lenis to the new position so its smooth scroll doesn't glide back.
+        window.dispatchEvent(new Event("alexpedia-scroll-lock"));
+      }
+    }
     const frame = requestAnimationFrame(() => {
       if (isSwitch) window.dispatchEvent(new CustomEvent("alexpedia-view-instant", { detail: view }));
     });
@@ -1638,7 +1652,12 @@ type HoverCardData = {
 type HoverMedia = { key: number; status: "loading" | "ready" | "none"; src?: string; icon?: boolean };
 
 // Page titles often end with the site name ("… | TechCrunch"); drop that suffix.
-const cleanTitle = (title: string) => title.replace(/\s+[|–—-]\s+[^|–—-]{2,30}$/, "").trim();
+// Bot-check and error pages ("Attention Required!", "Just a moment...") aren't real titles.
+const BLOCK_TITLE = /^(attention required|just a moment|access denied|security check|forbidden|403|404|page not found|are you a robot|forbes\.com)/i;
+const cleanTitle = (title: string) => {
+  const cleaned = title.replace(/\s+[|–—-]\s+[^|–—-]{2,30}$/, "").trim();
+  return BLOCK_TITLE.test(cleaned) ? "" : cleaned;
+};
 
 // Try to load an image for up to `ms`; resolves true only for a real picture (not a pixel).
 const tryImage = (src: string, ms: number, min = 40) => new Promise<boolean>(resolve => {
@@ -1775,7 +1794,7 @@ export function HoverCards() {
     live.then(data => {
       if (settled || card.person) return;
       if (data.description && !card.text) setLiveText({ key, text: data.description });
-      if (data.title && !linkPreviews[href]?.title) setLiveTitle({ key, title: cleanTitle(data.title) });
+      if (data.title && !linkPreviews[href]?.title && cleanTitle(data.title)) setLiveTitle({ key, title: cleanTitle(data.title) });
     });
     const liveImage = live.then(data => Promise.all((data.images ?? (data.image ? [data.image] : [])).slice(0, 4).map(url => load(url, 200)))).then(found => found.find(Boolean) ?? null);
     const icon = load(`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent("https://" + host)}&size=256`, 32);

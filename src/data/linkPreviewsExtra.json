@@ -26,6 +26,7 @@
     "description": "Jo Murayama on IMDb."
   },
   "https://alexslakas.medium.com/": {
-    "description": "Alex's case studies and writing on Medium."
+    "description": "Alex's case studies and writing on Medium.",
+    "title": "Alex on Medium"
   }
 }
