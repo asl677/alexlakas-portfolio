@@ -6474,3 +6474,12 @@ html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .w
 html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-sticky-actions .wiki-language-icon {
   opacity: 1 !important; transform: none !important; visibility: inherit !important; position: static !important;
 }
+/* One hover for every header icon: white icon on the grey fill. */
+html body .wiki-shell .wiki-topbar nav > a:is(:hover, :focus-visible, :active),
+html body .wiki-shell .wiki-sticky-actions > :is(a, button):is(:hover, :focus-visible, :active),
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) :is(.theme-toggle, .wiki-language-button):is(:hover, :focus-visible, :active),
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .wiki-language.is-open .wiki-language-button {
+  background: var(--wiki-subtle) !important;
+  color: var(--wiki-ink) !important;
+  outline: none !important;
+}
