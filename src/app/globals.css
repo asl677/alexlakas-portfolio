@@ -6459,7 +6459,8 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 html body .wiki-shell .wiki-language-icon,
 html body .wiki-shell .wiki-language-icon .wiki-language-button {
   opacity: 1 !important; transform: none !important; visibility: visible !important;
-  position: static !important; display: inline-flex !important; align-items: center;
+  position: static !important; display: inline-flex !important; align-items: center; justify-content: center;
   padding: 0 !important; margin: 0 !important; border: 0 !important; background: none !important; color: inherit !important;
 }
 html body .wiki-language-button:focus, html body .wiki-language-button:focus-visible { outline: none !important; box-shadow: none !important; }
+html body .wiki-shell .wiki-language-icon .wiki-language-button { width: 34px; height: 34px; }
