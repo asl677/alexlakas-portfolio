@@ -1071,7 +1071,6 @@ export function IntroSequence() {
         let previousLines: HTMLElement[] = [];
         return new SplitText(target, {
         type: "lines",
-        mask: "lines",
         tag: "span",
         aria: "none",
         ignore: ".reference",
