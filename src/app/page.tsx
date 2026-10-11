@@ -105,6 +105,7 @@ export default function Home() {
                   <div className="wiki-sticky-actions">
                     {/* Mobile: opens the same search sheet as the top bar icon. */}
                     <button type="button" className="wiki-sticky-search" aria-label="Search" title="Search" onClick={() => document.querySelector<HTMLButtonElement>(".wiki-topbar .wiki-nav-search")?.click()}><Search size={20} strokeWidth={2} /></button>
+                    <LanguageMenu icon={<Languages size={20} strokeWidth={2} />} />
                     <a href="https://www.linkedin.com/in/latenights/" target="_blank" rel="noreferrer" aria-label="Contact me" title="Contact me"><MailOpen size={20} strokeWidth={2} /></a>
                     <ThemeSwitch />
                   </div>

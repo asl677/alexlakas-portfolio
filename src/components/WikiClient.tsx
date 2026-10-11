@@ -861,9 +861,6 @@ export function IntroSequence() {
       const stickScroll = naturalTop - stickyTop;
       const handoff = Math.min(1, Math.max(0, (window.scrollY - stickScroll + 16) / 32));
       articleHeader.style.setProperty("--wiki-handoff", handoff.toFixed(3));
-      // The top-right icon group is fixed; keep its right edge on the content's right edge.
-      const tabsRight = articleHeader.querySelector<HTMLElement>(".wiki-tabs")?.getBoundingClientRect().right;
-      if (tabsRight) document.documentElement.style.setProperty("--wiki-nav-right", `${Math.round(window.innerWidth - tabsRight)}px`);
       // Section headings stick directly beneath the article header's real height.
       document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.getBoundingClientRect().height}px`);
       // Top bar contents fade to exactly 0 by the time the bar has scrolled out of view.

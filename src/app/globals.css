@@ -6471,16 +6471,3 @@ html body .wiki-language-button:focus, html body .wiki-language-button:focus-vis
 /* Top bar icons: size the nav to its icons (three now), so none spill past the right edge. */
 html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; max-width: none !important; flex: 0 0 auto !important; justify-self: end; }
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { width: max-content !important; min-width: max-content !important; }
-
-/* Desktop: the top-right icons (languages, contact, theme) are one fixed group that never
-   changes on scroll. The scrolled header's duplicate icons are not shown. */
-@media (min-width: 769px) {
-  html body .wiki-shell header.wiki-topbar > nav {
-    position: fixed !important;
-    top: 13px !important;
-    right: var(--wiki-nav-right, 20px) !important;
-    z-index: 60 !important;
-  }
-  html body header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) { filter: none !important; }
-  html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { display: none !important; }
-}
