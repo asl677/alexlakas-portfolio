@@ -6127,13 +6127,11 @@ html body .wiki-shell ol.references .reference-backlink {
   margin-right: 0.35em !important;
 }
 
-/* In-article Contents: numbered like Wikipedia (1. Early life, 2. Career, …). */
+/* In-article Contents: a plain list, no numbers. */
 html body .wiki-shell .wiki-article-body .article-toc > ol {
-  list-style: decimal !important;
-  padding-left: 1.6em !important;
+  list-style: none !important;
+  padding-left: 0 !important;
 }
-html body .wiki-shell .wiki-article-body .article-toc > ol > li { display: list-item !important; }
-html body .wiki-shell .wiki-article-body .article-toc > ol > li::marker { color: var(--wiki-muted); }
 
 /* Profile details two sizes down (14px to 12px). */
 html body .wiki-shell .infobox :is(dt, dd) {
