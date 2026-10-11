@@ -6142,8 +6142,8 @@ html body .wiki-shell .infobox :is(dt, dd) {
 /* Text lines rise 30% of their height (no mask) as they clear, in step with the fade and blur
    (load and scroll), unclipped so the blur can spread softly. */
 /* transform (not the newer translate property) for iOS Safari reliability. */
-/* Same fixed 12px rise on every screen (a % of line height differed between phone and desktop). */
-.wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 12px)); }
+/* Same fixed 18px rise on every screen (a % of line height differed between phone and desktop). */
+.wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 18px)); }
 .wiki-reveal-line[style*="--wiki-wipe: 1;"],
 .wiki-reveal-line:not([style*="--wiki-wipe"]) { transform: none; }
 @media (prefers-reduced-motion: reduce) {
@@ -6370,3 +6370,8 @@ html body .wiki-shell .wiki-talk-page .wiki-talk-status { gap: 8px !important; p
 html body .wiki-shell .wiki-talk-page .wiki-talk-status > div { display: flex !important; align-items: center !important; gap: 8px; min-height: 28px !important; line-height: 1.3 !important; }
 /* Divider above the policy notice too, with the same 16px of space below it. */
 html body .wiki-shell .wiki-talk-page .wiki-talk-notice { box-shadow: inset 0 1px 0 var(--wiki-border) !important; padding-top: 16px !important; }
+
+/* Performance: a lighter blur (4px desktop, 2px phones). Filters on many moving lines are
+   the heaviest part of the reveal and caused the stutter. */
+.wiki-reveal-line, .wiki-reveal-block { filter: blur(calc(var(--wiki-blur-t) * 4px)); }
+@media (max-width: 768px) { .wiki-reveal-line, .wiki-reveal-block { filter: blur(calc(var(--wiki-blur-t) * 2px)); } }

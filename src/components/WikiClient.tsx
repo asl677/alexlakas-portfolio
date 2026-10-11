@@ -1014,6 +1014,8 @@ export function IntroSequence() {
       // List items reveal as whole items (bullet included), in sync with other lists.
       ".wiki-section-content .wiki-link-list > li",
       ".wiki-section-content > ul:not(.stack-tags) > li",
+      // Stack tags reveal one by one with the rest of the stagger.
+      ".wiki-section-content .stack-tags > li",
       // Case study rows: the thumbnail gets the media wipe, the text block fades.
       ".wiki-section-content .article-list-item > .article-list-image",
       ".wiki-section-content .work-links > li",
@@ -1038,6 +1040,8 @@ export function IntroSequence() {
       // Phones run every reveal slower (1.4x on top of the base timing), and scroll reveals play over a longer stretch of
       // scrolling: the same motion reads rushed on a small screen.
       const pace = window.matchMedia("(max-width: 768px)").matches ? 1.4 : 1;
+      // Text runs at desktop speed on phones (1.4x felt too slow); images keep the slower pace.
+      const textPace = 1;
       const fade = { duration: 0.8 * pace, stagger: 0.04 * pace, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
@@ -1177,7 +1181,9 @@ export function IntroSequence() {
         // ~1.2s: per-line items made a fixed 80ms step crawl down a full screen of text.
         // Cascade top-down: a clear per-item step (cap ~2.2s total) with short line wipes, so rows
         // follow one another instead of all wiping left-to-right at once.
-        const step = Math.min(fade.stagger, (2.6 * pace) / Math.max(1, elements.length));
+        // Line-by-line cadence: 50ms apart, the whole cascade capped at 1.5s so a full screen of
+        // text never drags.
+        const step = Math.min(0.04 * textPace, (1.2 * textPace) / Math.max(1, elements.length));
         visualOrder(elements).forEach((element, index) => {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
@@ -1188,11 +1194,11 @@ export function IntroSequence() {
           // curve, so they never run ahead of the text around them.
           timeline.fromTo(element, revealProperties(element, 0), {
             ...revealProperties(element, 1),
-            duration: media ? 1.8 * pace : wipe ? 1.6 * pace : element.classList.contains("wiki-reveal-line") ? 1.1 * pace : fade.duration,
+            duration: media ? 1.4 * pace : wipe ? 1.1 * pace : element.classList.contains("wiki-reveal-line") ? 0.55 * textPace : 0.4 * textPace,
             ease: media ? "power2.inOut" : wipe ? "power3.inOut" : ease
             // Strips trail their slot by 0.35s so the text has begun appearing first (the
             // headings are the topmost items, so in-slot they led the whole load).
-          }, wipe ? index * step + 0.35 * pace : index * step);
+          }, index * step);
         });
       };
       const isInRevealArea = (element: HTMLElement) => {
@@ -1227,9 +1233,9 @@ export function IntroSequence() {
       // (re-measured on resize/accordion changes) so the per-frame loop does no layout reads.
       // Ease-out (cubic) for scroll-linked progress: an in-out curve here held content near
       // invisible, then snapped it in mid-scroll. Out-curves track the scroll smoothly.
-      // Smoothstep for scroll-linked progress: the load curve is front-loaded, which on scroll
-      // finished the rise within a few pixels of entering, so the slide was barely visible.
-      const scrubEase = (t: number) => t * t * (3 - 2 * t);
+      // Scroll progress follows the same curve as the load reveal, so a line's rise, fade and
+      // blur have the same shape whether it appears on load or while scrolling.
+      const scrubEase = revealEase;
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
       // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
@@ -1272,8 +1278,7 @@ export function IntroSequence() {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
-          // The sticky Contents rail and the top bar (logo, search, icons) never scrub out once
-          // shown: their cached tops go stale as they stick or scroll away.
+          // The sticky Contents rail and the top bar never scrub out once shown.
           const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
           // One-way: scrolling back up never fades content out again.
           if (target <= item.current) continue;
@@ -1282,7 +1287,6 @@ export function IntroSequence() {
           if (Math.abs(target - next) < 0.002) next = target;
           item.current = next;
           applyReveal(element, next);
-          // The side rail stays put once shown; it never fades back out on scroll.
           if (element === rail && next === 1) revealedTargets.add(rail);
         }
       };
