@@ -330,7 +330,7 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
           id={inputId}
           autoFocus={autoFocus}
           value={query}
-          onFocus={() => { if (!query) setShowRecent(true); broadcast({ query }); }}
+          onFocus={() => { window.dispatchEvent(new CustomEvent("alexpedia-popover", { detail: "search" })); if (!query) setShowRecent(true); broadcast({ query }); }}
           // Desktop: leaving the field closes its dropdown, so a search whose header scrolled
           // away (or faded out) can't leave a list floating on the page.
           onBlur={() => {
@@ -1054,7 +1054,7 @@ export function IntroSequence() {
       let queueReveal = () => {};
       const revealedLines = new Set<HTMLElement>();
       let revealReady = false;
-      const scrubState = new Map<HTMLElement, { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number }>();
+      const scrubState = new Map<HTMLElement, { element: HTMLElement; top: number; hidden: boolean; media: boolean; wipe: boolean; current: number }>();
       // Keep punctuation that follows a link or reference on the same line as it: otherwise
       // SplitText treats ", and" as its own word and can wrap the comma to the next line.
       const gluePunctuation = (root: HTMLElement) => {
@@ -1120,7 +1120,7 @@ export function IntroSequence() {
             const limit = window.innerHeight;
             previousLines.forEach(line => {
               if (revealedLines.has(line) || line.getBoundingClientRect().top > limit) return;
-              scrubState.set(line, { element: line, top: 0, hidden: false, media: false, current: 1 });
+              scrubState.set(line, { element: line, top: 0, hidden: false, media: false, wipe: false, current: 1 });
               gsap.set(line, revealProperties(line, 1));
             });
           }
@@ -1236,7 +1236,7 @@ export function IntroSequence() {
       // Scroll progress follows the same curve as the load reveal, so a line's rise, fade and
       // blur have the same shape whether it appears on load or while scrolling.
       const scrubEase = revealEase;
-      type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
+      type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; wipe: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
       // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
       // wrote styles, forced a synchronous style recalc every frame of the opening reveal.
@@ -1252,7 +1252,7 @@ export function IntroSequence() {
         const y = window.scrollY;
         scrollHeight = document.documentElement.scrollHeight;
         scrubItems = [...targets, ...textLines].map(element => {
-          const item = scrubState.get(element) ?? { element, top: 0, hidden: false, media: element.matches("figure, .article-list-item, .article-list-image, .infobox"), current: 0 };
+          const item = scrubState.get(element) ?? { element, top: 0, hidden: false, media: element.matches("figure, .article-list-item, .article-list-image, .infobox"), wipe: element.classList.contains("wiki-wipe"), current: 0 };
           scrubState.set(element, item);
           item.top = element.getBoundingClientRect().top + y;
           item.hidden = !!element.closest(".wiki-section-body[aria-hidden='true']");
@@ -1279,7 +1279,10 @@ export function IntroSequence() {
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
           // The sticky Contents rail and the top bar never scrub out once shown.
-          const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top) / r)));
+          // Strip wipes (headings, images) spend their first half drawing the grey strip, so they
+          // start later than text: the strip then lands in step with the lines around it.
+          const lag = item.wipe ? r * 0.45 : 0;
+          const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
           // One-way: scrolling back up never fades content out again.
           if (target <= item.current) continue;
           // Light time-based easing toward the scroll target gives the reveal its glide.
@@ -1705,6 +1708,9 @@ const tryImage = (src: string, ms: number, min = 40) => new Promise<boolean>(res
 export function HoverCards() {
   const [card, setCard] = useState<HoverCardData | null>(null);
   const [visible, setVisible] = useState(false);
+  // Moving straight from one link to the next: the card switches over in place instead of
+  // hiding and waiting for the new picture.
+  const [switching, setSwitching] = useState(false);
   const [media, setMedia] = useState<HoverMedia>({ key: 0, status: "none" });
   const [liveText, setLiveText] = useState<{ key: number; text: string } | null>(null);
   const [liveTitle, setLiveTitle] = useState<{ key: number; title: string } | null>(null);
@@ -1717,6 +1723,7 @@ export function HoverCards() {
     let showTimer = 0;
     let hideTimer = 0;
     let current: HTMLAnchorElement | null = null;
+    let pending: Element | null = null;
 
     const build = (link: HTMLAnchorElement): Omit<HoverCardData, "key" | "left" | "top" | "below"> | null => {
       const href = link.getAttribute("href") ?? "";
@@ -1744,7 +1751,7 @@ export function HoverCards() {
         return {
           // Article/page title when known (link text is often just the site name).
           title: (!person && saved.title && cleanTitle(saved.title)) || (link.textContent ?? "").trim(),
-          text: person ? (personBlurbs as Record<string, string>)[href] : saved.description,
+          text: person ? (personBlurbs as Record<string, string>)[href] ?? saved.description : saved.description,
           site: shown,
           person,
           href,
@@ -1773,28 +1780,52 @@ export function HoverCards() {
       if (!link || link === current || link.closest(".article-list-item, .wiki-tab, .article-toc, .reference-backlink")) return;
       window.clearTimeout(hideTimer);
       window.clearTimeout(showTimer);
+      pending = link;
+      const switchOver = !!current;
       showTimer = window.setTimeout(() => {
+        setSwitching(switchOver);
+        pending = null;
         const data = build(link);
         if (!data) return;
         current = link;
+        shownAtY = window.scrollY;
         place(link, data);
-      }, 120);
+      }, switchOver ? 0 : 120);
     };
     const onOut = (event: MouseEvent) => {
+      const from = event.target as HTMLElement;
       const to = event.relatedTarget as HTMLElement | null;
-      if (to && (cardRef.current?.contains(to) || (current && current.contains(to)))) return;
+      // Only leaving the hovered/pending link or the card matters; mouseouts from everything
+      // else on the page used to queue stray hide timers that killed the next card.
+      const leaving = (current && current.contains(from)) || (pending && pending.contains(from)) || cardRef.current?.contains(from);
+      if (!leaving) return;
+      if (to && (cardRef.current?.contains(to) || (current && current.contains(to)) || (pending && pending.contains(to)))) return;
       window.clearTimeout(showTimer);
+      pending = null;
+      window.clearTimeout(hideTimer);
       hideTimer = window.setTimeout(() => { setVisible(false); current = null; }, 160);
     };
-    const onScroll = () => { setVisible(false); current = null; };
+    // Smooth scrolling keeps emitting tiny scroll events after the wheel stops, which hid the
+    // card the moment it appeared. Only a real scroll (30px+ since it opened) hides it.
+    let shownAtY = 0;
+    const onScroll = () => { if (current && Math.abs(window.scrollY - shownAtY) > 30) { setVisible(false); current = null; } };
 
     document.addEventListener("mouseover", onOver);
+    // A link that scrolled under a resting cursor (or whose card a scroll closed) never gets a
+    // new mouseover; any movement over it shows the card.
+    const onMove = (event: MouseEvent) => {
+      if (current) return;
+      const link = (event.target as HTMLElement).closest?.("a[href]");
+      if (link && link !== pending) onOver(event);
+    };
+    document.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseout", onOut);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.clearTimeout(showTimer);
       window.clearTimeout(hideTimer);
       document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseout", onOut);
       window.removeEventListener("scroll", onScroll);
     };
@@ -1820,9 +1851,9 @@ export function HoverCards() {
       .then(response => response.json() as Promise<{ images?: string[]; image?: string; description?: string; title?: string }>)
       .catch(() => ({} as { images?: string[]; image?: string; description?: string; title?: string }));
     live.then(data => {
-      if (settled || card.person) return;
+      if (settled) return;
       if (data.description && !card.text) setLiveText({ key, text: data.description });
-      if (data.title && !linkPreviews[href]?.title && cleanTitle(data.title)) setLiveTitle({ key, title: cleanTitle(data.title) });
+      if (!card.person && data.title && !linkPreviews[href]?.title && cleanTitle(data.title)) setLiveTitle({ key, title: cleanTitle(data.title) });
     });
     const liveImage = live.then(data => Promise.all((data.images ?? (data.image ? [data.image] : [])).slice(0, 4).map(url => load(url, 200)))).then(found => found.find(Boolean) ?? null);
     const icon = load(`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent("https://" + host)}&size=256`, 32);
@@ -1834,7 +1865,11 @@ export function HoverCards() {
         if (results[i] === undefined && !force) return;
         if (results[i]) {
           settled = true;
-          setMedia({ key, status: "ready", src: results[i] as string, icon: i === 2 });
+          // A share image that is a logo (named logo/icon, or an SVG) shows inset like a site
+          // icon; square cover art and photos keep the full picture column.
+          const src = results[i] as string;
+          const logo = !card.person && /logo|icon|\.svg(\?|$)/i.test(decodeURIComponent(src));
+          setMedia({ key, status: "ready", src, icon: i === 2 || logo });
           setVisible(true);
           return;
         }
@@ -1878,7 +1913,9 @@ export function HoverCards() {
       ref={cardRef}
       // Visible only once the picture question is settled, so the card never shows at one
       // width and then jumps to another.
-      className={`wiki-hovercard${visible && (!card.href || (media.key === card.key && media.status !== "loading")) ? " is-visible" : ""}${card.below ? " is-below" : ""}${hasMedia ? " has-media" : ""}${!text && !card.bodyHtml ? " is-compact" : ""}`}
+      // Never indexed or quoted by search engines (people's details live here).
+      data-nosnippet=""
+      className={`wiki-hovercard${visible && (switching || !card.href || (media.key === card.key && media.status !== "loading")) ? " is-visible" : ""}${card.below ? " is-below" : ""}${hasMedia ? " has-media" : ""}${!text && !card.bodyHtml ? " is-compact" : ""}`}
       style={{ left: card.left, ...(card.below ? { top: card.top } : { bottom: card.top }) }}
     >
       <div className="wiki-hovercard-copy">
@@ -1941,9 +1978,17 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
     window.clearTimeout(closeTimer.current);
     const box = button.getBoundingClientRect();
     setCardPos({ top: box.bottom + 10, right: Math.max(16, window.innerWidth - box.right) });
+    // Only one menu open at a time: close the search list (it closes on blur) and other menus.
+    if (document.activeElement instanceof HTMLElement && document.activeElement.closest(".wiki-search")) document.activeElement.blur();
+    window.dispatchEvent(new CustomEvent("alexpedia-popover", { detail: rootRef.current }));
     setOpen(true);
   };
   const scheduleClose = () => { closeTimer.current = window.setTimeout(() => setOpen(false), 220); };
+  useEffect(() => {
+    const onOther = (event: Event) => { if ((event as CustomEvent).detail !== rootRef.current) setOpen(false); };
+    window.addEventListener("alexpedia-popover", onOther);
+    return () => window.removeEventListener("alexpedia-popover", onOther);
+  }, []);
   useEffect(() => {
     if (!open) return;
     const close = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node) && !cardRef.current?.contains(event.target as Node)) setOpen(false); };

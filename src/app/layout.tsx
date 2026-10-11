@@ -7,10 +7,15 @@ const enableGoogleAnalytics =
   process.env.VERCEL_ENV === "production" &&
   /^G-[A-Z0-9]+$/.test(gaMeasurementId ?? "");
 
+// Minimal, generic metadata: no other people's names or details.
+const description = "Designer and art director in Los Angeles.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://alexlakas.com"),
   title: "Alex, Designer",
-  description: "Alex Lakas, Los Angeles-based designer and art director. Product design, identity, systems, and creative work.",
+  description,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png" },
@@ -22,7 +27,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Alex, Designer",
-    description: "Alex Lakas, Los Angeles-based designer and art director. Product design, identity, systems, and creative work.",
+    description,
     url: "https://alexlakas.com",
     siteName: "Alex, Designer",
     locale: "en_US",
@@ -31,7 +36,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Alex, Designer",
-    description: "Alex Lakas, Los Angeles-based designer and art director. Product design, identity, systems, and creative work.",
+    description,
   },
 };
 

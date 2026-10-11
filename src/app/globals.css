@@ -6497,3 +6497,20 @@ html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) { gap: 8px !im
 html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-sticky-actions .wiki-language-icon {
   opacity: 1 !important; transform: none !important; visibility: inherit !important;
 }
+
+/* Language menu uses the search dropdown's surface: border, glass fill, no radius or shadow. */
+html body .wiki-language-card {
+  border: 1px solid var(--wiki-border) !important;
+  background: var(--wiki-glass-bg) !important;
+  -webkit-backdrop-filter: var(--wiki-glass-blur) !important;
+  backdrop-filter: var(--wiki-glass-blur) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+/* Old "N languages" label rules made .wiki-language unclickable once scrolled; the icon must stay clickable. */
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-language-icon,
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-language-icon .wiki-language-button { pointer-events: auto !important; }
+/* Text links keep their color on hover and after a visit; hover only draws the underline. */
+html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .references, .wiki-link-list, .wiki-contents) a:not(.article-list-image):not(.wiki-tab):is(:link, :visited, :hover, :focus-visible, :active) {
+  color: var(--wiki-link) !important;
+}

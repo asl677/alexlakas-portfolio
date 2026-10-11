@@ -10,23 +10,21 @@
   "https://www.514.ax/": {
     "description": "Fiveonefour: data infrastructure and AI tooling for developers."
   },
-  "https://www.morrowed.com/": {
-    "description": "Portfolio of designer Jason Morrow."
-  },
-  "https://www.simonfungcreative.com/": {
-    "description": "Portfolio of designer Simon Fung."
-  },
-  "https://dinetz.com/": {
-    "description": "Site of David Dinetz."
-  },
-  "https://www.cabral.design/": {
-    "description": "Portfolio of designer Andre Cabral."
-  },
-  "https://www.imdb.com/name/nm5680415/": {
-    "description": "Jo Murayama on IMDb."
-  },
+  "https://www.morrowed.com/": {},
+  "https://www.simonfungcreative.com/": {},
+  "https://dinetz.com/": {},
+  "https://www.cabral.design/": {},
+  "https://www.imdb.com/name/nm5680415/": {},
   "https://alexslakas.medium.com/": {
     "description": "Alex's case studies and writing on Medium.",
     "title": "Alex on Medium"
+  },
+  "https://www.youtube.com/watch?v=QIbPZgH1zRY": {
+    "title": "The Tonight Show features Google's Live Popular Times",
+    "description": "YouTube video posted by Alex Lakas."
+  },
+  "https://www.youtube.com/watch?v=0OScZ_93-_0": {
+    "title": "Culprit Creative Reel",
+    "description": "Culprit Studios reel. Clients include Beats by Dre, Starbucks, Facebook, Spotify and Coca-Cola."
   }
 }
