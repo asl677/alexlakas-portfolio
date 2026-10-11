@@ -6459,9 +6459,10 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
    arrives exactly like the sticky icons: scroll-linked, rising 14px and fading in. */
 html body .wiki-shell .wiki-tab-actions { display: flex; align-items: center; gap: 16px; }
 html body .wiki-shell .wiki-tab-actions .wiki-tab-language > * {
-  opacity: calc(var(--wiki-reveal, 1) * clamp(0, calc(var(--wiki-handoff, 0) * 2 - 1), 1));
-  transform: translateY(calc((1 - var(--wiki-handoff, 0)) * 14px));
-  pointer-events: none;
+  opacity: calc(var(--wiki-reveal, 1) * clamp(0, calc(var(--wiki-handoff, 0) * 2 - 1), 1)) !important;
+  visibility: visible !important;
+  transform: translateY(calc((1 - var(--wiki-handoff, 0)) * 14px)) !important;
+  pointer-events: none !important;
 }
-html body .wiki-shell .wiki-article-header.is-scrolled .wiki-tab-actions .wiki-tab-language > * { pointer-events: auto; }
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-tab-actions .wiki-tab-language > * { pointer-events: auto !important; }
 @media (max-width: 768px) { html body .wiki-shell .wiki-tab-actions .wiki-tab-language { display: none; } }
