@@ -847,6 +847,13 @@ export function IntroSequence() {
       const isScrolled = wasScrolled ? headerTop <= stickyTop + 8 : headerTop <= stickyTop + 1;
       const scrollProgress = Math.min(window.scrollY / 96, 1);
       const easedProgress = scrollProgress * scrollProgress * (3 - (2 * scrollProgress));
+      // Scrolled-header icons: a quick GSAP stagger in (rise + fade) when the header sticks,
+      // and back out in reverse when it un-sticks.
+      if (isScrolled !== wasScrolled) {
+        const icons = Array.from(articleHeader.querySelectorAll<HTMLElement>(".wiki-sticky-actions > *")).filter(icon => icon.offsetWidth);
+        gsap.killTweensOf(icons);
+        gsap.to(isScrolled ? icons : [...icons].reverse(), { "--icon-o": isScrolled ? 1 : 0, "--icon-y": isScrolled ? "0px" : "12px", duration: 0.35, ease: isScrolled ? "power3.out" : "power2.in", stagger: 0.06, overwrite: true });
+      }
       topbar.classList.toggle("is-scrolled", isScrolled);
       articleHeader.classList.toggle("is-scrolled", isScrolled);
       contents.classList.toggle("is-scrolled", isScrolled);
@@ -1950,7 +1957,10 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
     // Scrolling the page closes it (scrolling inside the card scrolls only the card). The
     // phone sheet stays open until a tap outside or a pick.
-    const onScroll = () => { if (!window.matchMedia("(max-width: 768px)").matches) setOpen(false); };
+    // Smooth scrolling keeps firing small scroll events after a wheel stops, so only a real
+    // scroll (40px+) closes it.
+    const startY = window.scrollY;
+    const onScroll = () => { if (!window.matchMedia("(max-width: 768px)").matches && Math.abs(window.scrollY - startY) > 40) setOpen(false); };
     document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", escape);
     window.addEventListener("scroll", onScroll, { passive: true });

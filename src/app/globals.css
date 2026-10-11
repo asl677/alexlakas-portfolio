@@ -6471,8 +6471,16 @@ html body .wiki-shell .wiki-language-icon.is-open .wiki-language-button {
 html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; }
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { width: max-content !important; min-width: max-content !important; }
 /* The scrolled-header language icon fades with its group, not with the old label's hand-off. */
-html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-sticky-actions .wiki-language-icon {
-  opacity: 1 !important; transform: none !important; visibility: inherit !important; position: static !important;
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-sticky-actions .wiki-language-icon { position: static !important; }
+/* The scrolled-header icons are revealed per icon by GSAP (staggered), so the group itself
+   no longer fades or slides with the scroll hand-off; it is clickable once stuck. */
+@media (min-width: 769px) {
+  html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-title-action .wiki-sticky-actions {
+    opacity: var(--wiki-reveal, 1) !important; transform: translateY(-50%) !important;
+  }
+  html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-title-action .wiki-sticky-actions > * {
+    opacity: var(--icon-o, 0) !important; transform: translateY(var(--icon-y, 12px)) !important; visibility: visible !important;
+  }
 }
 /* One hover for every header icon: white icon on the grey fill. */
 html body .wiki-shell .wiki-topbar nav > a:is(:hover, :focus-visible, :active),

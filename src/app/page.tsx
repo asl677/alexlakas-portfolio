@@ -1,6 +1,6 @@
 "use client";
 
-import { Languages, MailOpen, Search, Star } from "lucide-react";
+import { Globe, MailOpen, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
 import { ArticleTabs, ContentsScrollSpy, HoverCards, HoverPortrait, LanguageMenu, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
@@ -50,6 +50,17 @@ function Ref({ n }: { n: number }) {
   );
 }
 
+// Languages, contact and theme: one shared set, used in the top bar and the scrolled header.
+function HeaderIcons() {
+  return (
+    <>
+      <LanguageMenu icon={<Globe size={20} strokeWidth={2} />} />
+      <a href="https://www.linkedin.com/in/latenights/" target="_blank" rel="noreferrer" aria-label="Contact me" title="Contact me"><MailOpen size={20} strokeWidth={2} /></a>
+      <ThemeSwitch />
+    </>
+  );
+}
+
 export default function Home() {
 
   return (
@@ -69,9 +80,7 @@ export default function Home() {
           <PageSearch />
           <nav>
             <MobileSearchSheet />
-            <LanguageMenu icon={<Languages size={20} strokeWidth={2} />} />
-            <a href="https://www.linkedin.com/in/latenights/" target="_blank" rel="noreferrer" aria-label="Contact me" title="Contact me"><MailOpen size={20} strokeWidth={2} /></a>
-            <ThemeSwitch />
+            <HeaderIcons />
           </nav>
         </header>
 
@@ -105,15 +114,13 @@ export default function Home() {
                   <div className="wiki-sticky-actions">
                     {/* Mobile: opens the same search sheet as the top bar icon. */}
                     <button type="button" className="wiki-sticky-search" aria-label="Search" title="Search" onClick={() => document.querySelector<HTMLButtonElement>(".wiki-topbar .wiki-nav-search")?.click()}><Search size={20} strokeWidth={2} /></button>
-                    <LanguageMenu icon={<Languages size={20} strokeWidth={2} />} />
-                    <a href="https://www.linkedin.com/in/latenights/" target="_blank" rel="noreferrer" aria-label="Contact me" title="Contact me"><MailOpen size={20} strokeWidth={2} /></a>
-                    <ThemeSwitch />
+                    <HeaderIcons />
                   </div>
                 </div>
               </div>
               <ArticleTabs />
               <div className="wiki-mobile-tools" aria-label="Article tools">
-                <button type="button" aria-label="Languages"><Languages size={24} strokeWidth={2} /></button>
+                <button type="button" aria-label="Languages"><Globe size={24} strokeWidth={2} /></button>
                 <button type="button" aria-label="Add to watchlist"><Star size={24} strokeWidth={2} /></button>
               </div>
             </header>
