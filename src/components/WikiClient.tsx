@@ -1173,20 +1173,16 @@ export function IntroSequence() {
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
           const wipe = element.classList.contains("wiki-wipe");
           const media = element.classList.contains("wiki-wipe-media");
-          // Text fades only (no slide).
-          const rise = false;
-          timeline.fromTo(element, { ...revealProperties(element, 0), ...(rise ? { y: 20 } : {}) }, {
+          // Every element starts in its own top-down slot. Lines rise/fade/un-blur via CSS from
+          // --wiki-wipe; strips (headings 1.6s, images 1.8s) cover then uncover on a symmetric
+          // curve, so they never run ahead of the text around them.
+          timeline.fromTo(element, revealProperties(element, 0), {
             ...revealProperties(element, 1),
-            ...(rise ? { y: 0, force3D: true, clearProps: "transform" } : {}),
-            // One curve (easeInOutQuart) for everything. A wipe covers then uncovers, so it runs
-            // twice as long and starts half a fade early: its content appears exactly when a
-            // plain fade at the same slot would.
-            // Images: one continuous 1.8s reveal (fade + scale + cover retract together).
             duration: media ? 1.8 * pace : wipe ? 1.6 * pace : element.classList.contains("wiki-reveal-line") ? 1.1 * pace : fade.duration,
-            // Strip wipes keep a symmetric curve (cover, then uncover) and start 0.6s early so
-            // their content shows when a text fade in the same slot would.
             ease: media ? "power2.inOut" : wipe ? "power3.inOut" : ease
-          }, wipe && !media ? Math.max(0, index * step - 0.8 * pace) : index * step);
+            // Strips trail their slot by 0.35s so the text has begun appearing first (the
+            // headings are the topmost items, so in-slot they led the whole load).
+          }, wipe ? index * step + 0.35 * pace : index * step);
         });
       };
       const isInRevealArea = (element: HTMLElement) => {

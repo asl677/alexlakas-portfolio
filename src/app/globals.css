@@ -6163,3 +6163,8 @@ html body .wiki-shell .infobox :is(dt, dd) {
     line-height: 1.58 !important;
   }
 }
+
+/* No sliver of strip at rest: hidden until the reveal actually starts (and once it ends). */
+.wiki-wipe::after { opacity: clamp(0, calc(var(--wiki-wipe) * 50), 1); }
+.wiki-wipe[style*="--wiki-wipe: 1;"]::after,
+.wiki-wipe:not([style*="--wiki-wipe"])::after { display: none; }
