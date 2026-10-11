@@ -1948,8 +1948,9 @@ export function LanguageMenu() {
     if (!open) return;
     const close = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node) && !cardRef.current?.contains(event.target as Node)) setOpen(false); };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
-    // Scrolling the page closes it (scrolling inside the card scrolls only the card).
-    const onScroll = () => setOpen(false);
+    // Scrolling the page closes it (scrolling inside the card scrolls only the card). The
+    // phone sheet stays open until a tap outside or a pick.
+    const onScroll = () => { if (!window.matchMedia("(max-width: 768px)").matches) setOpen(false); };
     document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", escape);
     window.addEventListener("scroll", onScroll, { passive: true });

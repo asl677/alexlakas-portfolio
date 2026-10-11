@@ -6381,7 +6381,6 @@ html body .wiki-language-card { overscroll-behavior: contain; }
 html body .wiki-language-card ul { margin-top: 0; }
 html body .wiki-language-card li button.is-current { font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
 /* Phones: no languages control or card. */
-@media (max-width: 768px) { html body .wiki-shell .wiki-language, .wiki-language-card { display: none !important; } }
 /* All languages muted; only the current one is white (no underline, normal weight). */
 html body .wiki-language-card li button { color: var(--wiki-muted) !important; }
 html body .wiki-language-card li button.is-current { color: var(--wiki-ink) !important; text-decoration: none !important; font-weight: inherit !important; }
@@ -6434,3 +6433,24 @@ html:is(.translated-ltr, .translated-rtl) body {
 html:is(.translated-ltr, .translated-rtl) sup.reference,
 html:is(.translated-ltr, .translated-rtl) sup.reference * { word-spacing: -0.25em; white-space: nowrap; }
 html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font-family: Georgia, "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", serif; }
+
+/* Phones: the "N languages" label opens the list as a bottom sheet (like the search sheet). */
+@media (max-width: 768px) {
+  html body .wiki-shell .wiki-language { display: block !important; }
+  html body .wiki-language-card {
+    position: fixed !important;
+    top: auto !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-height: 75svh !important;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom)) !important;
+    background: var(--wiki-page) !important;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5) !important;
+    animation: wiki-sheet-up 0.35s var(--wiki-ease) both !important;
+  }
+  html body .wiki-language-card ul { columns: 2 !important; }
+  html body .wiki-language-card li button { padding: 8px 0 !important; font-size: 16px !important; }
+}
+@keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
