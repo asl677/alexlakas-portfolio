@@ -6133,9 +6133,10 @@ html body .wiki-shell .infobox :is(dt, dd) {
 
 /* Text lines rise their full height (100%) as they clear, in step with the fade and blur
    (load and scroll); the line mask clips the start of the travel. */
-.wiki-reveal-line { translate: 0 calc((1 - var(--wiki-wipe, 1)) * 100%); }
+/* transform (not the newer translate property) for iOS Safari reliability. */
+.wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 100%)); }
 .wiki-reveal-line[style*="--wiki-wipe: 1;"],
-.wiki-reveal-line:not([style*="--wiki-wipe"]) { translate: none; }
+.wiki-reveal-line:not([style*="--wiki-wipe"]) { transform: none; }
 @media (prefers-reduced-motion: reduce) {
-  .wiki-reveal-line { translate: none; }
+  .wiki-reveal-line { transform: none; }
 }
