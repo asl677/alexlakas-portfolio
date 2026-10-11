@@ -6455,11 +6455,13 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 }
 @keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 
-/* Desktop: the languages label stays in the stuck header like the tabs, sliding left as the
-   icons arrive so the two sit side by side. It keeps only the load reveal, no fade-out. */
-@media (min-width: 769px) {
-  html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-language {
-    opacity: var(--wiki-reveal, 1) !important;
-    transform: translate(calc(var(--wiki-handoff, 0) * -96px), calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px))) !important;
-  }
+/* Desktop: once the header sticks, a copy of the languages label sits left of "Read" and
+   arrives exactly like the sticky icons: scroll-linked, rising 14px and fading in. */
+html body .wiki-shell .wiki-tab-actions { display: flex; align-items: center; gap: 16px; }
+html body .wiki-shell .wiki-tab-actions .wiki-tab-language > * {
+  opacity: calc(var(--wiki-reveal, 1) * clamp(0, calc(var(--wiki-handoff, 0) * 2 - 1), 1));
+  transform: translateY(calc((1 - var(--wiki-handoff, 0)) * 14px));
+  pointer-events: none;
 }
+html body .wiki-shell .wiki-article-header.is-scrolled .wiki-tab-actions .wiki-tab-language > * { pointer-events: auto; }
+@media (max-width: 768px) { html body .wiki-shell .wiki-tab-actions .wiki-tab-language { display: none; } }

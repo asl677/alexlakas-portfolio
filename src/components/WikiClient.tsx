@@ -1486,6 +1486,7 @@ export function ArticleTabs() {
         <a href="#talk" className={"wiki-tab " + (view === "talk" ? "is-selected" : "")} role="tab" aria-selected={view === "talk"} onClick={releasePointerFocus}>Talk</a>
       </div>
       <div className="wiki-tab-actions">
+        <div className="wiki-tab-language"><LanguageMenu /></div>
         <span>Read</span>
       </div>
     </div>
