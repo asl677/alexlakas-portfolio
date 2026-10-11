@@ -6464,3 +6464,5 @@ html body .wiki-shell .wiki-language-icon .wiki-language-button {
 }
 html body .wiki-language-button:focus, html body .wiki-language-button:focus-visible { outline: none !important; box-shadow: none !important; }
 html body .wiki-shell .wiki-language-icon .wiki-language-button { width: 34px; height: 34px; }
+/* Top bar icons: size the nav to its icons (three now), so none spill past the right edge. */
+html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; max-width: none !important; flex: 0 0 auto !important; justify-self: end; }
