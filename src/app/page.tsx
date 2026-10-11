@@ -74,6 +74,13 @@ export default function Home() {
             <ThemeSwitch />
           </nav>
         </header>
+        {/* Desktop: the same icons as one fixed group, laid exactly over the top bar's icons
+            (which stay in place, invisible, so the bar's layout never changes). */}
+        <div className="wiki-fixed-icons">
+          <LanguageMenu icon={<Languages size={20} strokeWidth={2} />} />
+          <a href="https://www.linkedin.com/in/latenights/" target="_blank" rel="noreferrer" aria-label="Contact me" title="Contact me"><MailOpen size={20} strokeWidth={2} /></a>
+          <ThemeSwitch />
+        </div>
 
         <div className="wiki-layout">
           <aside className="wiki-contents" aria-label="Contents">

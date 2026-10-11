@@ -861,6 +861,12 @@ export function IntroSequence() {
       const stickScroll = naturalTop - stickyTop;
       const handoff = Math.min(1, Math.max(0, (window.scrollY - stickScroll + 16) / 32));
       articleHeader.style.setProperty("--wiki-handoff", handoff.toFixed(3));
+      // Fixed icon group: sit exactly where the top bar's own icons are at the top of the page.
+      const navBox = topbar.querySelector<HTMLElement>(":scope > nav")?.getBoundingClientRect();
+      if (navBox && navBox.width) {
+        document.documentElement.style.setProperty("--wiki-icons-right", `${Math.round(window.innerWidth - navBox.right)}px`);
+        document.documentElement.style.setProperty("--wiki-icons-top", `${Math.round(navBox.top + window.scrollY)}px`);
+      }
       // Section headings stick directly beneath the article header's real height.
       document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.getBoundingClientRect().height}px`);
       // Top bar contents fade to exactly 0 by the time the bar has scrolled out of view.

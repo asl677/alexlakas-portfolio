@@ -6471,3 +6471,27 @@ html body .wiki-language-button:focus, html body .wiki-language-button:focus-vis
 /* Top bar icons: size the nav to its icons (three now), so none spill past the right edge. */
 html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; max-width: none !important; flex: 0 0 auto !important; justify-self: end; }
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { width: max-content !important; min-width: max-content !important; }
+
+/* Desktop: one fixed icon group (languages, contact, theme) that never changes on scroll.
+   The top bar keeps its own icons for layout only; the scrolled header shows no copies. */
+.wiki-fixed-icons { display: none; }
+@media (min-width: 769px) {
+  html body .wiki-shell header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) { visibility: hidden !important; }
+  html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { display: none !important; }
+  html body .wiki-shell .wiki-fixed-icons {
+    position: fixed; z-index: 60; top: var(--wiki-icons-top, 15px); right: var(--wiki-icons-right, 44px);
+    display: flex; align-items: center; gap: 8px;
+  }
+  html body .wiki-shell .wiki-fixed-icons > a,
+  html body .wiki-shell .wiki-fixed-icons .theme-toggle,
+  html body .wiki-shell .wiki-fixed-icons .wiki-language-button {
+    display: inline-grid !important; place-items: center; width: 34px !important; height: 34px !important;
+    margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important;
+    color: var(--wiki-ink) !important; transition: background-color 160ms ease, color 160ms ease;
+  }
+  html body .wiki-shell .wiki-fixed-icons svg { width: 20px !important; height: 20px !important; stroke-width: 2 !important; }
+  html body .wiki-shell .wiki-fixed-icons :is(> a, .theme-toggle, .wiki-language-button):is(:hover, :focus-visible),
+  html body .wiki-shell .wiki-fixed-icons .wiki-language.is-open .wiki-language-button {
+    background: var(--wiki-subtle) !important; color: var(--wiki-link-blue-hover) !important; outline: none !important;
+  }
+}
