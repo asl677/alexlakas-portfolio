@@ -847,13 +847,6 @@ export function IntroSequence() {
       const isScrolled = wasScrolled ? headerTop <= stickyTop + 8 : headerTop <= stickyTop + 1;
       const scrollProgress = Math.min(window.scrollY / 96, 1);
       const easedProgress = scrollProgress * scrollProgress * (3 - (2 * scrollProgress));
-      // Scrolled-header icons: a quick GSAP stagger in (rise + fade) when the header sticks,
-      // and back out in reverse when it un-sticks.
-      if (isScrolled !== wasScrolled) {
-        const icons = Array.from(articleHeader.querySelectorAll<HTMLElement>(".wiki-sticky-actions > *")).filter(icon => icon.offsetWidth);
-        gsap.killTweensOf(icons);
-        gsap.to(isScrolled ? icons : [...icons].reverse(), { "--icon-o": isScrolled ? 1 : 0, "--icon-y": isScrolled ? "0px" : "12px", duration: 0.35, ease: isScrolled ? "power3.out" : "power2.in", stagger: 0.06, overwrite: true });
-      }
       topbar.classList.toggle("is-scrolled", isScrolled);
       articleHeader.classList.toggle("is-scrolled", isScrolled);
       contents.classList.toggle("is-scrolled", isScrolled);

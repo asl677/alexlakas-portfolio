@@ -6472,16 +6472,6 @@ html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-widt
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { width: max-content !important; min-width: max-content !important; }
 /* The scrolled-header language icon fades with its group, not with the old label's hand-off. */
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-sticky-actions .wiki-language-icon { position: static !important; }
-/* The scrolled-header icons are revealed per icon by GSAP (staggered), so the group itself
-   no longer fades or slides with the scroll hand-off; it is clickable once stuck. */
-@media (min-width: 769px) {
-  html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-title-action .wiki-sticky-actions {
-    opacity: var(--wiki-reveal, 1) !important; transform: translateY(-50%) !important;
-  }
-  html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-title-action .wiki-sticky-actions > * {
-    opacity: var(--icon-o, 0) !important; transform: translateY(var(--icon-y, 12px)) !important; visibility: visible !important;
-  }
-}
 /* One hover for every header icon: white icon on the grey fill. */
 html body .wiki-shell .wiki-topbar nav > a:is(:hover, :focus-visible, :active),
 html body .wiki-shell .wiki-sticky-actions > :is(a, button):is(:hover, :focus-visible, :active),
@@ -6490,4 +6480,20 @@ html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .wiki-language
   background: var(--wiki-subtle) !important;
   color: var(--wiki-ink) !important;
   outline: none !important;
+}
+
+/* Scrolled-header icons are the same component as the top bar's: identical box, icon and hover. */
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) > a,
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .theme-toggle,
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .wiki-language-button {
+  display: inline-grid !important; place-items: center !important; width: 34px !important; height: 34px !important;
+  margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important;
+  background: transparent; color: var(--wiki-ink) !important; transition: background-color 160ms ease, color 160ms ease;
+}
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) > a svg,
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) :is(.theme-toggle, .wiki-language-button) svg { width: 20px !important; height: 20px !important; stroke-width: 2 !important; }
+html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) { gap: 8px !important; }
+/* The scrolled-header language icon fades with its group, never with the old label's hand-off. */
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-sticky-actions .wiki-language-icon {
+  opacity: 1 !important; transform: none !important; visibility: inherit !important;
 }
