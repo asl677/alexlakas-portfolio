@@ -6456,7 +6456,7 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 @keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 
 /* Language icon: identical box, icon, stroke and hover to the envelope and theme buttons. */
-html body .wiki-shell .wiki-language-icon { display: inline-flex !important; opacity: 1 !important; transform: none !important; visibility: visible !important; position: static !important; margin: 0 !important; padding: 0 !important; }
+html body .wiki-shell .wiki-language-icon { display: inline-flex !important; position: static !important; margin: 0 !important; padding: 0 !important; transform: none !important; }
 html body .wiki-shell .wiki-language-icon .wiki-language-button {
   display: inline-grid !important; place-items: center; width: 34px !important; height: 34px !important;
   margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important;
