@@ -2009,7 +2009,8 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
   return (
     <div ref={rootRef} className={`wiki-language${icon ? " wiki-language-icon" : ""}${open ? " is-open" : ""}`}>
       <button type="button" className="wiki-language-button" aria-expanded={open} aria-label={icon ? "Languages" : undefined} title={icon ? "Languages" : undefined}
-        onClick={event => (open ? setOpen(false) : openAt(event.currentTarget))}
+        // Hover already opened it on desktop, so a click must not toggle it shut; touch toggles.
+        onClick={event => (open && !window.matchMedia("(hover: hover)").matches ? setOpen(false) : openAt(event.currentTarget))}
         // Desktop: opens on hover like the other cards.
         onMouseEnter={event => { if (window.matchMedia("(hover: hover)").matches) openAt(event.currentTarget); }}
         onMouseLeave={scheduleClose}>
