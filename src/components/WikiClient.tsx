@@ -1028,7 +1028,7 @@ export function IntroSequence() {
       // Phones run every reveal slower (1.4x on top of the base timing), and scroll reveals play over a longer stretch of
       // scrolling: the same motion reads rushed on a small screen.
       const pace = window.matchMedia("(max-width: 768px)").matches ? 1.4 : 1;
-      const fade = { duration: 1 * pace, stagger: 0.04 * pace, ease: wikiEase };
+      const fade = { duration: 0.8 * pace, stagger: 0.04 * pace, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
@@ -1179,7 +1179,7 @@ export function IntroSequence() {
             // twice as long and starts half a fade early: its content appears exactly when a
             // plain fade at the same slot would.
             // Images: one continuous 1.8s reveal (fade + scale + cover retract together).
-            duration: media ? 1.8 * pace : wipe ? 1.6 * pace : element.classList.contains("wiki-reveal-line") ? 1.3 * pace : fade.duration,
+            duration: media ? 1.8 * pace : wipe ? 1.6 * pace : element.classList.contains("wiki-reveal-line") ? 1.1 * pace : fade.duration,
             // Strip wipes keep a symmetric curve (cover, then uncover) and start 0.6s early so
             // their content shows when a text fade in the same slot would.
             ease: media ? "power2.inOut" : wipe ? "power3.inOut" : ease

@@ -6102,19 +6102,29 @@ html body .wiki-shell .article-toc { background: transparent !important; }
   }
 }
 
-/* References: a numbered list again (1., 2., …), with a regular-weight back-link caret. */
+/* References: the number (rendered in the markup) sits flush to the column's left edge, the
+   entry text starts 2em in, and wrapped lines hang under the text. */
 html body .wiki-shell .wiki-section .wiki-section-content ol.references {
-  list-style: decimal !important;
-  padding-left: 1.75em !important;
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
 html body .wiki-shell .wiki-section .wiki-section-content ol.references > li {
-  display: list-item !important;
+  display: block !important;
+  position: relative;
+  padding-left: 2em !important;
+  text-indent: 0 !important;
   margin: 0 0 0.35em !important;
 }
-html body .wiki-shell ol.references > li::marker { color: var(--wiki-muted); }
+html body .wiki-shell ol.references .reference-number {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--wiki-muted);
+}
 html body .wiki-shell ol.references .reference-backlink {
   font-weight: 400 !important;
-  margin-right: 0.35em;
+  margin-right: 0.35em !important;
 }
 
 /* In-article Contents: numbered like Wikipedia (1. Early life, 2. Career, …). */
@@ -6139,4 +6149,17 @@ html body .wiki-shell .infobox :is(dt, dd) {
 .wiki-reveal-line:not([style*="--wiki-wipe"]) { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .wiki-reveal-line { transform: none; }
+}
+
+/* Mobile section headers sit closer together (70px rows to 56px; still a comfortable tap). */
+@media (max-width: 48rem) {
+  html body .wiki-shell .wiki-section .wiki-section-toggle { min-height: 56px !important; height: 56px !important; }
+}
+
+/* Mobile: profile details use the body text size (16px, body line height). */
+@media (max-width: 48rem) {
+  html body .wiki-shell .infobox :is(dt, dd) {
+    font-size: 16px !important;
+    line-height: 1.58 !important;
+  }
 }
