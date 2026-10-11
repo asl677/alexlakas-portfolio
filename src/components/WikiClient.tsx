@@ -1778,7 +1778,7 @@ export function HoverCards() {
         if (!data) return;
         current = link;
         place(link, data);
-      }, 280);
+      }, 120);
     };
     const onOut = (event: MouseEvent) => {
       const to = event.relatedTarget as HTMLElement | null;
@@ -1842,7 +1842,7 @@ export function HoverCards() {
       if (force || results.every(r => r !== undefined)) { settled = true; setMedia({ key, status: "none" }); setVisible(true); }
     };
     [saved, liveImage, icon].forEach((promise, i) => promise.then(found => { results[i] = found; decide(false); }));
-    const timer = window.setTimeout(() => decide(true), 1500);
+    const timer = window.setTimeout(() => decide(true), 600);
     return () => { settled = true; window.clearTimeout(timer); };
   }, [card?.key]);
 
@@ -2008,7 +2008,7 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
 
   return (
     <div ref={rootRef} className={`wiki-language${icon ? " wiki-language-icon" : ""}${open ? " is-open" : ""}`}>
-      <button type="button" className="wiki-language-button" aria-expanded={open} aria-label={icon ? "Languages" : undefined}
+      <button type="button" className="wiki-language-button" aria-expanded={open} aria-label={icon ? "Languages" : undefined} title={icon ? "Languages" : undefined}
         onClick={event => (open ? setOpen(false) : openAt(event.currentTarget))}
         // Desktop: opens on hover like the other cards.
         onMouseEnter={event => { if (window.matchMedia("(hover: hover)").matches) openAt(event.currentTarget); }}

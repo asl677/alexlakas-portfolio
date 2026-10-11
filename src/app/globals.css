@@ -6455,14 +6455,18 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 }
 @keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 
-/* Language icon in the sticky actions: plain icon button like its neighbours, no focus ring. */
-html body .wiki-shell .wiki-language-icon,
+/* Language icon: identical box, icon, stroke and hover to the envelope and theme buttons. */
+html body .wiki-shell .wiki-language-icon { display: inline-flex !important; opacity: 1 !important; transform: none !important; visibility: visible !important; position: static !important; margin: 0 !important; padding: 0 !important; }
 html body .wiki-shell .wiki-language-icon .wiki-language-button {
-  opacity: 1 !important; transform: none !important; visibility: visible !important;
-  position: static !important; display: inline-flex !important; align-items: center; justify-content: center;
-  padding: 0 !important; margin: 0 !important; border: 0 !important; background: none !important; color: inherit !important;
+  display: inline-grid !important; place-items: center; width: 2.25rem !important; height: 2.25rem !important;
+  margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important;
+  color: var(--wiki-ink) !important; font: inherit; transition: background-color 160ms ease, color 160ms ease;
+}
+html body .wiki-shell .wiki-language-icon .wiki-language-button svg { width: 1.125rem; height: 1.125rem; stroke-width: 1.75; }
+html body .wiki-shell .wiki-language-icon .wiki-language-button:is(:hover, :focus-visible, :active),
+html body .wiki-shell .wiki-language-icon.is-open .wiki-language-button {
+  background: var(--wiki-subtle) !important; color: var(--wiki-link-blue-hover) !important;
 }
 html body .wiki-language-button:focus, html body .wiki-language-button:focus-visible { outline: none !important; box-shadow: none !important; }
-html body .wiki-shell .wiki-language-icon .wiki-language-button { width: 34px; height: 34px; }
 /* Top bar icons: size the nav to its icons (three now), so none spill past the right edge. */
 html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; max-width: none !important; flex: 0 0 auto !important; justify-self: end; }
