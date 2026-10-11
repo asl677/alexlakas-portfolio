@@ -6470,3 +6470,7 @@ html body .wiki-shell .wiki-language-icon.is-open .wiki-language-button {
 /* Room for three icons in the top bar and the scrolled header. */
 html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; }
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { width: max-content !important; min-width: max-content !important; }
+/* The scrolled-header language icon fades with its group, not with the old label's hand-off. */
+html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-sticky-actions .wiki-language-icon {
+  opacity: 1 !important; transform: none !important; visibility: inherit !important; position: static !important;
+}
