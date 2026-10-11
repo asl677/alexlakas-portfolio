@@ -6455,11 +6455,11 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 }
 @keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 
-/* Desktop has no sticky icons to hand off to, so the languages label stays in the stuck
-   header like the tabs: it keeps only the load reveal, not the scroll fade-out. */
+/* Desktop: the languages label stays in the stuck header like the tabs, sliding left as the
+   icons arrive so the two sit side by side. It keeps only the load reveal, no fade-out. */
 @media (min-width: 769px) {
   html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-language {
     opacity: var(--wiki-reveal, 1) !important;
-    transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px))) !important;
+    transform: translate(calc(var(--wiki-handoff, 0) * -96px), calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px))) !important;
   }
 }
