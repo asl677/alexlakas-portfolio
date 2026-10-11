@@ -1487,7 +1487,6 @@ export function ArticleTabs() {
       </div>
       <div className="wiki-tab-actions">
         <span>Read</span>
-        <div className="wiki-tab-language"><LanguageMenu /></div>
       </div>
     </div>
   );
@@ -1929,7 +1928,7 @@ const languageList = (display: string) => {
 
 // "So many languages": the title-row label (it keeps its scroll hand-off with the sticky
 // icons) opens a borderless card of languages; picking one opens this page translated.
-export function LanguageMenu() {
+export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
   const [open, setOpen] = useState(false);
   const [cardPos, setCardPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   const rootRef = useRef<HTMLDivElement>(null);
@@ -2008,13 +2007,13 @@ export function LanguageMenu() {
   };
 
   return (
-    <div ref={rootRef} className={`wiki-language${open ? " is-open" : ""}`}>
-      <button type="button" className="wiki-language-button" aria-expanded={open}
+    <div ref={rootRef} className={`wiki-language${icon ? " wiki-language-icon" : ""}${open ? " is-open" : ""}`}>
+      <button type="button" className="wiki-language-button" aria-expanded={open} aria-label={icon ? "Languages" : undefined}
         onClick={event => (open ? setOpen(false) : openAt(event.currentTarget))}
         // Desktop: opens on hover like the other cards.
         onMouseEnter={event => { if (window.matchMedia("(hover: hover)").matches) openAt(event.currentTarget); }}
         onMouseLeave={scheduleClose}>
-        {translateLanguages.length} languages
+        {icon ?? `${translateLanguages.length} languages`}
       </button>
       {open && createPortal(
         // Portaled to <body>: the header's transforms/opacity hand-off would otherwise hide or

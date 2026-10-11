@@ -69,6 +69,7 @@ export default function Home() {
           <PageSearch />
           <nav>
             <MobileSearchSheet />
+            <LanguageMenu icon={<Languages size={20} strokeWidth={2} />} />
             <a href="https://www.linkedin.com/in/latenights/" target="_blank" rel="noreferrer" aria-label="Contact me" title="Contact me"><MailOpen size={20} strokeWidth={2} /></a>
             <ThemeSwitch />
           </nav>

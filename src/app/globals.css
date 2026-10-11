@@ -6455,15 +6455,11 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 }
 @keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 
-/* Desktop: once the header sticks, a copy of the languages label sits left of "Read" and
-   arrives exactly like the sticky icons: scroll-linked, rising 14px and fading in. */
-html body .wiki-shell .wiki-tab-actions .wiki-tab-language { order: -1; }
-html body .wiki-shell .wiki-tabs .wiki-tab-language button { color: var(--wiki-ink) !important; font: inherit !important; letter-spacing: inherit !important; line-height: inherit !important; padding: 8px 0 !important; margin: 0 !important; border: 0 !important; text-decoration: none !important; }
-html body .wiki-shell .wiki-tab-actions .wiki-tab-language > * {
-  opacity: calc(var(--wiki-reveal, 1) * clamp(0, calc(var(--wiki-handoff, 0) * 2 - 1), 1)) !important;
-  visibility: visible !important;
-  transform: translateY(calc((1 - var(--wiki-handoff, 0)) * 14px)) !important;
-  pointer-events: none !important;
+/* Language icon in the sticky actions: plain icon button like its neighbours, no focus ring. */
+html body .wiki-shell .wiki-language-icon,
+html body .wiki-shell .wiki-language-icon .wiki-language-button {
+  opacity: 1 !important; transform: none !important; visibility: visible !important;
+  position: static !important; display: inline-flex !important; align-items: center;
+  padding: 0 !important; margin: 0 !important; border: 0 !important; background: none !important; color: inherit !important;
 }
-html body .wiki-shell .wiki-article-header.is-scrolled .wiki-tab-actions .wiki-tab-language > * { pointer-events: auto !important; }
-@media (max-width: 768px) { html body .wiki-shell .wiki-tab-actions .wiki-tab-language { display: none; } }
+html body .wiki-language-button:focus, html body .wiki-language-button:focus-visible { outline: none !important; box-shadow: none !important; }
