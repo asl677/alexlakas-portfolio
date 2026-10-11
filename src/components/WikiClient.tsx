@@ -30,7 +30,9 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
 export const wikiEase = cubicBezier(0.76, 0, 0.24, 1);
 
 const hoverPortraitFrames = [
-  // First frame is a product shot, not a face. Local 640px square crops: the originals are
+  // Hover/press opens on the yearbook portrait, then cycles the work frames.
+  "/me.png?v=yearbook-20261001",
+  // Next frame is a product shot, not a face. Local 640px square crops: the originals are
   // up to 5000px and alias badly when scaled down ~20x into the portrait box.
   "/portrait/frame-01.webp",
   "/portrait/frame-02.webp",
@@ -558,7 +560,8 @@ export function HoverPortrait() {
 
   const activeFrames = hoverPortraitFrames.filter(src => loadedFramesRef.current.has(src));
   const activeFrame = activeFrames[frame];
-  const portraitSrc = "/me.png?v=yearbook-20261001";
+  // Default: the sketching photo; the yearbook portrait is the first hover frame.
+  const portraitSrc = "/profile-sketch.jpg";
 
   return (
     <div

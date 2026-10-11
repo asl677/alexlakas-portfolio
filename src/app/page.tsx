@@ -165,10 +165,7 @@ export default function Home() {
             </nav>
 
             <WikiSection id="early-life" title="Early life">
-              <div className="career-feature career-feature--right career-feature--thumb">
-                <figure>
-                  <img src="/early-life-sketch.jpg" alt="Alex sketching on a tablet" />
-                </figure>
+              <div className="career-feature">
                 <p>Alex grew up on the East Coast and got into design through illustration, animation, and the web. He studied art and computer science at the University of Maryland, College Park, under <a href="https://www.jamesthorpedesign.com/about" target="_blank" rel="noreferrer">James Thorpe</a>, <a href="https://www.coplanar.org/" target="_blank" rel="noreferrer">Brandon Morse</a>, and <a href="https://design.ncsu.edu/people/hsarmstr/" target="_blank" rel="noreferrer">Helen Armstrong</a>.</p>
                 <p>Fueled by software and creativity, Alex has spent years understanding theory, trends and research sitting atop a background in studio work. He later moved to the Bay Area to join the tech movement, then to Los Angeles to freelance and live by the beach.<Ref n={1} /><Ref n={8} /></p>
               </div></WikiSection>
