@@ -6455,43 +6455,18 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 }
 @keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 
-/* Language icon: identical box, icon, stroke and hover to the envelope and theme buttons. */
-html body .wiki-shell .wiki-language-icon { display: inline-flex !important; position: static !important; margin: 0 !important; padding: 0 !important; transform: none !important; }
+/* Language icon: same box, icon, stroke and hover as the envelope and theme buttons. */
+html body .wiki-shell .wiki-language-icon { display: inline-flex; margin: 0; padding: 0; }
 html body .wiki-shell .wiki-language-icon .wiki-language-button {
   display: inline-grid !important; place-items: center; width: 34px !important; height: 34px !important;
   margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important;
-  color: var(--wiki-ink) !important; font: inherit; transition: background-color 160ms ease, color 160ms ease;
+  color: var(--wiki-ink) !important; transition: background-color 160ms ease, color 160ms ease;
 }
 html body .wiki-shell .wiki-language-icon .wiki-language-button svg { width: 20px !important; height: 20px !important; stroke-width: 2 !important; }
-html body .wiki-shell .wiki-language-icon .wiki-language-button:is(:hover, :focus-visible, :active),
+html body .wiki-shell .wiki-language-icon .wiki-language-button:is(:hover, :focus-visible),
 html body .wiki-shell .wiki-language-icon.is-open .wiki-language-button {
-  background: var(--wiki-subtle) !important; color: var(--wiki-link-blue-hover) !important;
+  background: var(--wiki-subtle) !important; color: var(--wiki-link-blue-hover) !important; outline: none !important;
 }
-html body .wiki-language-button:focus, html body .wiki-language-button:focus-visible { outline: none !important; box-shadow: none !important; }
-/* Top bar icons: size the nav to its icons (three now), so none spill past the right edge. */
-html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; max-width: none !important; flex: 0 0 auto !important; justify-self: end; }
+/* Room for three icons in the top bar and the scrolled header. */
+html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; }
 html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { width: max-content !important; min-width: max-content !important; }
-
-/* Desktop: one fixed icon group (languages, contact, theme) that never changes on scroll.
-   The top bar keeps its own icons for layout only; the scrolled header shows no copies. */
-.wiki-fixed-icons { display: none; }
-@media (min-width: 769px) {
-  html body .wiki-shell header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) { visibility: hidden !important; }
-  html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { display: none !important; }
-  html body .wiki-shell .wiki-fixed-icons {
-    position: fixed; z-index: 1000 !important; top: var(--wiki-icons-top, 15px); right: var(--wiki-icons-right, 44px);
-    display: flex; align-items: center; gap: 8px;
-  }
-  html body .wiki-shell .wiki-fixed-icons > a,
-  html body .wiki-shell .wiki-fixed-icons .theme-toggle,
-  html body .wiki-shell .wiki-fixed-icons .wiki-language-button {
-    display: inline-grid !important; place-items: center; width: 34px !important; height: 34px !important;
-    margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important;
-    color: var(--wiki-ink) !important; transition: background-color 160ms ease, color 160ms ease;
-  }
-  html body .wiki-shell .wiki-fixed-icons svg { width: 20px !important; height: 20px !important; stroke-width: 2 !important; }
-  html body .wiki-shell .wiki-fixed-icons :is(> a, .theme-toggle, .wiki-language-button):is(:hover, :focus-visible),
-  html body .wiki-shell .wiki-fixed-icons .wiki-language.is-open .wiki-language-button {
-    background: var(--wiki-subtle) !important; color: var(--wiki-link-blue-hover) !important; outline: none !important;
-  }
-}
