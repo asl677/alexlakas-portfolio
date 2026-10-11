@@ -6454,3 +6454,12 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
   html body .wiki-language-card li button { padding: 8px 0 !important; font-size: 16px !important; }
 }
 @keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+
+/* Desktop has no sticky icons to hand off to, so the languages label stays in the stuck
+   header like the tabs: it keeps only the load reveal, not the scroll fade-out. */
+@media (min-width: 769px) {
+  html body .wiki-shell .wiki-article-header:is(.is-scrolled, :not(.is-scrolled)) .wiki-title-row .wiki-language {
+    opacity: var(--wiki-reveal, 1) !important;
+    transform: translateY(calc(var(--wiki-title-nudge, 0px) + var(--wiki-language-shift, 0px))) !important;
+  }
+}
