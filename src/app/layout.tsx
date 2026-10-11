@@ -9,7 +9,7 @@ const enableGoogleAnalytics =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://alexlakas.com"),
-  title: "Alex | Designer",
+  title: "Alex, Designer",
   description: "Alex Lakas, Los Angeles-based designer and art director. Product design, identity, systems, and creative work.",
   icons: {
     icon: [
@@ -21,16 +21,16 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Alex | Designer",
+    title: "Alex, Designer",
     description: "Alex Lakas, Los Angeles-based designer and art director. Product design, identity, systems, and creative work.",
     url: "https://alexlakas.com",
-    siteName: "Alex | Designer",
+    siteName: "Alex, Designer",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Alex | Designer",
+    title: "Alex, Designer",
     description: "Alex Lakas, Los Angeles-based designer and art director. Product design, identity, systems, and creative work.",
   },
 };

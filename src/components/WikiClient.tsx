@@ -343,6 +343,8 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
             type="button"
             className="search-clear"
             aria-label="Clear search"
+            // Keep focus in the field: a blur here closed the list, then the click reopened it.
+            onPointerDown={(event) => event.preventDefault()}
             onClick={() => {
               setQuery("");
               setResults([]);
@@ -374,6 +376,8 @@ export function MobileSearchSheet() {
   const [dragOffset, setDragOffset] = useState(0);
   const dragRef = useRef<{ startY: number; startTime: number } | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalRoot(document.querySelector<HTMLElement>(".wiki-shell") ?? document.body); }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -390,6 +394,12 @@ export function MobileSearchSheet() {
     // Smooth scrolling (Lenis) is paused too, so an in-flight glide cannot carry the page.
     document.documentElement.classList.add("wiki-sheet-open");
     window.dispatchEvent(new Event("alexpedia-scroll-lock"));
+    // iOS Safari still rubber-bands the page under a fixed overlay while dragging the sheet.
+    // Pinning the body in place (and restoring the scroll position after) stops it moving.
+    const lockedY = window.scrollY;
+    const body = document.body;
+    const previousBody = { position: body.style.position, top: body.style.top, left: body.style.left, right: body.style.right, width: body.style.width };
+    Object.assign(body.style, { position: "fixed", top: `-${lockedY}px`, left: "0", right: "0", width: "100%" });
     // React touch handlers are passive; this one must be able to cancel page scrolling.
     // Only the results list may scroll, and only while it has room to scroll.
     const sheet = sheetRef.current;
@@ -412,6 +422,8 @@ export function MobileSearchSheet() {
     return () => {
       sheet?.removeEventListener("touchstart", onTouchStart);
       sheet?.removeEventListener("touchmove", onTouchMove);
+      Object.assign(body.style, previousBody);
+      window.scrollTo(0, lockedY);
       document.documentElement.classList.remove("wiki-sheet-open");
       window.dispatchEvent(new Event("alexpedia-scroll-unlock"));
       // Re-sync the scroll reveal after the sheet (and keyboard) close.
@@ -443,7 +455,9 @@ export function MobileSearchSheet() {
   return (
     <>
       <button type="button" className="wiki-icon-button wiki-nav-search" aria-label="Search" title="Search" aria-expanded={isOpen} onClick={() => setIsOpen((open) => !open)}><Search size={20} strokeWidth={2} /></button>
-      <div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} data-lenis-prevent ref={sheetRef} onPointerDown={() => setIsOpen(false)}>
+      {/* Rendered at the page root (not inside the top bar) so no header transform, filter or
+          stacking can break the fixed sheet, which happened in iOS Safari. */}
+      {portalRoot && createPortal(<div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} data-lenis-prevent ref={sheetRef} onPointerDown={() => setIsOpen(false)}>
         <section
           className={`wiki-mobile-search-sheet-panel${dragOffset ? " is-dragging" : ""}`}
           role="dialog"
@@ -463,7 +477,7 @@ export function MobileSearchSheet() {
           </div>
           <PageSearch inputId="mobile-sheet-search" recentOnMount />
         </section>
-      </div>
+      </div>, portalRoot)}
     </>
   );
 }
@@ -937,6 +951,17 @@ export function IntroSequence() {
       // Hand off: the logo (already "Designer" underneath the typed counter) is shown at once,
       // so the word stays on screen while the loader fades around it.
       window.dispatchEvent(new Event("alexpedia-loader-handoff"));
+      // The typed word stays put and fades out with the loader layer, while the identical logo
+      // (shown instantly underneath) emerges as that layer clears: the two copies sum to a
+      // constant, so "Designer" never dips. Hiding the word at once left the logo still behind
+      // the fading loader background, which read as the word flashing.
+      // The top bar (which holds the logo) is hidden while loading; show it in that same frame
+      // too. Its opacity transition made the logo fade up after the typed word vanished: a flash.
+      const topbar = document.querySelector<HTMLElement>(".wiki-topbar");
+      if (topbar) {
+        topbar.style.transition = "none";
+        requestAnimationFrame(() => requestAnimationFrame(() => { topbar.style.transition = ""; }));
+      }
       shell?.classList.remove("is-loading");
       // Loader fades out, then a short pause before the page starts revealing.
       // The logo is already on screen, so the page starts revealing shortly after the handoff
@@ -977,7 +1002,6 @@ export function IntroSequence() {
       ".wiki-section-content > ol > li",
       // Case study rows: the thumbnail gets the media wipe, the text block fades.
       ".wiki-section-content .article-list-item > .article-list-image",
-      ".wiki-section-content .article-list-item > div",
       ".wiki-section-content .references > li",
       ".wiki-section-content .wiki-link-list > li",
       ".wiki-section-content .work-links > li",
@@ -1002,7 +1026,7 @@ export function IntroSequence() {
       // Phones run every reveal slower (1.4x on top of the base timing), and scroll reveals play over a longer stretch of
       // scrolling: the same motion reads rushed on a small screen.
       const pace = window.matchMedia("(max-width: 768px)").matches ? 1.4 : 1;
-      const fade = { duration: 1 * pace, stagger: 0.08 * pace, ease: wikiEase };
+      const fade = { duration: 1 * pace, stagger: 0.04 * pace, ease: wikiEase };
       // Scroll reveals are scrubbed: progress is tied to the scroll position.
       const SCRUB_RANGE = 120;
       const visualOrder = (elements: HTMLElement[]) => elements.sort((a, b) => {
@@ -1034,7 +1058,9 @@ export function IntroSequence() {
         ".wiki-article-body > p",
         ".wiki-section-content > p",
         ".wiki-section-content > h3",
-        ".wiki-section-content .career-feature > p"
+        ".wiki-section-content .career-feature > p",
+        // Case study rows: meta, title and line reveal like the body text.
+        ".wiki-section-content .article-list-item > div > :is(p, h3)"
       ].join(", "))).map(target => {
         gluePunctuation(target);
         let previousLines: HTMLElement[] = [];
@@ -1068,7 +1094,7 @@ export function IntroSequence() {
             nextOffset += textLength(line);
             const wasRevealed = revealedRanges.some(range => range.start < nextOffset && range.end > start);
             if (wasRevealed) revealedLines.add(line);
-            gsap.set(line, { opacity: wasRevealed ? 1 : 0 });
+            line.style.setProperty("--wiki-wipe", wasRevealed ? "1" : "0");
           });
           // Rewraps must not replay: lines already on or above screen start fully shown.
           if (revealReady) {
@@ -1106,7 +1132,8 @@ export function IntroSequence() {
         // Header controls whose opacity CSS also drives (scroll-linked hand-off): reveal through
         // a variable that CSS multiplies in, so the load fade and the hand-off combine.
         if (element.matches(".wiki-title-row > .wiki-title-action, .wiki-title-row > .wiki-scroll-actions, .wiki-contents .contents-top")) return { "--wiki-reveal": opacity };
-        // Opacity only for text: the line slide was removed (owner's call).
+        // Text lines reveal with the strip wipe: a page-colored cover retracts left to right.
+        if (element.classList.contains("wiki-reveal-line")) return { "--wiki-wipe": opacity };
         return { opacity };
       };
       // Per-frame writer for the scrub loop. gsap.set builds a tween per call, and each one
@@ -1128,11 +1155,14 @@ export function IntroSequence() {
         const timeline = gsap.timeline({ delay });
         // Up to 80ms between items, each a 0.6s expo.out fade, with the whole cascade held to
         // ~1.2s: per-line items made a fixed 80ms step crawl down a full screen of text.
-        const step = Math.min(fade.stagger, (1.6 * pace) / Math.max(1, elements.length));
+        // Cascade top-down: a clear per-item step (cap ~2.2s total) with short line wipes, so rows
+        // follow one another instead of all wiping left-to-right at once.
+        const step = Math.min(fade.stagger, (2.6 * pace) / Math.max(1, elements.length));
         visualOrder(elements).forEach((element, index) => {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
           const wipe = element.classList.contains("wiki-wipe");
+          const media = element.classList.contains("wiki-wipe-media");
           // Text fades only (no slide).
           const rise = false;
           timeline.fromTo(element, { ...revealProperties(element, 0), ...(rise ? { y: 20 } : {}) }, {
@@ -1141,11 +1171,12 @@ export function IntroSequence() {
             // One curve (easeInOutQuart) for everything. A wipe covers then uncovers, so it runs
             // twice as long and starts half a fade early: its content appears exactly when a
             // plain fade at the same slot would.
-            duration: wipe ? 1.6 * pace : rise ? 0.8 : fade.duration,
+            // Images: one continuous 1.8s reveal (fade + scale + cover retract together).
+            duration: media ? 1.8 * pace : wipe ? 1.6 * pace : element.classList.contains("wiki-reveal-line") ? 1.3 * pace : fade.duration,
             // Strip wipes keep a symmetric curve (cover, then uncover) and start 0.6s early so
             // their content shows when a text fade in the same slot would.
-            ease: wipe ? "power3.inOut" : ease
-          }, wipe ? Math.max(0, index * step - 0.8 * pace) : index * step);
+            ease: media ? "power2.inOut" : wipe ? "power3.inOut" : ease
+          }, wipe && !media ? Math.max(0, index * step - 0.8 * pace) : index * step);
         });
       };
       const isInRevealArea = (element: HTMLElement) => {
@@ -1240,21 +1271,29 @@ export function IntroSequence() {
       const revealSection = (event: Event) => {
         const section = document.getElementById((event as CustomEvent<string>).detail);
         if (!section) return;
-        // Re-opening replays the reveal: everything inside fades in once, opacity only. All of
-        // it is marked revealed and never handed to the scroll scrub: the scrub's cached tops
-        // were measured before the section expanded, so handed-off lines froze half-faded.
+        // Opening a section replays its reveal: the first screenful staggers in like the page
+        // load (same cadence and line reveal); everything below it is reset and handed to the
+        // scroll reveal, which re-measures once the section has finished expanding.
         const inside = [...targets, ...textLines].filter(element => section.contains(element) && element !== section && !element.closest(".wiki-section-toggle"));
+        const sectionTop = section.getBoundingClientRect().top;
+        const firstScreen = (element: HTMLElement) => element.getBoundingClientRect().top - sectionTop < window.innerHeight;
+        const pending: HTMLElement[] = [];
         inside.forEach(element => {
-          (element.classList.contains("wiki-reveal-line") ? revealedLines : revealedTargets).add(element);
-          const item = scrubState.get(element);
-          if (item) item.current = 1;
           gsap.killTweensOf(element);
+          const sets = element.classList.contains("wiki-reveal-line") ? revealedLines : revealedTargets;
+          const item = scrubState.get(element);
+          if (firstScreen(element)) {
+            sets.add(element);
+            if (item) item.current = 1;
+            pending.push(element);
+          } else {
+            sets.delete(element);
+            if (item) item.current = 0;
+            applyReveal(element, 0);
+          }
         });
-        const step = Math.min(0.018, 0.5 / Math.max(1, inside.length));
-        const timeline = gsap.timeline({ delay: 0.04 });
-        visualOrder(inside).forEach((element, index) => {
-          timeline.fromTo(element, revealProperties(element, 0), { ...revealProperties(element, 1), duration: 0.8 * pace, ease: wikiEase }, index * step);
-        });
+        fadeIn(pending, 0.04);
+        [120, 700].forEach(delay => window.setTimeout(() => queueReveal(), delay));
         // Positions below the section changed: refresh the scrub's cache.
         queueReveal();
       };
@@ -1300,10 +1339,11 @@ export function IntroSequence() {
       };
       window.addEventListener("alexpedia-view-instant", revealViewInstantly);
       const showBrandForHandoff = () => {
-        const brand = document.querySelector<HTMLElement>(".wiki-topbar > .wiki-brand");
-        if (!brand) return;
-        revealedTargets.add(brand);
-        gsap.set(brand, { opacity: 1 });
+        // Both logo variants (brand link and wordmark) are shown at once and never re-faded.
+        document.querySelectorAll<HTMLElement>(".wiki-topbar > .wiki-brand, .wiki-topbar > .wiki-wordmark").forEach(brand => {
+          revealedTargets.add(brand);
+          gsap.set(brand, { opacity: 1 });
+        });
       };
       window.addEventListener("alexpedia-loader-handoff", showBrandForHandoff);
       return () => {

@@ -61,7 +61,7 @@ export default function Home() {
       <div className="wiki-page" id="top">
         <header className="wiki-topbar" data-lenis-prevent>
           <div className="wiki-brand">
-            <a href="#top" className="wiki-wordmark" aria-label="Alex | Designer">
+            <a href="#top" className="wiki-wordmark" aria-label="Alex, Designer">
               <span className="wiki-wordmark-text" aria-hidden="true" data-nosnippet>Designer</span>
             </a>
           </div>
@@ -141,14 +141,14 @@ export default function Home() {
               <dl>
                 <dt>Status</dt><dd><OnlineStatus /></dd>
                 <dt>Based in</dt><dd>Los Angeles, CA</dd>
-                <dt>Occupation</dt><dd>Sr. staff designer, art director, product designer</dd>
+                <dt>Occupation</dt><dd>Product Design, Art Direction</dd>
                 <dt>Known for</dt><dd>&ldquo;Incredibly talented&rdquo;, &ldquo;Good people&rdquo;</dd>
-                <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">linkedin.com/in/latenights</a></dd>
-                <dt>Interests</dt><dd>Cars, design, engineering, comedy, AI, systems</dd>
+                <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">/latenights</a></dd>
+                <dt>Interests</dt><dd>Cars, design, AI, systems</dd>
               </dl>
             </aside>
 
-            <p className="lead"><b>Alexander Stephanos Lakas</b> is a Los Angeles-based designer and art director with over 15 years of experience whose work spans product and interaction design, identity, prototyping, and generative AI. He&rsquo;s collaborated on small and large scale projects with folks like <span style={{ whiteSpace: "nowrap" }}><a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>,</span> Zippo, Converse, Culprit, Nintendo and more. His work has been featured in <span style={{ whiteSpace: "nowrap" }}><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a>,</span> and on The Tonight Show.<Ref n={1} /><Ref n={2} /><Ref n={5} /><Ref n={10} /><Ref n={16} /></p>
+            <p className="lead"><b>Alexander Stephanos Lakas</b> is a Los Angeles-based designer and art director with over 15 years of experience whose work spans product and interaction design, identity, prototyping, and generative AI. He&rsquo;s collaborated on small and large scale projects with folks like <span style={{ whiteSpace: "nowrap" }}><a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>,</span> Zippo, Nintendo and more. His work has been featured in <span style={{ whiteSpace: "nowrap" }}><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a>,</span> and on The Tonight Show.<Ref n={1} /><Ref n={2} /><Ref n={5} /><Ref n={10} /><Ref n={16} /></p>
 
             <nav className="toc article-toc" aria-label="Table of contents">
               <h2>Contents</h2>
@@ -190,7 +190,7 @@ export default function Home() {
                 <figure>
                   <img src="https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp" alt="Alex Lakas" />
                 </figure>
-                <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
+                <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. Around 2012, he joined <a href="https://www.linkedin.com/in/vlokshin/" target="_blank" rel="noreferrer">Vlad Lokshin</a> and <a href="https://www.linkedin.com/in/andytiffany/" target="_blank" rel="noreferrer">Andy Tiffany</a> to form a small 0-1 dev shop based in San Francisco, CA. This focused on agency style work that funded their own ideas. That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
                 <p>These projects treated websites and prototypes as complete experiences rather than static portfolios: each combined narrative, interface, and behavior. The work formed the foundation for Alex&apos;s later focus on clear systems and useful digital tools.</p>
               </div>
               <div id="local-search-for-merchants-and-consumers" className="career-feature career-feature--right career-feature--landscape career-feature--thumb">
@@ -198,8 +198,8 @@ export default function Home() {
                 <figure>
                   <img src="https://miro.medium.com/v2/1*J9oOQMv0N12QmSq7vbCiCQ.png" alt="A product design project" />
                 </figure>
-                <p>At <a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>, Alex worked across Google My Business, Local Search, and Maps. His visual design, prototyping and systems thinking helped shape local discovery, Live Popular Times, visit-duration information, and booking flows that connect people with nearby businesses and services.<Ref n={1} /><Ref n={8} /><Ref n={9} /></p>
-                <p>Those experiences turned complex local data into timely signals people could act on: whether a place was busy, when to visit, and how to make a reservation without leaving Search or Maps. For small businesses, the same tools made practical information and conversion paths easier to maintain and find. The role also gave him the chance to work with agencies such as <a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a> and <a href="https://www.method.com/" target="_blank" rel="noreferrer">Method</a> on a range of projects.</p>
+                <p>At <a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>, Alex worked across Google My Business, Local Search, and Maps. His visual design, prototyping and systems thinking helped shape place listing management, local discovery, Live Popular Times, visit-duration information, and booking flows that connect people with nearby businesses and services.<Ref n={1} /><Ref n={8} /><Ref n={9} /></p>
+                <p>Those experiences turned complex local data into timely signals people could act on: whether a place was busy, when to visit, and how to make a reservation without leaving Search or Maps - collaborating with folks like YC Alum, <a href="https://www.linkedin.com/in/abhishek24/" target="_blank" rel="noreferrer">Abhishek Poddar</a>, <a href="https://www.morrowed.com/" target="_blank" rel="noreferrer">Jason Morrow</a>, <a href="https://dribbble.com/uekermann" target="_blank" rel="noreferrer">Marcel Uekermann</a>, <a href="https://www.linkedin.com/in/daniel-balgley-5786a917/" target="_blank" rel="noreferrer">Daniel Balgley</a>, <a href="https://www.simonfungcreative.com/" target="_blank" rel="noreferrer">Simon Fung</a>, and <a href="https://www.linkedin.com/in/hintzemichael/" target="_blank" rel="noreferrer">Michael Hintze</a>. For small businesses, the same tools made practical information and conversion paths easier to maintain and find. The role also gave him the chance to work with agencies such as <a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a> and <a href="https://www.method.com/" target="_blank" rel="noreferrer">Method</a> on a range of projects.</p>
               </div>
               <div id="modernizing-social-media-for-professionals" className="career-feature career-feature--thumb career-feature--right career-feature--square career-feature--team">
                 <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Modernizing social media for professionals</span></span></h3>

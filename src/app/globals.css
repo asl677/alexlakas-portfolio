@@ -3961,7 +3961,7 @@ header.wiki-topbar {
     margin: 0.5rem auto 0 !important;
   }
 
-  .wiki-topbar .wiki-mobile-search-sheet .wiki-search {
+  .wiki-mobile-search-sheet .wiki-search {
     display: grid !important;
     width: 100% !important;
   }
@@ -4978,7 +4978,7 @@ html.wiki-sheet-open body {
   overscroll-behavior: contain;
   touch-action: none;
 }
-html body .wiki-shell .wiki-topbar .wiki-mobile-search-sheet .wiki-search,
+html body .wiki-shell .wiki-mobile-search-sheet .wiki-search,
 html body .wiki-mobile-search-sheet form.wiki-search {
   display: flex !important;
   flex-direction: column !important;
@@ -5042,15 +5042,15 @@ html body .wiki-shell .wiki-sticky-actions > .wiki-sticky-search {
   }
 }
 html body .wiki-mobile-search-sheet {
-  transition: background-color 360ms ease, visibility 0s linear 360ms !important;
+  transition: background-color 560ms ease, visibility 0s linear 560ms !important;
 }
 
 html body .wiki-mobile-search-sheet.is-open {
-  transition: background-color 360ms ease, visibility 0s linear 0s !important;
+  transition: background-color 560ms ease, visibility 0s linear 0s !important;
 }
 
 html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel:not(.is-dragging) {
-  transition: transform 360ms var(--wiki-ease) !important;
+  transition: transform 560ms var(--wiki-ease) !important;
 }
 html body .wiki-mobile-search-sheet .wiki-search .wiki-search-results {
   border-radius: 0 !important;
@@ -5721,12 +5721,12 @@ html body .wiki-shell .wiki-contents.is-scrolled .contents-top { background: tra
 
 /* Glass tokens: translucent surface + backdrop blur (between Tailwind blur-2xl and blur-3xl). */
 :root {
-  --wiki-glass-bg: rgba(0, 0, 0, 0.72);
-  --wiki-glass-blur: blur(48px) saturate(1.2);
+  --wiki-glass-bg: rgba(0, 0, 0, 0.52);
+  --wiki-glass-blur: blur(32px) saturate(1.2);
 }
-:root[data-theme="light"] { --wiki-glass-bg: rgba(255, 255, 255, 0.78); }
+:root[data-theme="light"] { --wiki-glass-bg: rgba(255, 255, 255, 0.58); }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --wiki-glass-bg: rgba(255, 255, 255, 0.78); }
+  :root:not([data-theme="dark"]) { --wiki-glass-bg: rgba(255, 255, 255, 0.58); }
 }
 
 /* Search results use the glass tokens. Backdrop blur can't nest (an ancestor with its own
@@ -5940,12 +5940,12 @@ html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-c
 /* A link or reference glued to its trailing punctuation never breaks between them. */
 .wiki-nowrap { white-space: nowrap; }
 
-/* Mobile search sheet fills the screen (small-viewport height, so it never hides under the
-   browser toolbar). */
+/* Mobile search sheet: 95% of the small viewport height, leaving a strip above it to tap to
+   close (small-viewport units, so it never hides under the browser toolbar). */
 @media (max-width: 48rem) {
   html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
-    height: 100svh !important;
-    max-height: 100svh !important;
+    height: 95svh !important;
+    max-height: 95svh !important;
     border-radius: 0 !important;
   }
 }
@@ -6053,3 +6053,70 @@ html body .wiki-shell .wiki-contents .contents-top {
 
 /* In-article Contents box: no panel fill, just the list on the page background. */
 html body .wiki-shell .article-toc { background: transparent !important; }
+
+/* Text reveal (after React Bits' ScrollReveal), line by line: each line starts at 10% opacity
+   with a 4px blur and clears as its --wiki-wipe goes 0 to 1 (load stagger and scroll). */
+.wiki-reveal-line {
+  opacity: calc(0.1 + var(--wiki-wipe, 1) * 0.9);
+  filter: blur(calc((1 - var(--wiki-wipe, 1)) * 4px));
+}
+/* Settled lines drop the filter entirely (a no-op blur still costs a filter pass). */
+.wiki-reveal-line[style*="--wiki-wipe: 1;"],
+.wiki-reveal-line:not([style*="--wiki-wipe"]) { filter: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .wiki-reveal-line { opacity: 1; filter: none; }
+}
+
+/* Images: one continuous reveal instead of cover-then-uncover. The page-colored cover starts
+   in place and retracts left to right over the whole reveal, while the image fades in and
+   scales 1.1 to 1 across the same span, so all three move together and read slower. */
+.wiki-wipe-media::after {
+  clip-path: inset(0 0 0 calc(var(--wiki-wipe) * 100%)) !important;
+}
+.wiki-wipe-media > :not(figcaption) {
+  --wiki-wipe-smooth: calc(var(--wiki-wipe) * var(--wiki-wipe) * (3 - 2 * var(--wiki-wipe)));
+  opacity: var(--wiki-wipe) !important;
+  scale: calc(1.1 - var(--wiki-wipe-smooth) * 0.1);
+}
+
+/* Left Contents rail: 30px narrower (top bar logo column matches so the edges stay aligned). */
+@media (min-width: 56.3125rem) and (max-width: 68.6875rem) {
+  html body .wiki-shell .wiki-layout { grid-template-columns: calc(13.5rem - 30px) minmax(0, 1fr) !important; }
+}
+@media (min-width: 68.75rem) {
+  html body .wiki-shell .wiki-layout { grid-template-columns: calc(12.25rem - 30px) minmax(0, 1fr) !important; }
+  html body .wiki-shell header.wiki-topbar,
+  html body .wiki-shell header.wiki-topbar.is-scrolled { grid-template-columns: calc(12.25rem - 30px) minmax(0, 1fr) auto !important; }
+}
+
+/* Mobile search sheet: paint its solid fill robustly (iOS Safari could
+   drop the panel background mid-slide, leaving the page showing through). */
+@media (max-width: 48rem) {
+  html body .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
+    background-color: var(--wiki-page) !important;
+    isolation: isolate;
+  }
+}
+
+/* References: a numbered list again (1., 2., …), with a regular-weight back-link caret. */
+html body .wiki-shell .wiki-section .wiki-section-content ol.references {
+  list-style: decimal !important;
+  padding-left: 1.75em !important;
+}
+html body .wiki-shell .wiki-section .wiki-section-content ol.references > li {
+  display: list-item !important;
+  margin: 0 0 0.35em !important;
+}
+html body .wiki-shell ol.references > li::marker { color: var(--wiki-muted); }
+html body .wiki-shell ol.references .reference-backlink {
+  font-weight: 400 !important;
+  margin-right: 0.35em;
+}
+
+/* In-article Contents: numbered like Wikipedia (1. Early life, 2. Career, …). */
+html body .wiki-shell .wiki-article-body .article-toc > ol {
+  list-style: decimal !important;
+  padding-left: 1.6em !important;
+}
+html body .wiki-shell .wiki-article-body .article-toc > ol > li { display: list-item !important; }
+html body .wiki-shell .wiki-article-body .article-toc > ol > li::marker { color: var(--wiki-muted); }
