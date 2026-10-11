@@ -6458,7 +6458,7 @@ html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font
 /* Language icon: identical box, icon, stroke and hover to the envelope and theme buttons. */
 html body .wiki-shell .wiki-language-icon { display: inline-flex !important; opacity: 1 !important; transform: none !important; visibility: visible !important; position: static !important; margin: 0 !important; padding: 0 !important; }
 html body .wiki-shell .wiki-language-icon .wiki-language-button {
-  display: inline-grid !important; place-items: center; width: 2.25rem !important; height: 2.25rem !important;
+  display: inline-grid !important; place-items: center; width: 34px !important; height: 34px !important;
   margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important;
   color: var(--wiki-ink) !important; font: inherit; transition: background-color 160ms ease, color 160ms ease;
 }
@@ -6470,3 +6470,4 @@ html body .wiki-shell .wiki-language-icon.is-open .wiki-language-button {
 html body .wiki-language-button:focus, html body .wiki-language-button:focus-visible { outline: none !important; box-shadow: none !important; }
 /* Top bar icons: size the nav to its icons (three now), so none spill past the right edge. */
 html body .wiki-shell .wiki-topbar nav { width: max-content !important; min-width: max-content !important; max-width: none !important; flex: 0 0 auto !important; justify-self: end; }
+html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { width: max-content !important; min-width: max-content !important; }
