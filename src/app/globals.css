@@ -6375,3 +6375,62 @@ html body .wiki-shell .wiki-talk-page .wiki-talk-notice { box-shadow: inset 0 1p
    the heaviest part of the reveal and caused the stutter. */
 .wiki-reveal-line, .wiki-reveal-block { filter: blur(calc(var(--wiki-blur-t) * 4px)); }
 @media (max-width: 768px) { .wiki-reveal-line, .wiki-reveal-block { filter: blur(calc(var(--wiki-blur-t) * 2px)); } }
+
+/* Language card: one scrollable list. */
+html body .wiki-language-card { overscroll-behavior: contain; }
+html body .wiki-language-card ul { margin-top: 0; }
+html body .wiki-language-card li button.is-current { font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+/* Phones: no languages control or card. */
+@media (max-width: 768px) { html body .wiki-shell .wiki-language, .wiki-language-card { display: none !important; } }
+/* All languages muted; only the current one is white (no underline, normal weight). */
+html body .wiki-language-card li button { color: var(--wiki-muted) !important; }
+html body .wiki-language-card li button.is-current { color: var(--wiki-ink) !important; text-decoration: none !important; font-weight: inherit !important; }
+@media (hover: hover) { html body .wiki-language-card li button:hover { color: var(--wiki-ink) !important; } }
+/* Read top to bottom, then across: three newspaper-style columns. */
+html body .wiki-language-card ul { display: block !important; columns: 3; column-gap: 12px; }
+html body .wiki-language-card li { break-inside: avoid; }
+@media (max-width: 48rem) { html body .wiki-language-card ul { columns: 2; } }
+
+/* Google Website Translator: keep its banner, tooltips and highlight out of the design. */
+html:is(.translated-ltr, .translated-rtl) body { top: 0 !important; }
+.skiptranslate iframe, .goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip { display: none !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
+#google-translate-host { display: none !important; }
+
+/* The title-row search only exists in the scrolled (sticky) header; never at rest. */
+html body .wiki-shell .wiki-article-header:not(.is-scrolled) .wiki-scroll-search { display: none !important; }
+/* Translated pages: the comma-gluing (nowrap) is for English punctuation; in other languages
+   it forced breaks before the translated punctuation, so let text wrap normally there. */
+html:is(.translated-ltr, .translated-rtl) .wiki-nowrap { white-space: normal !important; }
+html:is(.translated-ltr, .translated-rtl) :lang(ja), html:is(.translated-ltr, .translated-rtl) :lang(zh) { line-break: strict; word-break: normal; }
+html body .wiki-language-card .wiki-language-reset { display: block; margin-top: 12px; padding: 0; border: 0; background: none; color: var(--wiki-ink); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: default; }
+/* Google translator leftovers: its spinner/logo icon (top left), tooltip popups and the
+   highlight it puts over translated text. */
+body > .skiptranslate, iframe.skiptranslate, .goog-te-spinner-pos, .goog-te-gadget, [id^="goog-gt-"],
+.VIpgJd-ZVi9od-ORHb-OEVmcd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, .VIpgJd-yAWNEb-L7lbkb, .VIpgJd-ZVi9od-l4eHX-hSRGPd { display: none !important; }
+font[class*="VIpgJd"], .VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q { background: none !important; box-shadow: none !important; }
+/* "Reset to default" matches the site's text links: ink colour, no resting underline, the
+   sliding underline on hover. */
+html body .wiki-language-card .wiki-language-reset {
+  text-decoration: none !important;
+  color: var(--wiki-ink) !important;
+  background-image: linear-gradient(currentColor, currentColor) !important;
+  background-repeat: no-repeat !important;
+  background-position: 100% 100% !important;
+  background-size: 0% 1px !important;
+  transition: background-size 0.45s cubic-bezier(0.65, 0, 0.35, 1) !important;
+}
+@media (hover: hover) {
+  html body .wiki-language-card .wiki-language-reset:is(:hover, :focus-visible) { background-position: 0% 100% !important; background-size: 100% 1px !important; }
+}
+/* Translated pages: no extra letter-spacing (made for the Latin type; it spreads CJK, Thai,
+   Arabic etc. apart), system fonts for non-Latin scripts at matching sizes, and tight
+   reference markers ("[8]" not "[ 8 ]"). */
+html:is(.translated-ltr, .translated-rtl) body,
+html:is(.translated-ltr, .translated-rtl) body * { letter-spacing: normal !important; }
+html:is(.translated-ltr, .translated-rtl) body {
+  font-family: "Helvetica Neue", Helvetica, Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "PingFang SC", "PingFang TC", "Apple SD Gothic Neo", "Noto Sans CJK JP", "Noto Sans", sans-serif;
+}
+html:is(.translated-ltr, .translated-rtl) sup.reference,
+html:is(.translated-ltr, .translated-rtl) sup.reference * { word-spacing: -0.25em; white-space: nowrap; }
+html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font-family: Georgia, "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", serif; }

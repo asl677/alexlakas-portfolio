@@ -1362,6 +1362,29 @@ export function IntroSequence() {
         });
       };
       window.addEventListener("alexpedia-view-instant", revealViewInstantly);
+      // Translating: put paragraphs back as plain text (split lines would each be translated
+      // on their own and break the sentences), fully shown.
+      const unsplitForTranslation = () => {
+        textSplits.forEach(split => split.revert());
+        textLines = [];
+        scrubItems = scrubItems.filter(item => !item.element.classList.contains("wiki-reveal-line"));
+      };
+      window.addEventListener("alexpedia-translate", unsplitForTranslation);
+      if (/googtrans=\/en\/(?!en)/.test(document.cookie) || window.location.hostname.endsWith("translate.goog")) unsplitForTranslation();
+      // Once Google has translated the page: show everything, stop the scroll reveal (Google's
+      // text rewrites made it re-measure constantly, which lagged), and let Lenis re-measure the
+      // new page height so the bottom is reachable.
+      const onTranslated = () => {
+        if (!document.documentElement.matches(".translated-ltr, .translated-rtl")) return;
+        unsplitForTranslation();
+        [...targets].forEach(element => { revealedTargets.add(element); applyReveal(element, 1); });
+        gsap.ticker.remove(scrubTick);
+        layoutObserver.disconnect();
+        [100, 800, 2000].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("resize")), delay));
+      };
+      const translationWatcher = new MutationObserver(onTranslated);
+      translationWatcher.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+      onTranslated();
       const showBrandForHandoff = () => {
         // Both logo variants (brand link and wordmark) are shown at once and never re-faded.
         document.querySelectorAll<HTMLElement>(".wiki-topbar > .wiki-brand, .wiki-topbar > .wiki-wordmark").forEach(brand => {
@@ -1380,6 +1403,7 @@ export function IntroSequence() {
         window.removeEventListener("alexpedia-accordion-reveal", revealSection);
         window.removeEventListener("alexpedia-view-instant", revealViewInstantly);
         window.removeEventListener("alexpedia-loader-handoff", showBrandForHandoff);
+        translationWatcher.disconnect();
         queueReveal = () => {};
         revealCancelled = true;
         cancelAnimationFrame(frame);
@@ -1874,6 +1898,7 @@ export function HoverCards() {
 }
 
 const translateLanguages: [string, string][] = [
+  ["en", "English"],
   ["es", "Español"], ["zh-CN", "中文"], ["fr", "Français"], ["de", "Deutsch"], ["it", "Italiano"], ["vi", "Tiếng Việt"],
   ["af", "Afrikaans"], ["ar", "العربية"], ["az", "Azərbaycanca"], ["id", "Bahasa Indonesia"], ["ms", "Bahasa Melayu"], ["bn", "বাংলা"],
   ["bg", "Български"], ["ca", "Català"], ["cs", "Čeština"], ["cy", "Cymraeg"], ["da", "Dansk"], ["et", "Eesti"],
@@ -1886,56 +1911,126 @@ const translateLanguages: [string, string][] = [
   ["uk", "Українська"], ["ur", "اردو"], ["zh-TW", "繁體中文"],
 ];
 
+// Language names are shown in the page's current language (English names on the English
+// page) and sorted alphabetically by that name.
+const languageList = (display: string) => {
+  let names: Intl.DisplayNames | null = null;
+  try { names = new Intl.DisplayNames([display], { type: "language" }); } catch { /* fall back */ }
+  return translateLanguages
+    .map(([code, native]) => [code, (names?.of(code) ?? native).replace(/\s*\(.*\)$/, "")] as [string, string])
+    .map(([code, name]) => [code, code === "zh-TW" ? `${name} (Traditional)` : code === "zh-CN" ? `${name} (Simplified)` : name] as [string, string])
+    .map(([code, name]) => [code, name.charAt(0).toLocaleUpperCase(display) + name.slice(1)] as [string, string])
+    // English is always labelled "English" (so it's easy to get back to) and sorts in its
+    // alphabetical place like every other name.
+    .map(([code, name]) => [code, code === "en" ? "English" : name] as [string, string])
+    .sort(([, nameA], [, nameB]) => nameA.localeCompare(nameB, display, { sensitivity: "base" }));
+};
+
 // "So many languages": the title-row label (it keeps its scroll hand-off with the sticky
 // icons) opens a borderless card of languages; picking one opens this page translated.
 export function LanguageMenu() {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const [cardPos, setCardPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   const rootRef = useRef<HTMLDivElement>(null);
+  // Current language: Google's translation cookie, or English.
+  const [current, setCurrent] = useState("en");
+  useEffect(() => { setCurrent(document.cookie.match(/googtrans=\/en\/([\w-]+)/)?.[1] ?? "en"); }, []);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef(0);
+  const openAt = (button: HTMLElement) => {
+    window.clearTimeout(closeTimer.current);
+    const box = button.getBoundingClientRect();
+    setCardPos({ top: box.bottom + 10, right: Math.max(16, window.innerWidth - box.right) });
+    setOpen(true);
+  };
+  const scheduleClose = () => { closeTimer.current = window.setTimeout(() => setOpen(false), 220); };
   useEffect(() => {
     if (!open) return;
-    const close = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node)) setOpen(false); };
+    const close = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node) && !cardRef.current?.contains(event.target as Node)) setOpen(false); };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    // Scrolling the page closes it (scrolling inside the card scrolls only the card).
+    const onScroll = () => setOpen(false);
     document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", escape);
-    return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", escape); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", escape); window.removeEventListener("scroll", onScroll); };
   }, [open]);
+  // Translates the page in place with Google's Website Translator (no new tab). The widget is
+  // loaded on first use and hidden; picking a language drives its language select.
   const translate = (code: string) => {
-    const url = `https://translate.google.com/translate?sl=en&tl=${encodeURIComponent(code)}&u=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-    window.open(url, "_blank", "noopener");
     setOpen(false);
+    window.dispatchEvent(new Event("alexpedia-translate"));
+    setCurrent(code);
+    const w = window as Window & { google?: { translate?: { TranslateElement: new (options: object, id: string) => unknown } }; googleTranslateReady?: () => void };
+    // Wait until Google has filled its language list, then pick the language (no reload).
+    const apply = (tries = 0) => {
+      const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+      const target = code === "en" ? "" : code;
+      const ready = select && (target === "" || [...select.options].some(option => option.value === target));
+      if (!ready) { if (tries < 60) window.setTimeout(() => apply(tries + 1), 150); return; }
+      if (code === "en") {
+        // Back to the original in place: click Google's own "Show original" button inside its
+        // (hidden) toolbar frame, or clear the language select. Clear the cookie too so a later
+        // visit isn't translated. Reload only as a last resort if the page stays translated.
+        const expire = "expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        const host = window.location.hostname;
+        const parent = host.split(".").slice(-2).join(".");
+        for (const domain of ["", `; domain=${host}`, `; domain=.${host}`, `; domain=.${parent}`]) document.cookie = `googtrans=; ${expire}${domain}`;
+        let restored = false;
+        for (const frame of Array.from(document.querySelectorAll<HTMLIFrameElement>("iframe"))) {
+          try {
+            const button = frame.contentDocument?.querySelector<HTMLElement>("[id$='.restore'], button[id*='restore']");
+            if (button) { button.click(); restored = true; break; }
+          } catch { /* cross-origin frame */ }
+        }
+        if (!restored) { select.value = ""; select.dispatchEvent(new Event("change")); }
+        window.setTimeout(() => {
+          if (document.documentElement.matches(".translated-ltr, .translated-rtl")) window.location.reload();
+        }, 1500);
+        return;
+      }
+      select.value = target;
+      select.dispatchEvent(new Event("change"));
+    };
+    if (w.google?.translate) { apply(); return; }
+    if (!document.getElementById("google-translate-host")) {
+      const host = document.createElement("div");
+      host.id = "google-translate-host";
+      host.hidden = true;
+      document.body.append(host);
+      w.googleTranslateReady = () => { new w.google!.translate!.TranslateElement({ pageLanguage: "en", autoDisplay: false }, "google-translate-host"); apply(); };
+      const script = document.createElement("script");
+      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateReady";
+      document.body.append(script);
+    }
   };
-  const term = query.trim().toLocaleLowerCase();
-  const matches = translateLanguages.filter(([code, name]) => !term || name.toLocaleLowerCase().includes(term) || code.toLowerCase().startsWith(term));
+
   return (
     <div ref={rootRef} className={`wiki-language${open ? " is-open" : ""}`}>
-      <button type="button" className="wiki-language-button" aria-expanded={open} onClick={event => {
-        // Fixed to the viewport (positioned from the button) so the header can't clip it.
-        const box = event.currentTarget.getBoundingClientRect();
-        setCardPos({ top: box.bottom + 10, right: Math.max(16, window.innerWidth - box.right) });
-        setOpen(value => !value);
-      }}>
-        So many languages
+      <button type="button" className="wiki-language-button" aria-expanded={open}
+        onClick={event => (open ? setOpen(false) : openAt(event.currentTarget))}
+        // Desktop: opens on hover like the other cards.
+        onMouseEnter={event => { if (window.matchMedia("(hover: hover)").matches) openAt(event.currentTarget); }}
+        onMouseLeave={scheduleClose}>
+        {translateLanguages.length} languages
       </button>
-      {open && (
-        <div className="wiki-language-card" role="dialog" aria-label="Translate this page" style={{ top: cardPos.top, right: cardPos.right }}>
-          <input autoFocus value={query} onChange={event => setQuery(event.target.value)} placeholder="Search languages" aria-label="Search languages" />
-          {!term && <p className="wiki-language-heading">Suggested languages</p>}
+      {open && createPortal(
+        // Portaled to <body>: the header's transforms/opacity hand-off would otherwise hide or
+        // misplace a fixed card inside it.
+        <div ref={cardRef} className="wiki-language-card notranslate" translate="no" role="dialog" aria-label="Translate this page" data-lenis-prevent style={{ top: cardPos.top, right: cardPos.right }}
+          onMouseEnter={() => window.clearTimeout(closeTimer.current)} onMouseLeave={scheduleClose}>
           <ul>
-            {(term ? matches : translateLanguages.slice(0, 6)).map(([code, name]) => (
-              <li key={code}><button type="button" onClick={() => translate(code)}>{name}</button></li>
+            {languageList(current).map(([code, name]) => (
+              <li key={code}>
+                <button type="button" className={code === current ? "is-current" : ""} aria-current={code === current ? "true" : undefined}
+                  onClick={() => (code === current ? setOpen(false) : translate(code))}>{name}</button>
+              </li>
             ))}
           </ul>
-          {!term && <p className="wiki-language-heading">All languages</p>}
-          {!term && (
-            <ul>
-              {translateLanguages.slice(6).map(([code, name]) => (
-                <li key={code}><button type="button" onClick={() => translate(code)}>{name}</button></li>
-              ))}
-            </ul>
-          )}
-        </div>
+          {/* Back to the original (untranslated) page. */}
+          {current !== "en" && <button type="button" className="wiki-language-reset" onClick={() => translate("en")}>Reset to default</button>}
+        </div>,
+        document.body,
       )}
     </div>
   );

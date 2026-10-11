@@ -144,7 +144,7 @@ export default function Home() {
                 <dt>Based in</dt><dd>Los Angeles, CA</dd>
                 <dt>Occupation</dt><dd>Designer</dd>
                 <dt>Known for</dt><dd>&lsquo;talented&rsquo;, &lsquo;good people&rsquo;</dd>
-                <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">/latenights</a></dd>
+                <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer" translate="no">/latenights</a></dd>
                 <dt>Interests</dt><dd>Cars, design, AI, systems</dd>
               </dl>
             </aside>
