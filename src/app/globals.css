@@ -6479,7 +6479,7 @@ html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .w
   html body .wiki-shell header.wiki-topbar > nav > :not(.wiki-mobile-search-sheet) { visibility: hidden !important; }
   html body .wiki-shell .wiki-article-header .wiki-title-row .wiki-title-action .wiki-sticky-actions { display: none !important; }
   html body .wiki-shell .wiki-fixed-icons {
-    position: fixed; z-index: 60; top: var(--wiki-icons-top, 15px); right: var(--wiki-icons-right, 44px);
+    position: fixed; z-index: 1000 !important; top: var(--wiki-icons-top, 15px); right: var(--wiki-icons-right, 44px);
     display: flex; align-items: center; gap: 8px;
   }
   html body .wiki-shell .wiki-fixed-icons > a,
