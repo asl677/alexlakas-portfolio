@@ -3,29 +3,29 @@
 import { Languages, MailOpen, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
-import { ArticleTabs, ContentsScrollSpy, HoverPortrait, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
+import { ArticleTabs, ContentsScrollSpy, HoverCards, HoverPortrait, LanguageMenu, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
 
 const references = [
-  { label: "Alex Lakas featured in UX designer portfolios worth studying", href: "https://www.uxpin.com/studio/blog/ux-portfolio-examples/", source: "UXPin" },
-  { label: "Fiveonefour announces $17M raise", href: "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html", source: "PR Newswire" },
-  { label: "Alex Lakas portfolio", href: "https://craftwork.design/curated/website/alex-lakas", source: "Craftwork" },
+  { label: "16 Best UX Portfolio Examples That Stand Out to Recruiters", href: "https://www.uxpin.com/studio/blog/ux-portfolio-examples/", source: "UXPin" },
+  { label: "Fiveonefour Raises $17M to Redefine the Developer Experience by Connecting Data Infrastructure and AI Innovation", href: "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html", source: "PR Newswire" },
+  { label: "Alex Lakas — Portfolio Website Design Inspiration", href: "https://craftwork.design/curated/website/alex-lakas", source: "Craftwork" },
   { label: "Building a side hustle remotely while working a 9-to-5", href: "https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-", source: "As Told By Nomads podcast" },
   { label: "Insured Nomads acquires Peanut", href: "https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension", source: "ITIJ" },
-  { label: "Designing LinkedIn Home and Sharing Experience", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
+  { label: "Designing a simpler, more inclusive LinkedIn Home & Sharing experience", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
   { label: "Do I need a COVID test to travel? And other summer travel questions", href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/", source: "Forbes" },
   { label: "LinkedIn adds polls and live video-based events", href: "https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/", source: "TechCrunch" },
   { label: "U.S. design patents", links: [{ label: "D893,509", href: "https://uspto.report/patent/grant/D893%2C509" }, { label: "D892,816", href: "https://patentimages.storage.googleapis.com/94/19/e7/9f1b746a0a9912/USD892816.pdf" }, { label: "D869,501", href: "https://patents.justia.com/patent/D869501" }], source: "Patents" },
   { label: "Google adds salon and spa bookings through Maps and Search", href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/", source: "TechCrunch" },
   { label: "Google Live Popular Times featured on The Tonight Show Starring Jimmy Fallon", href: "https://www.youtube.com/watch?v=QIbPZgH1zRY", source: "YouTube" },
   { label: "LinkedIn is gearing up for a redesign", href: "https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/", source: "TechCrunch" },
-  { label: "Alex Lakas featured in 10 UX design portfolio examples", href: "https://www.shutterstock.com/blog/ux-design-portfolios", source: "Shutterstock" },
-  { label: "Alex Lakas featured in 30 UX designer portfolio examples", href: "https://www.founderjar.com/inspiration/ux-designer-portfolio-examples/", source: "FounderJar" },
-  { label: "Alex Lakas featured in product-designer portfolio case studies", href: "https://blog.designpeeps.net/blog/product-design-portfolios/?p=403", source: "DesignPeeps" },
-  { label: "Google Maps redesign case study crediting Alex Lakas", href: "https://www.simonfungcreative.com/google-maps.html", source: "Simon Fung Creative" },
-  { label: "Alex Lakas portfolio and product-design archive", href: "https://dribbble.com/alex2pt0", source: "Dribbble" },
-  { label: "Alex Lakas product-design portfolio", href: "https://www.behance.net/alexlakas?locale=en_US", source: "Behance" },
-  { label: "Google Business Profile help: popular times, wait times, and visit duration", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
-  { label: "Alex's design portfolio archive", href: "https://thecreativefinder.com/export-portfolio.php?username=asl677", source: "The Creative Finder" },
+  { label: "UX design portfolio examples", href: "https://www.shutterstock.com/blog/ux-design-portfolios", source: "Shutterstock" },
+  { label: "The 30 Best UX Designer Portfolio Examples", href: "https://www.founderjar.com/inspiration/ux-designer-portfolio-examples/", source: "FounderJar" },
+  { label: "Product design portfolio examples", href: "https://blog.designpeeps.net/blog/product-design-portfolios/?p=403", source: "DesignPeeps" },
+  { label: "Google Maps", href: "https://www.simonfungcreative.com/google-maps.html", source: "Simon Fung Creative" },
+  { label: "Alex Lakas on Dribbble", href: "https://dribbble.com/alex2pt0", source: "Dribbble" },
+  { label: "Alex Lakas – Product Designer", href: "https://www.behance.net/alexlakas?locale=en_US", source: "Behance" },
+  { label: "About popular times, wait times & visit duration data", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
+  { label: "Alex Lakas design portfolio", href: "https://thecreativefinder.com/export-portfolio.php?username=asl677", source: "The Creative Finder" },
 ];
 
 const articles = [
@@ -57,6 +57,7 @@ export default function Home() {
       <div className="wiki-loader" aria-hidden="true">{/* The head script types into this span before hydration; innerHTML keeps React from diffing its text. */}<span className="wiki-loader-counter" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: "" }} /></div>
       <IntroSequence />
       <SmoothAnchorScroll />
+      <HoverCards />
       <ContentsScrollSpy />
       <div className="wiki-page" id="top">
         <header className="wiki-topbar" data-lenis-prevent>
@@ -100,6 +101,7 @@ export default function Home() {
                   <div className="wiki-scroll-search"><PageSearch inputId="sticky-page-search" /></div>
                 </div>
                 <div className="wiki-title-action">
+                  <LanguageMenu />
                   <div className="wiki-sticky-actions">
                     {/* Mobile: opens the same search sheet as the top bar icon. */}
                     <button type="button" className="wiki-sticky-search" aria-label="Search" title="Search" onClick={() => document.querySelector<HTMLButtonElement>(".wiki-topbar .wiki-nav-search")?.click()}><Search size={20} strokeWidth={2} /></button>
@@ -147,7 +149,7 @@ export default function Home() {
               </dl>
             </aside>
 
-            <p className="lead"><b>Alexander Stephanos Lakas</b> is a Los Angeles-based designer and art director with over 15 years of experience whose work spans product and interaction design, identity, prototyping, and generative AI. He&rsquo;s collaborated on small and large scale projects with folks like <span style={{ whiteSpace: "nowrap" }}><a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>,</span> Zippo, Nintendo and more. His work has been featured in <span style={{ whiteSpace: "nowrap" }}><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a>,</span> and on The Tonight Show.<Ref n={1} /><Ref n={2} /><Ref n={5} /><Ref n={10} /><Ref n={16} /></p>
+            <p className="lead"><b>Alexander Stephanos Lakas</b> is a Los Angeles-based designer and art director with over 15 years of experience whose work spans product and interaction design, identity, prototyping, and generative AI. He&rsquo;s collaborated on small and large scale projects with folks like <span style={{ whiteSpace: "nowrap" }}><a href="https://about.google/" target="_blank" rel="noreferrer">Google</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn</a>,</span> Zippo, Nintendo and more. His work has been featured in <span style={{ whiteSpace: "nowrap" }}><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a>,</span> and on The Tonight Show.<Ref n={1} /><Ref n={2} /><Ref n={5} /><Ref n={10} /><Ref n={16} /></p>
 
             <nav className="toc article-toc" aria-label="Table of contents">
               <h2><span className="wiki-wipe"><span className="wiki-wipe-content">Contents</span></span></h2>
@@ -165,7 +167,7 @@ export default function Home() {
 
             <WikiSection id="early-life" title="Early life">
               <div className="career-feature">
-                <p>Alex grew up on the East Coast and got into design through illustration, animation, and the web. He studied art and computer science at the University of Maryland, College Park, under <a href="https://www.jamesthorpedesign.com/about" target="_blank" rel="noreferrer">James Thorpe</a>, <a href="https://www.coplanar.org/" target="_blank" rel="noreferrer">Brandon Morse</a>, and <a href="https://design.ncsu.edu/people/hsarmstr/" target="_blank" rel="noreferrer">Helen Armstrong</a>. Fueled by software and creativity, Alex has spent years understanding theory, trends and research sitting atop a background in studio work. He later moved to the Bay Area to join the tech movement, then to Los Angeles to freelance and live by the beach.<Ref n={1} /><Ref n={8} /></p>
+                <p>Alex grew up on the East Coast and got into design through illustration, animation, and the web. He studied art and computer science at the University of Maryland, College Park, under <span data-nosnippet><a href="https://www.jamesthorpedesign.com/about" target="_blank" rel="nofollow noreferrer">James Thorpe</a></span>, <span data-nosnippet><a href="https://www.coplanar.org/" target="_blank" rel="nofollow noreferrer">Brandon Morse</a></span>, and <span data-nosnippet><a href="https://design.ncsu.edu/people/hsarmstr/" target="_blank" rel="nofollow noreferrer">Helen Armstrong</a></span>. Fueled by software and creativity, Alex has spent years understanding theory, trends and research sitting atop a background in studio work. He later moved to the Bay Area to join the tech movement, then to Los Angeles to freelance and live by the beach.<Ref n={1} /><Ref n={8} /></p>
               </div></WikiSection>
 
             <WikiSection id="career" title="Career">
@@ -185,7 +187,7 @@ export default function Home() {
                 <figure>
                   <img src="https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp" alt="Alex Lakas" />
                 </figure>
-                <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. Around 2012, he joined <a href="https://www.linkedin.com/in/vlokshin/" target="_blank" rel="noreferrer">Vlad Lokshin</a> and <a href="https://www.linkedin.com/in/andytiffany/" target="_blank" rel="noreferrer">Andy Tiffany</a> to form a small 0-1 dev shop based in San Francisco, CA. This focused on agency style work that funded their own ideas. That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
+                <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. Around 2012, he joined <span data-nosnippet><a href="https://www.linkedin.com/in/vlokshin/" target="_blank" rel="nofollow noreferrer">Vlad Lokshin</a></span> and <span data-nosnippet><a href="https://www.linkedin.com/in/andytiffany/" target="_blank" rel="nofollow noreferrer">Andy Tiffany</a></span> to form a small 0-1 dev shop based in San Francisco, CA. This focused on agency style work that funded their own ideas. That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
                 <p>These projects treated websites and prototypes as complete experiences rather than static portfolios: each combined narrative, interface, and behavior. The work formed the foundation for Alex&apos;s later focus on clear systems and useful digital tools.</p>
               </div>
               <div id="local-search-for-merchants-and-consumers" className="career-feature career-feature--right career-feature--landscape career-feature--thumb">
@@ -193,15 +195,15 @@ export default function Home() {
                 <figure>
                   <img src="https://miro.medium.com/v2/resize:fit:720/1*tvnPllmUzgIvJVdPxyPVPg.png" alt="Google Maps Live Popular Times on a laptop" />
                 </figure>
-                <p>At <a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>, Alex worked across Google My Business, Local Search, and Maps. His visual design, prototyping and systems thinking helped shape place listing management, local discovery, Live Popular Times, visit-duration information, and booking flows that connect people with nearby businesses and services.<Ref n={1} /><Ref n={8} /><Ref n={9} /></p>
-                <p>Those experiences turned complex local data into timely signals people could act on: whether a place was busy, when to visit, and how to make a reservation without leaving Search or Maps - collaborating with folks like YC Alum, <a href="https://www.linkedin.com/in/abhishek24/" target="_blank" rel="noreferrer">Abhishek Poddar</a>, <a href="https://www.morrowed.com/" target="_blank" rel="noreferrer">Jason Morrow</a>, <a href="https://dribbble.com/uekermann" target="_blank" rel="noreferrer">Marcel Uekermann</a>, <a href="https://www.linkedin.com/in/daniel-balgley-5786a917/" target="_blank" rel="noreferrer">Daniel Balgley</a>, <a href="https://www.simonfungcreative.com/" target="_blank" rel="noreferrer">Simon Fung</a>, and <a href="https://www.linkedin.com/in/hintzemichael/" target="_blank" rel="noreferrer">Michael Hintze</a>. For small businesses, the same tools made practical information and conversion paths easier to maintain and find. The role also gave him the chance to work with agencies such as <a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a> and <a href="https://www.method.com/" target="_blank" rel="noreferrer">Method</a> on a range of projects.</p>
+                <p>At <a href="https://about.google/" target="_blank" rel="noreferrer">Google</a>, Alex worked across Google My Business, Local Search, and Maps. His visual design, prototyping and systems thinking helped shape place listing management, local discovery, Live Popular Times, visit-duration information, and booking flows that connect people with nearby businesses and services.<Ref n={1} /><Ref n={8} /><Ref n={9} /></p>
+                <p>Those experiences turned complex local data into timely signals people could act on: whether a place was busy, when to visit, and how to make a reservation without leaving Search or Maps - collaborating with folks like <span data-nosnippet>YC Alum</span>, <span data-nosnippet><a href="https://www.linkedin.com/in/abhishek24/" target="_blank" rel="nofollow noreferrer">Abhishek Poddar</a></span>, <span data-nosnippet><a href="https://www.morrowed.com/" target="_blank" rel="nofollow noreferrer">Jason Morrow</a></span>, <span data-nosnippet><a href="https://dribbble.com/uekermann" target="_blank" rel="nofollow noreferrer">Marcel Uekermann</a></span>, <span data-nosnippet><a href="https://www.dbalgley.com/" target="_blank" rel="nofollow noreferrer">Daniel Balgley</a></span>, <span data-nosnippet><a href="https://www.simonfungcreative.com/" target="_blank" rel="nofollow noreferrer">Simon Fung</a></span>, and <span data-nosnippet><a href="https://michaelhintze.com/" target="_blank" rel="nofollow noreferrer">Michael Hintze</a></span>. For small businesses, the same tools made practical information and conversion paths easier to maintain and find. The role also gave him the chance to work with agencies such as <a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a> and <a href="https://www.method.com/" target="_blank" rel="noreferrer">Method</a> on a range of projects.</p>
               </div>
               <div id="modernizing-social-media-for-professionals" className="career-feature career-feature--thumb career-feature--right career-feature--square career-feature--team">
                 <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Modernizing social media for professionals</span></span></h3>
                 <figure>
                   <img src="https://miro.medium.com/v2/1*nacLVsr2ifTQvHN_qQknYw.png" alt="Alex with the LinkedIn Sharing team" />
                 </figure>
-                <p>As a Senior Product Designer at <a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>, Alex helped re-shape and design the home experience and sharing tools, including polls, posting, comment controls, a modernization overhaul, and more, as the platform expanded how professional communities could participate and connect. The work spanned design systems, product design, and prototyping.<Ref n={3} /><Ref n={6} /><Ref n={10} /></p>
+                <p>As a Senior Product Designer at <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn</a>, Alex helped re-shape and design the home experience and sharing tools, including polls, posting, comment controls, a modernization overhaul, and more, as the platform expanded how professional communities could participate and connect. The work spanned design systems, product design, and prototyping.<Ref n={3} /><Ref n={6} /><Ref n={10} /></p>
                 <p>The goal was to make professional participation feel less formal and more immediate. Streamlined sharing, lightweight polls, and live formats gave members more ways to contribute, while preserving the context and utility people expect from a professional network.</p>
               </div>
               <div id="freelance-and-0-1" className="career-feature career-feature--right career-feature--wide career-feature--peanut career-feature--thumb">
@@ -211,7 +213,7 @@ export default function Home() {
                     <img src="/peanut-travel-on.png" alt="Peanut: Travel on." />
                   </div>
                 </figure>
-                <p>Alex co-founded <a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Peanut</a>, a Chrome extension that surfaced travel info during online booking, later acquired by Insured Nomads. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a> on a stealth social media app spanning VFX, design, and product, working with <a href="https://dinetz.com/" target="_blank" rel="noreferrer">David Dinetz</a>, <a href="https://www.cabral.design/" target="_blank" rel="noreferrer">Andre Cabral</a>, <a href="https://www.imdb.com/name/nm5680415/" target="_blank" rel="noreferrer">Jo Murayama</a>, and <a href="https://povio.com/" target="_blank" rel="noreferrer">Povio</a>.<Ref n={1} /><Ref n={11} /></p>
+                <p>Alex co-founded <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Peanut</a>, a Chrome extension that surfaced travel info during online booking, later acquired by Insured Nomads. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a> on a stealth social media app spanning VFX, design, and product, working with <span data-nosnippet><a href="https://dinetz.com/" target="_blank" rel="nofollow noreferrer">David Dinetz</a></span>, <span data-nosnippet><a href="https://www.cabral.design/" target="_blank" rel="nofollow noreferrer">Andre Cabral</a></span>, <span data-nosnippet><a href="https://www.instagram.com/jomurayama/" target="_blank" rel="nofollow noreferrer">Jo Murayama</a></span>, and <a href="https://povio.com/" target="_blank" rel="noreferrer">Povio</a>.<Ref n={1} /><Ref n={11} /></p>
                 <figure className="career-video">
                   <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
                 </figure>

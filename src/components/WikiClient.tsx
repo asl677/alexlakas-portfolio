@@ -6,6 +6,13 @@ import { BookMarked, BriefcaseBusiness, ChevronDown, Code2, FileText, Graduation
 import { gsap, SplitText } from "gsap/all";
 import Lenis from "lenis";
 import { scrubConfig } from "./scrubConfig";
+import fetchedPreviews from "../data/linkPreviews.json";
+import extraPreviews from "../data/linkPreviewsExtra.json";
+import personBlurbs from "../data/personBlurbs.json";
+// Fetched Open Graph previews, plus hand-written fallbacks for sites that block the fetch.
+const linkPreviews: Record<string, { image?: string; description?: string; title?: string }> = Object.fromEntries(
+  [...new Set([...Object.keys(extraPreviews), ...Object.keys(fetchedPreviews)])].map(url => [url, { ...(fetchedPreviews as Record<string, object>)[url], ...(extraPreviews as Record<string, object>)[url] }]),
+);
 
 gsap.registerPlugin(SplitText);
 
@@ -1002,6 +1009,9 @@ export function IntroSequence() {
       ".article-toc > ol > li",
       ".wiki-section-content > ol > li",
       ".wiki-section-content .references > li",
+      // List items reveal as whole items (bullet included), in sync with other lists.
+      ".wiki-section-content .wiki-link-list > li",
+      ".wiki-section-content > ul:not(.stack-tags) > li",
       // Case study rows: the thumbnail gets the media wipe, the text block fades.
       ".wiki-section-content .article-list-item > .article-list-image",
       ".wiki-section-content .work-links > li",
@@ -1042,7 +1052,10 @@ export function IntroSequence() {
       // Keep punctuation that follows a link or reference on the same line as it: otherwise
       // SplitText treats ", and" as its own word and can wrap the comma to the next line.
       const gluePunctuation = (root: HTMLElement) => {
-        root.querySelectorAll<HTMLElement>("a, sup").forEach(element => {
+        root.querySelectorAll<HTMLElement>("a, sup").forEach(link => {
+          // A link wrapped in a data-nosnippet span: glue the punctuation to the wrapper.
+          let element: HTMLElement = link;
+          while (!element.nextSibling && element.parentElement?.hasAttribute("data-nosnippet")) element = element.parentElement;
           const next = element.nextSibling;
           if (!next || next.nodeType !== Node.TEXT_NODE) return;
           const match = /^[,.;:!?)\]\u2019\u201d]+/.exec(next.textContent ?? "");
@@ -1060,12 +1073,8 @@ export function IntroSequence() {
         ".wiki-section-content > h3",
         ".wiki-section-content .career-feature > p",
         // Case study rows: meta, title and line reveal like the body text.
-        ".wiki-section-content .article-list-item > div > :is(p, h3)",
-        // Link lists (Press, External) reveal line by line too, so they stagger with the
-        // paragraphs instead of fading as whole blocks. (References keep a block reveal: their
-        // numbers are positioned against the list item.)
-        ".wiki-section-content .wiki-link-list > li",
-        ".wiki-section-content > ul:not(.stack-tags) > li"
+        ".wiki-section-content .article-list-item > div > :is(p, h3)"
+
       ].join(", "))).map(target => {
         gluePunctuation(target);
         let previousLines: HTMLElement[] = [];
@@ -1216,9 +1225,9 @@ export function IntroSequence() {
       // (re-measured on resize/accordion changes) so the per-frame loop does no layout reads.
       // Ease-out (cubic) for scroll-linked progress: an in-out curve here held content near
       // invisible, then snapped it in mid-scroll. Out-curves track the scroll smoothly.
-      // Same curve as the load reveal, so a line rises and clears with the same shape whether
-      // it appears on load or while scrolling.
-      const scrubEase = revealEase;
+      // Smoothstep for scroll-linked progress: the load curve is front-loaded, which on scroll
+      // finished the rise within a few pixels of entering, so the slide was barely visible.
+      const scrubEase = (t: number) => t * t * (3 - 2 * t);
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
       // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
@@ -1608,4 +1617,303 @@ export function ContentsScrollSpy() {
   }, []);
 
   return null;
+}
+
+// Hover cards (Wikipedia-style previews) for footnotes and links: references show their full
+// entry, in-page links show the opening of that section, external links show their title and
+// site. Desktop pointers only; no border, caret or dividers, just a soft fade and slide up.
+type HoverCardData = {
+  key: number;
+  left: number;
+  top: number;
+  below: boolean;
+  title?: string;
+  text?: string;
+  bodyHtml?: string;
+  site?: string;
+  person: boolean;
+  href?: string;
+  candidates: string[];
+};
+type HoverMedia = { key: number; status: "loading" | "ready" | "none"; src?: string; icon?: boolean };
+
+// Page titles often end with the site name ("… | TechCrunch"); drop that suffix.
+const cleanTitle = (title: string) => title.replace(/\s+[|–—-]\s+[^|–—-]{2,30}$/, "").trim();
+
+// Try to load an image for up to `ms`; resolves true only for a real picture (not a pixel).
+const tryImage = (src: string, ms: number, min = 40) => new Promise<boolean>(resolve => {
+  const image = new window.Image();
+  const done = (ok: boolean) => { window.clearTimeout(timer); image.onload = image.onerror = null; resolve(ok); };
+  const timer = window.setTimeout(() => done(false), ms);
+  image.referrerPolicy = "no-referrer";
+  image.onload = () => {
+    // A usable picture: big enough (favicons exempt via a small `min`) and not a thin banner.
+    const ratio = image.naturalWidth / Math.max(1, image.naturalHeight);
+    done(image.naturalWidth >= min && image.naturalHeight >= Math.min(min, 120) && ratio < 3.2 && ratio > 0.3);
+  };
+  image.onerror = () => done(false);
+  image.src = src;
+});
+
+export function HoverCards() {
+  const [card, setCard] = useState<HoverCardData | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [media, setMedia] = useState<HoverMedia>({ key: 0, status: "none" });
+  const [liveText, setLiveText] = useState<{ key: number; text: string } | null>(null);
+  const [liveTitle, setLiveTitle] = useState<{ key: number; title: string } | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const counter = useRef(0);
+
+  useEffect(() => {
+    // Desktop only: no hover cards on touch devices or phone-width screens.
+    if (!window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 769px)").matches) return;
+    let showTimer = 0;
+    let hideTimer = 0;
+    let current: HTMLAnchorElement | null = null;
+
+    const build = (link: HTMLAnchorElement): Omit<HoverCardData, "key" | "left" | "top" | "below"> | null => {
+      const href = link.getAttribute("href") ?? "";
+      if (link.closest("sup.reference") && href.startsWith("#ref-")) {
+        // Footnotes: the reference entry, text only.
+        const entry = document.getElementById(href.slice(1))?.cloneNode(true) as HTMLElement | undefined;
+        if (!entry) return null;
+        entry.querySelectorAll(".reference-number, .reference-backlink").forEach(node => node.remove());
+        return { bodyHtml: entry.innerHTML, person: false, candidates: [] };
+      }
+      if (href.startsWith("#") && href.length > 1) {
+        const target = document.getElementById(href.slice(1));
+        const paragraph = target?.querySelector<HTMLElement>(".wiki-section-content p, p");
+        if (!target || !paragraph) return null;
+        const title = (target.querySelector("h2, h3")?.textContent ?? link.textContent ?? "").trim();
+        const text = (paragraph.innerText || paragraph.textContent || "").replace(/\[\d+\]/g, "").replace(/\s+/g, " ").trim();
+        return { title, text: text.length > 260 ? text.slice(0, 260).replace(/\s+\S*$/, "") + "…" : text, person: false, candidates: [] };
+      }
+      if (/^https?:/.test(href)) {
+        const person = !!link.closest("[data-nosnippet]");
+        const saved = linkPreviews[href] ?? {};
+        const youtube = href.match(/youtube\.com\/watch\?v=([\w-]+)/)?.[1];
+        const shown = person ? href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") : new URL(href).hostname.replace(/^www\./, "");
+        const candidates = [saved.image, youtube && `https://i.ytimg.com/vi/${youtube}/hqdefault.jpg`].filter(Boolean) as string[];
+        return {
+          // Article/page title when known (link text is often just the site name).
+          title: (!person && saved.title && cleanTitle(saved.title)) || (link.textContent ?? "").trim(),
+          text: person ? (personBlurbs as Record<string, string>)[href] : saved.description,
+          site: shown,
+          person,
+          href,
+          candidates,
+        };
+      }
+      return null;
+    };
+
+    const place = (link: HTMLAnchorElement, data: Omit<HoverCardData, "key" | "left" | "top" | "below">) => {
+      const box = link.getBoundingClientRect();
+      const width = Math.min(data.href ? 470 : 350, window.innerWidth - 32);
+      const left = Math.max(16, Math.min(box.left, window.innerWidth - width - 16));
+      const below = box.top < 220;
+      counter.current += 1;
+      // Above the link: anchored by its bottom edge (no translateY(-100%)), so switching between
+      // above/below never animates the card across its own height from far away.
+      setCard({ ...data, key: counter.current, left, top: below ? box.bottom + 8 : window.innerHeight - box.top + 8, below });
+      requestAnimationFrame(() => setVisible(true));
+    };
+
+    const onOver = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (cardRef.current?.contains(target)) { window.clearTimeout(hideTimer); return; }
+      const link = target.closest<HTMLAnchorElement>(".wiki-article-body a[href], .wiki-talk-page a[href]");
+      if (!link || link === current || link.closest(".article-list-item, .wiki-tab, .article-toc, .reference-backlink")) return;
+      window.clearTimeout(hideTimer);
+      window.clearTimeout(showTimer);
+      showTimer = window.setTimeout(() => {
+        const data = build(link);
+        if (!data) return;
+        current = link;
+        place(link, data);
+      }, 280);
+    };
+    const onOut = (event: MouseEvent) => {
+      const to = event.relatedTarget as HTMLElement | null;
+      if (to && (cardRef.current?.contains(to) || (current && current.contains(to)))) return;
+      window.clearTimeout(showTimer);
+      hideTimer = window.setTimeout(() => { setVisible(false); current = null; }, 160);
+    };
+    const onScroll = () => { setVisible(false); current = null; };
+
+    document.addEventListener("mouseover", onOver);
+    document.addEventListener("mouseout", onOut);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+      document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseout", onOut);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  // Resolve the card's picture: every source is tried at once (saved image, the page's live
+  // share/first images, the site's favicon) and the best one that loads within 1.5s wins, in
+  // that order of preference. The card is revealed only then, at its final size.
+  useEffect(() => {
+    if (!card) return;
+    const key = card.key;
+    if (!card.href) { setMedia({ key, status: "none" }); setVisible(true); return; }
+    const href = card.href;
+    let settled = false;
+    setMedia({ key, status: "loading" });
+    const load = (url: string, min: number) => {
+      const list = url.startsWith("http:") ? [`/api/image?url=${encodeURIComponent(url)}`] : [url, `/api/image?url=${encodeURIComponent(url)}`];
+      return Promise.all(list.map(src => tryImage(src, 1400, min))).then(ok => list.find((_, i) => ok[i]) ?? null);
+    };
+    const host = new URL(href).hostname;
+    const saved = Promise.all(card.candidates.map(url => load(url, 120))).then(found => found.find(Boolean) ?? null);
+    const live = fetch(`/api/preview?url=${encodeURIComponent(href)}`)
+      .then(response => response.json() as Promise<{ images?: string[]; image?: string; description?: string; title?: string }>)
+      .catch(() => ({} as { images?: string[]; image?: string; description?: string; title?: string }));
+    live.then(data => {
+      if (settled || card.person) return;
+      if (data.description && !card.text) setLiveText({ key, text: data.description });
+      if (data.title && !linkPreviews[href]?.title) setLiveTitle({ key, title: cleanTitle(data.title) });
+    });
+    const liveImage = live.then(data => Promise.all((data.images ?? (data.image ? [data.image] : [])).slice(0, 4).map(url => load(url, 200)))).then(found => found.find(Boolean) ?? null);
+    const icon = load(`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent("https://" + host)}&size=256`, 32);
+    const results: (string | null | undefined)[] = [undefined, undefined, undefined];
+    const decide = (force: boolean) => {
+      if (settled) return;
+      // Take the best source once everything ranked above it has answered (or time is up).
+      for (let i = 0; i < 3; i++) {
+        if (results[i] === undefined && !force) return;
+        if (results[i]) {
+          settled = true;
+          setMedia({ key, status: "ready", src: results[i] as string, icon: i === 2 });
+          setVisible(true);
+          return;
+        }
+      }
+      if (force || results.every(r => r !== undefined)) { settled = true; setMedia({ key, status: "none" }); setVisible(true); }
+    };
+    [saved, liveImage, icon].forEach((promise, i) => promise.then(found => { results[i] = found; decide(false); }));
+    const timer = window.setTimeout(() => decide(true), 1500);
+    return () => { settled = true; window.clearTimeout(timer); };
+  }, [card?.key]);
+
+  // 5 lines in total: measure how many lines the title actually takes (1 or 2) and give the
+  // description the rest, leaving one line for the URL.
+  useLayoutEffect(() => {
+    const element = cardRef.current;
+    const title = element?.querySelector<HTMLElement>(".wiki-hovercard-title");
+    if (!element) return;
+    let titleLines = 0;
+    if (title) {
+      const lineHeight = parseFloat(getComputedStyle(title).lineHeight) || 20;
+      titleLines = Math.min(2, Math.max(1, Math.round(title.scrollHeight / lineHeight)));
+    }
+    const site = element.querySelector(".wiki-hovercard-site") ? 1 : 0;
+    element.style.setProperty("--wiki-card-lines", String(Math.max(1, 5 - titleLines - site)));
+  });
+
+  if (!card) return null;
+  // The card opens text-only; if a picture loads, the card widens to expose it (no placeholder).
+  const hasMedia = !!card.href && media.key === card.key && media.status === "ready";
+  const rawText = card.text ?? (liveText?.key === card.key ? liveText.text : undefined);
+  // Descriptions cut mid-sentence by the source get an ellipsis instead of ending abruptly.
+  let text = rawText;
+  if (rawText && !/[.!?…"”)]$/.test(rawText.trim())) {
+    // Cut mid-sentence by the source: end on the last full sentence if there is one, else
+    // drop the dangling little words and add an ellipsis.
+    const sentence = rawText.match(/^([\s\S]*[.!?])\s/)?.[1];
+    text = sentence && sentence.length > 60 ? sentence : rawText.trim().replace(/(\s+(?:a|an|the|of|to|and|or|in|on|for|with|by|is|at))+$/i, "") + "…";
+  }
+  return createPortal(
+    <div
+      ref={cardRef}
+      // Visible only once the picture question is settled, so the card never shows at one
+      // width and then jumps to another.
+      className={`wiki-hovercard${visible && (!card.href || (media.key === card.key && media.status !== "loading")) ? " is-visible" : ""}${card.below ? " is-below" : ""}${hasMedia ? " has-media" : ""}${!text && !card.bodyHtml ? " is-compact" : ""}`}
+      style={{ left: card.left, ...(card.below ? { top: card.top } : { bottom: card.top }) }}
+    >
+      <div className="wiki-hovercard-copy">
+        {card.title && <strong className="wiki-hovercard-title">{liveTitle?.key === card.key ? liveTitle.title : card.title}</strong>}
+        {card.bodyHtml && <div className="wiki-hovercard-text" dangerouslySetInnerHTML={{ __html: card.bodyHtml }} />}
+        {text && <div className="wiki-hovercard-text">{text}</div>}
+        {card.site && <div className="wiki-hovercard-text wiki-hovercard-site">{card.site}</div>}
+      </div>
+      {hasMedia && (
+        <div className={`wiki-hovercard-thumb${media.icon ? " is-icon" : ""}`}>
+          <img src={media.src} alt="" referrerPolicy="no-referrer" />
+        </div>
+      )}
+    </div>,
+    document.body,
+  );
+}
+
+const translateLanguages: [string, string][] = [
+  ["es", "Español"], ["zh-CN", "中文"], ["fr", "Français"], ["de", "Deutsch"], ["it", "Italiano"], ["vi", "Tiếng Việt"],
+  ["af", "Afrikaans"], ["ar", "العربية"], ["az", "Azərbaycanca"], ["id", "Bahasa Indonesia"], ["ms", "Bahasa Melayu"], ["bn", "বাংলা"],
+  ["bg", "Български"], ["ca", "Català"], ["cs", "Čeština"], ["cy", "Cymraeg"], ["da", "Dansk"], ["et", "Eesti"],
+  ["el", "Ελληνικά"], ["eo", "Esperanto"], ["eu", "Euskara"], ["fa", "فارسی"], ["ga", "Gaeilge"], ["gl", "Galego"],
+  ["ko", "한국어"], ["hy", "Հայերեն"], ["hi", "हिन्दी"], ["hr", "Hrvatski"], ["is", "Íslenska"], ["he", "עברית"],
+  ["ka", "ქართული"], ["sw", "Kiswahili"], ["lv", "Latviešu"], ["lt", "Lietuvių"], ["hu", "Magyar"], ["mk", "Македонски"],
+  ["nl", "Nederlands"], ["ja", "日本語"], ["no", "Norsk"], ["uz", "Oʻzbekcha"], ["pl", "Polski"], ["pt", "Português"],
+  ["ro", "Română"], ["ru", "Русский"], ["sq", "Shqip"], ["sk", "Slovenčina"], ["sl", "Slovenščina"], ["sr", "Српски"],
+  ["fi", "Suomi"], ["sv", "Svenska"], ["tl", "Tagalog"], ["ta", "தமிழ்"], ["th", "ไทย"], ["tr", "Türkçe"],
+  ["uk", "Українська"], ["ur", "اردو"], ["zh-TW", "繁體中文"],
+];
+
+// "So many languages": the title-row label (it keeps its scroll hand-off with the sticky
+// icons) opens a borderless card of languages; picking one opens this page translated.
+export function LanguageMenu() {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [cardPos, setCardPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node)) setOpen(false); };
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", escape); };
+  }, [open]);
+  const translate = (code: string) => {
+    const url = `https://translate.google.com/translate?sl=en&tl=${encodeURIComponent(code)}&u=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
+    window.open(url, "_blank", "noopener");
+    setOpen(false);
+  };
+  const term = query.trim().toLocaleLowerCase();
+  const matches = translateLanguages.filter(([code, name]) => !term || name.toLocaleLowerCase().includes(term) || code.toLowerCase().startsWith(term));
+  return (
+    <div ref={rootRef} className={`wiki-language${open ? " is-open" : ""}`}>
+      <button type="button" className="wiki-language-button" aria-expanded={open} onClick={event => {
+        // Fixed to the viewport (positioned from the button) so the header can't clip it.
+        const box = event.currentTarget.getBoundingClientRect();
+        setCardPos({ top: box.bottom + 10, right: Math.max(16, window.innerWidth - box.right) });
+        setOpen(value => !value);
+      }}>
+        So many languages
+      </button>
+      {open && (
+        <div className="wiki-language-card" role="dialog" aria-label="Translate this page" style={{ top: cardPos.top, right: cardPos.right }}>
+          <input autoFocus value={query} onChange={event => setQuery(event.target.value)} placeholder="Search languages" aria-label="Search languages" />
+          {!term && <p className="wiki-language-heading">Suggested languages</p>}
+          <ul>
+            {(term ? matches : translateLanguages.slice(0, 6)).map(([code, name]) => (
+              <li key={code}><button type="button" onClick={() => translate(code)}>{name}</button></li>
+            ))}
+          </ul>
+          {!term && <p className="wiki-language-heading">All languages</p>}
+          {!term && (
+            <ul>
+              {translateLanguages.slice(6).map(([code, name]) => (
+                <li key={code}><button type="button" onClick={() => translate(code)}>{name}</button></li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }

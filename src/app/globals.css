@@ -6142,7 +6142,7 @@ html body .wiki-shell .infobox :is(dt, dd) {
 /* Text lines rise 30% of their height (no mask) as they clear, in step with the fade and blur
    (load and scroll), unclipped so the blur can spread softly. */
 /* transform (not the newer translate property) for iOS Safari reliability. */
-.wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 30%)); }
+.wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 50%)); }
 .wiki-reveal-line[style*="--wiki-wipe: 1;"],
 .wiki-reveal-line:not([style*="--wiki-wipe"]) { transform: none; }
 @media (prefers-reduced-motion: reduce) {
@@ -6166,3 +6166,164 @@ html body .wiki-shell .infobox :is(dt, dd) {
 .wiki-wipe::after { opacity: clamp(0, calc(var(--wiki-wipe) * 50), 1); }
 .wiki-wipe[style*="--wiki-wipe: 1;"]::after,
 .wiki-wipe:not([style*="--wiki-wipe"])::after { display: none; }
+
+/* Hover cards: a borderless panel with no caret or dividers; it fades and slides up 6px. */
+.wiki-hovercard {
+  position: fixed;
+  z-index: 2100;
+  width: min(320px, calc(100vw - 32px));
+  padding: 14px 16px;
+  background: var(--wiki-profile-surface);
+  color: var(--wiki-ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  /* Hidden cards stay in the page for the fade-out, so they must not catch the pointer:
+     an invisible card was sitting over links and swallowing hovers and clicks. */
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-100%) translateY(6px);
+  transition: opacity 0.2s var(--wiki-ease), transform 0.2s var(--wiki-ease), visibility 0s linear 0.2s;
+}
+.wiki-hovercard.is-visible { opacity: 1; transform: translateY(-100%); pointer-events: auto; visibility: visible; transition: opacity 0.2s var(--wiki-ease), transform 0.2s var(--wiki-ease), visibility 0s; }
+.wiki-hovercard.is-below { transform: translateY(6px); }
+.wiki-hovercard.is-below.is-visible { transform: none; }
+.wiki-hovercard-title { display: block; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+.wiki-hovercard-text { color: var(--wiki-muted); }
+.wiki-hovercard-text a { color: var(--wiki-ink); }
+.wiki-hovercard-site { font-size: 12px; }
+.wiki-hovercard-site { margin-top: 6px; }
+
+
+/* "So many languages" button and its card (borderless, fades and slides up like hover cards). */
+.wiki-language { position: relative; }
+.wiki-language-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+.wiki-language-card {
+  position: fixed;
+  z-index: 2100;
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(420px, 70vh);
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  background: var(--wiki-profile-surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  text-align: left;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  animation: wiki-card-in 0.2s var(--wiki-ease) both;
+}
+@keyframes wiki-card-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.wiki-language-card input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--wiki-border);
+  background: transparent;
+  color: var(--wiki-ink);
+  font: inherit;
+  outline: none;
+}
+.wiki-language-card input:focus { border-color: var(--wiki-ink); }
+.wiki-language-heading { margin: 14px 0 6px; color: var(--wiki-muted); font-weight: 600; }
+.wiki-language-card ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 12px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.wiki-language-card li button {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--wiki-ink);
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+@media (hover: hover) { .wiki-language-card li button:hover { color: var(--wiki-muted); } }
+@media (max-width: 48rem) { .wiki-language-card ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Mouse clicks don't leave a focus box on links; keyboard focus still shows it. */
+html body .wiki-shell a:focus:not(:focus-visible) { outline: none !important; }
+
+/* Hover card layout: copy on the left, an optional picture column on the right. The picture
+   shows whole (never cropped) at its own shape, pinned top right; company favicons sit
+   centered. While it loads the column pulses softly, then the image fades in. */
+.wiki-hovercard { width: min(320px, calc(100vw - 32px)); padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); transition: opacity 0.2s var(--wiki-ease), transform 0.2s var(--wiki-ease), visibility 0s linear 0.2s; }
+.wiki-hovercard.has-media { width: min(400px, calc(100vw - 32px)); grid-template-columns: minmax(0, 1fr) 120px; overflow: hidden; }
+.wiki-hovercard.is-visible { transition: opacity 0.2s var(--wiki-ease), transform 0.2s var(--wiki-ease), visibility 0s; }
+.wiki-hovercard-copy { padding: 14px 16px; }
+.wiki-hovercard-title { display: block; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+.wiki-hovercard-text { color: var(--wiki-muted); }
+.wiki-hovercard-text a { color: var(--wiki-ink); }
+.wiki-hovercard-site { margin-top: 6px; font-size: 12px; }
+.wiki-hovercard-thumb { position: relative; align-self: start; }
+.wiki-hovercard-thumb.is-icon { align-self: center; }
+.wiki-hovercard-thumb img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  object-position: right top;
+  animation: wiki-thumb-in 0.35s var(--wiki-ease) both;
+}
+.wiki-hovercard-thumb.is-icon { display: grid; place-items: center; }
+.wiki-hovercard-thumb.is-icon img { width: 64px; height: 64px; }
+.wiki-hovercard-thumb.is-ready @keyframes wiki-thumb-in { from { opacity: 0; } to { opacity: 1; } }
+.wiki-hovercard-copy > .wiki-hovercard-text:not(.wiki-hovercard-site) { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Final hover-card layout: the text column is a fixed 320px and never reflows. If a picture
+   loads, the card grows to the right to reveal a 120px column, with the picture pinned top
+   right. */
+html body .wiki-hovercard { grid-template-columns: min(320px, calc(100vw - 32px)) !important; }
+html body .wiki-hovercard.has-media { width: min(440px, calc(100vw - 32px)) !important; grid-template-columns: min(320px, calc(100vw - 32px)) 120px !important; }
+html body .wiki-hovercard-thumb,
+html body .wiki-hovercard-thumb.is-icon { align-self: start !important; justify-self: end; padding: 14px 14px 0 0; background: none !important; }
+html body .wiki-hovercard-thumb img { width: 106px !important; height: auto !important; object-position: right top; animation: wiki-thumb-in 0.35s var(--wiki-ease) 0.15s both; }
+html body .wiki-hovercard-thumb.is-icon img { width: 56px !important; height: 56px !important; }
+
+/* Card height follows the text; the picture fills the right column flush (no padding),
+   cropped from its top-right corner to that height. Favicons stay small and centered. */
+html body .wiki-hovercard-thumb { align-self: stretch !important; justify-self: stretch; padding: 0 !important; position: relative; overflow: hidden; }
+html body .wiki-hovercard-thumb img { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; object-position: right top; }
+html body .wiki-hovercard-thumb.is-icon { display: grid; place-items: center; }
+html body .wiki-hovercard-thumb.is-icon img { position: static; width: 56px !important; height: 56px !important; object-fit: contain; }
+
+/* Picture column: the image shows whole at its natural height (never cropped), pinned top
+   right; if it's taller than the text the card grows to fit it. */
+html body .wiki-hovercard-thumb { align-self: start !important; overflow: visible; padding: 0 !important; }
+html body .wiki-hovercard-thumb img { position: static !important; display: block; width: 100% !important; height: auto !important; object-fit: contain !important; object-position: right top; }
+html body .wiki-hovercard-thumb.is-icon { align-self: start !important; display: flex; justify-content: flex-end; padding: 14px 14px 0 0 !important; }
+html body .wiki-hovercard-thumb.is-icon img { width: 48px !important; height: 48px !important; }
+
+/* Sizes: text-only cards 350px, picture cards 350px of text + a 120px picture column.
+   At most 5 lines in total: a title of up to 2 lines, the description fills the rest, then the URL. */
+html body .wiki-hovercard { width: min(350px, calc(100vw - 32px)) !important; grid-template-columns: min(350px, calc(100vw - 32px)) !important; }
+html body .wiki-hovercard.has-media { width: min(470px, calc(100vw - 32px)) !important; grid-template-columns: min(350px, calc(100vw - 32px)) 120px !important; }
+html body .wiki-hovercard-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+html body .wiki-hovercard-copy > .wiki-hovercard-text:not(.wiki-hovercard-site) { -webkit-line-clamp: var(--wiki-card-lines, 3) !important; }
+html body .wiki-hovercard-site { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Cards fade and slide just 6px from where they sit (anchored above or below the link). */
+html body .wiki-hovercard { transform: translateY(6px) !important; transition: opacity 0.2s var(--wiki-ease), transform 0.2s var(--wiki-ease), visibility 0s linear 0.2s !important; }
+html body .wiki-hovercard.is-visible { transform: none !important; transition: opacity 0.2s var(--wiki-ease), transform 0.2s var(--wiki-ease), visibility 0s !important; }
+/* Favicons only: inset to match the card's text padding. */
+html body .wiki-hovercard-thumb.is-icon { padding: 14px 16px 0 0 !important; }
+
+/* Name + URL only (no description): same 350px width as footnote cards; a favicon or
+   picture takes a slim right column inside that width instead of widening the card. */
+html body .wiki-hovercard.is-compact { width: min(350px, calc(100vw - 32px)) !important; grid-template-columns: minmax(0, 1fr) !important; }
+html body .wiki-hovercard.is-compact.has-media { width: min(350px, calc(100vw - 32px)) !important; grid-template-columns: minmax(0, 1fr) 96px !important; }
+@media (max-width: 768px) { .wiki-hovercard { display: none !important; } }
