@@ -3,7 +3,7 @@
 export const scrubConfig = {
   text: { frac: 0.32, min: 200, max: 300 },
   media: { frac: 0.32, min: 200, max: 300 },
-  damping: 4,
+  damping: 12,
   // px above the viewport bottom where reveals begin (clears the mobile browser toolbar).
   edgeInset: 70,
 };

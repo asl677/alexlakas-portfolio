@@ -28,6 +28,8 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
 }
 // easeInOutQuart (easings.net), matching --wiki-ease in CSS.
 export const wikiEase = cubicBezier(0.76, 0, 0.24, 1);
+// Text reveal curve (owner's pick): fast start, long soft settle. Used on load and scroll.
+const revealEase = cubicBezier(0.3, 0.592, 0.011, 0.986);
 
 const hoverPortraitFrames = [
   // Hover/press opens on the yearbook portrait, then cycles the work frames.
@@ -984,22 +986,19 @@ export function IntroSequence() {
       ".wiki-topbar > .wiki-brand",
       ".wiki-topbar > .wiki-search",
       ".wiki-topbar nav > :not(.wiki-mobile-search-sheet)",
-      ".wiki-contents summary",
       // The rail's "Top" link joins the load reveal (it still only shows once scrolled).
       ".wiki-contents .contents-top",
       ".wiki-contents nav > a",
       // The Talk title is hidden until its tab is chosen; it should switch in instantly,
       // not run the page-load fade the first time it appears.
-      ".wiki-title-row > *:not(.wiki-talk-title)",
+      ".wiki-title-row > *:not(.wiki-talk-title):not(.wiki-article-title)",
       ".wiki-tab-primary > *",
       ".wiki-tab-actions > *",
       ".wiki-mobile-tools > *",
-      ".infobox h2",
       ".infobox-portrait",
       ".infobox .caption",
       ".infobox dt",
       ".infobox dd",
-      ".article-toc > h2",
       ".article-toc > ol > li",
       ".wiki-section-content > ul > li",
       ".wiki-section-content > ol > li",
@@ -1121,6 +1120,11 @@ export function IntroSequence() {
         divider.classList.add("wiki-reveal-divider");
         targets.push(divider);
       });
+      // Every other piece of body text (lists, profile rows, Contents links, Talk, categories)
+      // reveals exactly like the split paragraphs: fade, soft blur and a short rise.
+      targets.forEach(target => {
+        if (target.matches(".infobox :is(dt, dd), .article-toc > ol > li, .wiki-section-content > :is(ul, ol) > li, .wiki-section-content .references > li, .wiki-section-content .wiki-link-list > li, .wiki-section-content .work-links > li, .wiki-categories > *, .wiki-talk-page > *, .wiki-contents nav > a")) target.classList.add("wiki-reveal-block");
+      });
       // Every image and video (Career, profile portrait, case studies) uses the same block wipe.
       targets.forEach(target => { if (target.matches(".career-feature > figure, .infobox-portrait, .article-list-image")) target.classList.add("wiki-wipe", "wiki-wipe-media"); });
       targets.forEach(target => {
@@ -1136,7 +1140,7 @@ export function IntroSequence() {
         // a variable that CSS multiplies in, so the load fade and the hand-off combine.
         if (element.matches(".wiki-title-row > .wiki-title-action, .wiki-title-row > .wiki-scroll-actions, .wiki-contents .contents-top")) return { "--wiki-reveal": opacity };
         // Text lines reveal with the strip wipe: a page-colored cover retracts left to right.
-        if (element.classList.contains("wiki-reveal-line")) return { "--wiki-wipe": opacity };
+        if (element.classList.contains("wiki-reveal-line") || element.classList.contains("wiki-reveal-block")) return { "--wiki-wipe": opacity };
         return { opacity };
       };
       // Per-frame writer for the scrub loop. gsap.set builds a tween per call, and each one
@@ -1203,7 +1207,7 @@ export function IntroSequence() {
         // loader's "Designer" lands; scroll reveals keep the site curve.
         // 0.6s fades 80ms apart (cascade capped ~1.2s) on power3.out: expo.out's long tail kept
         // the 10px rise creeping for the last few pixels, which read as lag.
-        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, "power3.out");
+        fadeIn([...initiallyVisible, ...initiallyVisibleLines], 0, revealEase);
         revealReady = true;
       };
       let revealCancelled = false;
@@ -1214,7 +1218,9 @@ export function IntroSequence() {
       // (re-measured on resize/accordion changes) so the per-frame loop does no layout reads.
       // Ease-out (cubic) for scroll-linked progress: an in-out curve here held content near
       // invisible, then snapped it in mid-scroll. Out-curves track the scroll smoothly.
-      const scrubEase = (t: number) => 1 - Math.pow(1 - t, 3);
+      // Same curve as the load reveal, so a line rises and clears with the same shape whether
+      // it appears on load or while scrolling.
+      const scrubEase = revealEase;
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
       // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
@@ -1295,7 +1301,7 @@ export function IntroSequence() {
             applyReveal(element, 0);
           }
         });
-        fadeIn(pending, 0.04);
+        fadeIn(pending, 0.04, revealEase);
         [120, 700].forEach(delay => window.setTimeout(() => queueReveal(), delay));
         // Positions below the section changed: refresh the scrub's cache.
         queueReveal();
@@ -1366,7 +1372,7 @@ export function IntroSequence() {
         window.removeEventListener("resize", onLayout);
         textSplits.forEach(split => split.revert());
         dividers.forEach(divider => divider.classList.remove("wiki-reveal-divider"));
-        targets.forEach(target => { target.classList.remove("wiki-slide", "wiki-wipe-media"); if (target.matches("figure, .infobox-portrait, .article-list-image")) target.classList.remove("wiki-wipe"); });
+        targets.forEach(target => { target.classList.remove("wiki-slide", "wiki-wipe-media", "wiki-reveal-block"); if (target.matches("figure, .infobox-portrait, .article-list-image")) target.classList.remove("wiki-wipe"); });
       };
 
     });

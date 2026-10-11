@@ -5708,10 +5708,6 @@ html body .wiki-shell .wiki-article-header :is(.wiki-title-row, .wiki-tabs)::aft
 html body .wiki-shell .wiki-contents .contents-top,
 html body .wiki-shell .wiki-contents.is-scrolled .contents-top { background: transparent !important; }
 
-/* Profile status: dot left of the label, green when online, gray when offline. */
-.wiki-status { display: inline-flex; align-items: center; gap: 6px; }
-.wiki-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #8a8a8a; flex: none; }
-.wiki-status.is-online::before { background: #22c55e; }
 
 /* Mobile: stacked images get breathing room before the text below. */
 @media (max-width: 767px) {
@@ -5922,7 +5918,8 @@ html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-c
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: var(--wiki-page);
+  /* Dark grey strip (12% text color over the page: about #1f1f1f in dark mode, light grey in light). */
+  background: color-mix(in srgb, var(--wiki-ink) 12%, var(--wiki-page));
   clip-path: inset(0 calc((1 - var(--wiki-wipe-grow)) * 100%) 0 calc(var(--wiki-wipe-shrink) * 100%));
   pointer-events: none;
 }
@@ -6056,10 +6053,14 @@ html body .wiki-shell .article-toc { background: transparent !important; }
 
 /* Text reveal (after React Bits' ScrollReveal), line by line: each line starts at 10% opacity
    with a 4px blur and clears as its --wiki-wipe goes 0 to 1 (load stagger and scroll). */
-.wiki-reveal-line {
+.wiki-reveal-line, .wiki-reveal-block {
   opacity: calc(0.1 + var(--wiki-wipe, 1) * 0.9);
-  filter: blur(calc((1 - var(--wiki-wipe, 1)) * 4px));
+  /* Starts at an 8px blur and sharpens as the line reveals. */
+  filter: blur(calc((1 - var(--wiki-wipe, 1)) * 8px));
 }
+.wiki-reveal-block { translate: 0 calc((1 - var(--wiki-wipe, 1)) * 0.6em); }
+.wiki-reveal-block[style*="--wiki-wipe: 1;"],
+.wiki-reveal-block:not([style*="--wiki-wipe"]) { filter: none; opacity: 1; translate: none; }
 /* Settled lines drop the filter entirely (a no-op blur still costs a filter pass). */
 .wiki-reveal-line[style*="--wiki-wipe: 1;"],
 .wiki-reveal-line:not([style*="--wiki-wipe"]) { filter: none; opacity: 1; }
@@ -6070,13 +6071,16 @@ html body .wiki-shell .article-toc { background: transparent !important; }
 /* Images: one continuous reveal instead of cover-then-uncover. The page-colored cover starts
    in place and retracts left to right over the whole reveal, while the image fades in and
    scales 1.1 to 1 across the same span, so all three move together and read slower. */
-.wiki-wipe-media::after {
-  clip-path: inset(0 0 0 calc(var(--wiki-wipe) * 100%)) !important;
-}
+/* Image/video strip: the same dark grey strip as headings, drawing in then retracting (so
+   nothing grey sits over an image before or after its reveal); the image itself fades and
+   scales continuously underneath. */
 .wiki-wipe-media > :not(figcaption) {
-  --wiki-wipe-smooth: calc(var(--wiki-wipe) * var(--wiki-wipe) * (3 - 2 * var(--wiki-wipe)));
-  opacity: var(--wiki-wipe) !important;
-  scale: calc(1.1 - var(--wiki-wipe-smooth) * 0.1);
+  /* Fade and scale run with the strip's retract (the second half), so the image settles as
+     the strip clears it rather than finishing underneath while still covered. */
+  /* Same progress as the strip's retracting edge, so scale and fade land exactly when the
+     strip clears. */
+  opacity: var(--wiki-wipe-shrink) !important;
+  scale: calc(1.1 - var(--wiki-wipe-shrink) * 0.1);
 }
 
 /* Left Contents rail: 30px narrower (top bar logo column matches so the edges stay aligned). */
@@ -6120,3 +6124,18 @@ html body .wiki-shell .wiki-article-body .article-toc > ol {
 }
 html body .wiki-shell .wiki-article-body .article-toc > ol > li { display: list-item !important; }
 html body .wiki-shell .wiki-article-body .article-toc > ol > li::marker { color: var(--wiki-muted); }
+
+/* Profile details two sizes down (14px to 12px). */
+html body .wiki-shell .infobox :is(dt, dd) {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+/* Text lines rise their full height (100%) as they clear, in step with the fade and blur
+   (load and scroll); the line mask clips the start of the travel. */
+.wiki-reveal-line { translate: 0 calc((1 - var(--wiki-wipe, 1)) * 100%); }
+.wiki-reveal-line[style*="--wiki-wipe: 1;"],
+.wiki-reveal-line:not([style*="--wiki-wipe"]) { translate: none; }
+@media (prefers-reduced-motion: reduce) {
+  .wiki-reveal-line { translate: none; }
+}

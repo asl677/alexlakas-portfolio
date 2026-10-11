@@ -76,7 +76,7 @@ export default function Home() {
         <div className="wiki-layout">
           <aside className="wiki-contents" aria-label="Contents">
             <details open>
-              <summary><strong>Contents</strong><span className="contents-toggle" aria-hidden="true" /></summary>
+              <summary><strong><span className="wiki-wipe"><span className="wiki-wipe-content">Contents</span></span></strong><span className="contents-toggle" aria-hidden="true" /></summary>
               <a className="contents-top" href="#top">Top</a>
               <nav>
                 <a href="#early-life">Early life</a>
@@ -94,7 +94,7 @@ export default function Home() {
           <article className="wiki-article">
             <header className="wiki-article-header" data-lenis-prevent>
               <div className="wiki-title-row">
-                <h1 className="wiki-article-title">Alex</h1>
+                <h1 className="wiki-article-title"><span className="wiki-wipe"><span className="wiki-wipe-content">Alex</span></span></h1>
                 <h1 className="wiki-talk-title">Talk: Alex</h1>
                 <div className="wiki-scroll-actions">
                   <div className="wiki-scroll-search"><PageSearch inputId="sticky-page-search" /></div>
@@ -136,13 +136,12 @@ export default function Home() {
             <div className="wiki-article-body">
 
             <aside className="infobox">
-              <h2>Alex</h2>
+              <h2><span className="wiki-wipe"><span className="wiki-wipe-content">Alex</span></span></h2>
               <HoverPortrait />
               <dl>
-                <dt>Status</dt><dd><OnlineStatus /></dd>
                 <dt>Based in</dt><dd>Los Angeles, CA</dd>
-                <dt>Occupation</dt><dd>Product Design, Art Direction</dd>
-                <dt>Known for</dt><dd>&ldquo;Incredibly talented&rdquo;, &ldquo;Good people&rdquo;</dd>
+                <dt>Occupation</dt><dd>Designer</dd>
+                <dt>Known for</dt><dd>&lsquo;talented&rsquo;, &lsquo;good people&rsquo;</dd>
                 <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">/latenights</a></dd>
                 <dt>Interests</dt><dd>Cars, design, AI, systems</dd>
               </dl>
@@ -151,7 +150,7 @@ export default function Home() {
             <p className="lead"><b>Alexander Stephanos Lakas</b> is a Los Angeles-based designer and art director with over 15 years of experience whose work spans product and interaction design, identity, prototyping, and generative AI. He&rsquo;s collaborated on small and large scale projects with folks like <span style={{ whiteSpace: "nowrap" }}><a href="https://support.google.com/business/answer/6263531?hl=en" target="_blank" rel="noreferrer">Google</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.ueno.co/" target="_blank" rel="noreferrer">Ueno</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">LinkedIn</a>,</span> Zippo, Nintendo and more. His work has been featured in <span style={{ whiteSpace: "nowrap" }}><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a>,</span> <span style={{ whiteSpace: "nowrap" }}><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a>,</span> and on The Tonight Show.<Ref n={1} /><Ref n={2} /><Ref n={5} /><Ref n={10} /><Ref n={16} /></p>
 
             <nav className="toc article-toc" aria-label="Table of contents">
-              <h2>Contents</h2>
+              <h2><span className="wiki-wipe"><span className="wiki-wipe-content">Contents</span></span></h2>
               <ol>
                 <li><a href="#early-life">Early life</a></li>
                 <li><a href="#career">Career</a></li>
@@ -297,21 +296,4 @@ function TimeAgo() {
     else setLabel("today");
   }, []);
   return <>{label}</>;
-}
-
-// Online Mon-Fri, 9am-5pm Pacific; checked after mount and every minute.
-function OnlineStatus() {
-  const [online, setOnline] = useState(false);
-  useEffect(() => {
-    const check = () => {
-      const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(new Date());
-      const weekday = parts.find(part => part.type === "weekday")?.value ?? "";
-      const hour = Number(parts.find(part => part.type === "hour")?.value);
-      setOnline(!["Sat", "Sun"].includes(weekday) && hour >= 9 && hour < 17);
-    };
-    check();
-    const timer = setInterval(check, 60000);
-    return () => clearInterval(timer);
-  }, []);
-  return <span className={"wiki-status" + (online ? " is-online" : "")}>{online ? "Online" : "Offline"}</span>;
 }
