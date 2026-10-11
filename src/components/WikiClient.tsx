@@ -1000,12 +1000,10 @@ export function IntroSequence() {
       ".infobox dt",
       ".infobox dd",
       ".article-toc > ol > li",
-      ".wiki-section-content > ul > li",
       ".wiki-section-content > ol > li",
+      ".wiki-section-content .references > li",
       // Case study rows: the thumbnail gets the media wipe, the text block fades.
       ".wiki-section-content .article-list-item > .article-list-image",
-      ".wiki-section-content .references > li",
-      ".wiki-section-content .wiki-link-list > li",
       ".wiki-section-content .work-links > li",
       ".wiki-section-content .medium-card",
       ".wiki-section-content .career-feature > figure",
@@ -1062,7 +1060,12 @@ export function IntroSequence() {
         ".wiki-section-content > h3",
         ".wiki-section-content .career-feature > p",
         // Case study rows: meta, title and line reveal like the body text.
-        ".wiki-section-content .article-list-item > div > :is(p, h3)"
+        ".wiki-section-content .article-list-item > div > :is(p, h3)",
+        // Link lists (Press, External) reveal line by line too, so they stagger with the
+        // paragraphs instead of fading as whole blocks. (References keep a block reveal: their
+        // numbers are positioned against the list item.)
+        ".wiki-section-content .wiki-link-list > li",
+        ".wiki-section-content > ul:not(.stack-tags) > li"
       ].join(", "))).map(target => {
         gluePunctuation(target);
         let previousLines: HTMLElement[] = [];
