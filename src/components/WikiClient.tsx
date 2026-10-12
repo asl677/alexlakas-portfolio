@@ -384,24 +384,32 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
   );
 }
 
-export function MobileSearchSheet() {
-  const [isOpen, setIsOpen] = useState(false);
+// The phone bottom sheet (search, languages): one component so every sheet looks and behaves
+// the same: slide-up panel, drag handle (drag or flick down to dismiss), tap outside or Escape
+// to close, and the page locked underneath. Content marked [data-sheet-scroll] may scroll.
+function BottomSheet({ open, onClose, label, children }: { open: boolean; onClose: () => void; label: string; children: ReactNode }) {
   const [dragOffset, setDragOffset] = useState(0);
   const dragRef = useRef<{ startY: number; startTime: number } | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
   useEffect(() => { setPortalRoot(document.querySelector<HTMLElement>(".wiki-shell") ?? document.body); }, []);
 
+  // Only one sheet at a time: opening one closes any other that's open.
+  const sheetId = useRef(Math.random());
   useEffect(() => {
-    if (!isOpen) return;
+    const onOther = (event: Event) => { if ((event as CustomEvent).detail !== sheetId.current) closeRef.current(); };
+    if (open) window.dispatchEvent(new CustomEvent("alexpedia-sheet-open", { detail: sheetId.current }));
+    if (!open) return;
+    window.addEventListener("alexpedia-sheet-open", onOther);
+    return () => window.removeEventListener("alexpedia-sheet-open", onOther);
+  }, [open]);
 
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false);
-    };
-    const closeOnSelect = () => setIsOpen(false);
-
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") closeRef.current(); };
     document.addEventListener("keydown", closeOnEscape);
-    window.addEventListener("alexpedia-search-selected", closeOnSelect);
     // Lock page scrolling while the sheet is open. The sheet covers the viewport, so a
     // non-passive touchmove guard on it is enough; the page itself is never moved.
     // Smooth scrolling (Lenis) is paused too, so an in-flight glide cannot carry the page.
@@ -414,12 +422,12 @@ export function MobileSearchSheet() {
     const previousBody = { position: body.style.position, top: body.style.top, left: body.style.left, right: body.style.right, width: body.style.width };
     Object.assign(body.style, { position: "fixed", top: `-${lockedY}px`, left: "0", right: "0", width: "100%" });
     // React touch handlers are passive; this one must be able to cancel page scrolling.
-    // Only the results list may scroll, and only while it has room to scroll.
+    // Only the sheet's scrolling content may scroll, and only while it has room to scroll.
     const sheet = sheetRef.current;
     let lastY = 0;
     const onTouchStart = (event: TouchEvent) => { lastY = event.touches[0]?.clientY ?? 0; };
     const onTouchMove = (event: TouchEvent) => {
-      const list = (event.target as HTMLElement).closest<HTMLElement>(".wiki-search-results");
+      const list = (event.target as HTMLElement).closest<HTMLElement>(".wiki-search-results, [data-sheet-scroll]");
       const y = event.touches[0]?.clientY ?? 0;
       const deltaY = y - lastY;
       lastY = y;
@@ -442,9 +450,8 @@ export function MobileSearchSheet() {
       // Re-sync the scroll reveal after the sheet (and keyboard) close.
       [0, 250, 600].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("alexpedia-reveal")), delay));
       document.removeEventListener("keydown", closeOnEscape);
-      window.removeEventListener("alexpedia-search-selected", closeOnSelect);
     };
-  }, [isOpen]);
+  }, [open]);
 
   // Drag the handle down to dismiss: past 80px, or a quick downward flick, closes the sheet.
   const onHandlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -462,35 +469,52 @@ export function MobileSearchSheet() {
     const velocity = distance / Math.max(1, performance.now() - dragRef.current.startTime);
     dragRef.current = null;
     setDragOffset(0);
-    if (distance > 80 || velocity > 0.6) setIsOpen(false);
+    if (distance > 80 || velocity > 0.6) closeRef.current();
   };
+
+  // Rendered at the page root (not inside the top bar) so no header transform, filter or
+  // stacking can break the fixed sheet, which happened in iOS Safari.
+  return portalRoot ? createPortal(
+    <div className={`wiki-mobile-search-sheet${open ? " is-open" : ""}`} role="presentation" aria-hidden={!open} data-lenis-prevent ref={sheetRef} onPointerDown={() => closeRef.current()}>
+      <section
+        className={`wiki-mobile-search-sheet-panel${dragOffset ? " is-dragging" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        style={dragOffset ? { transform: `translateY(${dragOffset}px)` } : undefined}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        <div
+          className="wiki-mobile-search-sheet-handle"
+          onPointerDown={onHandlePointerDown}
+          onPointerMove={onHandlePointerMove}
+          onPointerUp={onHandlePointerUp}
+          onPointerCancel={onHandlePointerUp}
+        >
+          <span aria-hidden="true" />
+        </div>
+        {children}
+      </section>
+    </div>,
+    portalRoot,
+  ) : null;
+}
+
+export function MobileSearchSheet() {
+  const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    if (!isOpen) return;
+    const closeOnSelect = () => setIsOpen(false);
+    window.addEventListener("alexpedia-search-selected", closeOnSelect);
+    return () => window.removeEventListener("alexpedia-search-selected", closeOnSelect);
+  }, [isOpen]);
 
   return (
     <>
       <button type="button" className="wiki-icon-button wiki-nav-search" aria-label="Search" title="Search" aria-expanded={isOpen} onClick={() => setIsOpen((open) => !open)}><Search size={20} strokeWidth={2} /></button>
-      {/* Rendered at the page root (not inside the top bar) so no header transform, filter or
-          stacking can break the fixed sheet, which happened in iOS Safari. */}
-      {portalRoot && createPortal(<div className={`wiki-mobile-search-sheet${isOpen ? " is-open" : ""}`} role="presentation" aria-hidden={!isOpen} data-lenis-prevent ref={sheetRef} onPointerDown={() => setIsOpen(false)}>
-        <section
-          className={`wiki-mobile-search-sheet-panel${dragOffset ? " is-dragging" : ""}`}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Search this page"
-          style={dragOffset ? { transform: `translateY(${dragOffset}px)` } : undefined}
-          onPointerDown={(event) => event.stopPropagation()}
-        >
-          <div
-            className="wiki-mobile-search-sheet-handle"
-            onPointerDown={onHandlePointerDown}
-            onPointerMove={onHandlePointerMove}
-            onPointerUp={onHandlePointerUp}
-            onPointerCancel={onHandlePointerUp}
-          >
-            <span aria-hidden="true" />
-          </div>
-          <PageSearch inputId="mobile-sheet-search" recentOnMount />
-        </section>
-      </div>, portalRoot)}
+      <BottomSheet open={isOpen} onClose={() => setIsOpen(false)} label="Search this page">
+        <PageSearch inputId="mobile-sheet-search" recentOnMount />
+      </BottomSheet>
     </>
   );
 }
@@ -1328,7 +1352,21 @@ export function IntroSequence() {
             applyReveal(element, 0);
           }
         });
-        fadeIn(pending, 0.04, revealEase);
+        // Each item starts the moment the expanding section's edge uncovers it (checked every
+        // frame while it opens), so the reveal sweeps down with the accordion, one by one,
+        // instead of finishing lines that are still clipped.
+        const body = section.querySelector<HTMLElement>(".wiki-section-body");
+        const waiting = new Set(pending);
+        pending.forEach(element => applyReveal(element, 0));
+        const opened = performance.now();
+        const sweep = () => {
+          const edge = body ? body.getBoundingClientRect().bottom : Infinity;
+          const late = performance.now() - opened > 900;
+          const ready = visualOrder([...waiting]).filter(element => late || element.getBoundingClientRect().top < edge - 4);
+          ready.forEach((element, index) => { waiting.delete(element); fadeIn([element], index * 0.04, revealEase); });
+          if (waiting.size) requestAnimationFrame(sweep);
+        };
+        requestAnimationFrame(sweep);
         [120, 700].forEach(delay => window.setTimeout(() => queueReveal(), delay));
         // Positions below the section changed: refresh the scrub's cache.
         queueReveal();
@@ -2052,6 +2090,15 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
   const rootRef = useRef<HTMLDivElement>(null);
   // Current language: Google's translation cookie, or English.
   const [current, setCurrent] = useState("en");
+  // Phones use the bottom sheet; wider screens the hover card.
+  const [isPhone, setIsPhone] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 768px)");
+    const update = () => setIsPhone(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   useEffect(() => { setCurrent(document.cookie.match(/googtrans=\/en\/([\w-]+)/)?.[1] ?? "en"); }, []);
   const cardRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef(0);
@@ -2074,7 +2121,8 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
   }, []);
   useEffect(() => {
     if (!open) return;
-    const close = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node) && !cardRef.current?.contains(event.target as Node)) setOpen(false); };
+    // The phone sheet handles its own outside taps; ignore taps inside any sheet here.
+    const close = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node) && !cardRef.current?.contains(event.target as Node) && !(event.target as HTMLElement).closest?.(".wiki-mobile-search-sheet")) setOpen(false); };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
     // Scrolling the page closes it (scrolling inside the card scrolls only the card). The
     // phone sheet stays open until a tap outside or a pick.
@@ -2152,13 +2200,31 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
     <div ref={rootRef} className={`wiki-language${icon ? " wiki-language-icon" : ""}${open ? " is-open" : ""}`}>
       <button type="button" className="wiki-language-button" aria-expanded={open} aria-label={icon ? "Languages" : undefined} title={icon ? "Languages" : undefined}
         // Hover already opened it on desktop, so a click must not toggle it shut; touch toggles.
-        onClick={event => (open && !window.matchMedia("(hover: hover)").matches ? setOpen(false) : openAt(event.currentTarget))}
-        // Desktop: opens on hover like the other cards.
-        onMouseEnter={event => { if (window.matchMedia("(hover: hover)").matches) openAt(event.currentTarget); }}
-        onMouseLeave={scheduleClose}>
+        // Phones: the sheet opens and closes on tap only (never on hover, which also closed it
+        // midway when the pointer left the icon). Desktop: the hover opens it, so a click must
+        // not toggle it shut.
+        onClick={event => (open && (isPhone || !window.matchMedia("(hover: hover)").matches) ? setOpen(false) : openAt(event.currentTarget))}
+        onMouseEnter={event => { if (!isPhone && window.matchMedia("(hover: hover)").matches) openAt(event.currentTarget); }}
+        onMouseLeave={() => { if (!isPhone) scheduleClose(); }}>
         {icon ?? `${translateLanguages.length} languages`}
       </button>
-      {open && createPortal(
+      {/* Phones: the same bottom sheet as search, with the languages as rows. */}
+      {isPhone && (
+        <BottomSheet open={open} onClose={() => setOpen(false)} label="Translate this page">
+          <div className="wiki-language-sheet notranslate" translate="no" data-sheet-scroll>
+            {current !== "en" && <button type="button" className="wiki-language-reset" onClick={() => translate("en")}>Reset to default</button>}
+            <ul>
+              {languageList(current).map(([code, name]) => (
+                <li key={code}>
+                  <button type="button" className={code === current ? "is-current" : ""} aria-current={code === current ? "true" : undefined}
+                    onClick={() => (code === current ? setOpen(false) : translate(code))}>{name}</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </BottomSheet>
+      )}
+      {open && !isPhone && createPortal(
         // Portaled to <body>: the header's transforms/opacity hand-off would otherwise hide or
         // misplace a fixed card inside it.
         <div ref={cardRef} className="wiki-language-card notranslate" translate="no" role="dialog" aria-label="Translate this page" data-lenis-prevent style={{ top: cardPos.top, right: cardPos.right }}

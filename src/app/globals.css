@@ -6434,26 +6434,22 @@ html:is(.translated-ltr, .translated-rtl) sup.reference,
 html:is(.translated-ltr, .translated-rtl) sup.reference * { word-spacing: -0.25em; white-space: nowrap; }
 html:is(.translated-ltr, .translated-rtl) :is(h1, h2, .wiki-wipe-content) { font-family: Georgia, "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", serif; }
 
-/* Phones: the "N languages" label opens the list as a bottom sheet (like the search sheet). */
-@media (max-width: 768px) {
-  html body .wiki-shell .wiki-language { display: block !important; }
-  html body .wiki-language-card {
-    position: fixed !important;
-    top: auto !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    max-height: 75svh !important;
-    padding: 20px 16px calc(20px + env(safe-area-inset-bottom)) !important;
-    background: var(--wiki-page) !important;
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5) !important;
-    animation: wiki-sheet-up 0.35s var(--wiki-ease) both !important;
-  }
-  html body .wiki-language-card ul { columns: 2 !important; }
-  html body .wiki-language-card li button { padding: 8px 0 !important; font-size: 16px !important; }
+/* Phones: languages open in the same bottom sheet as search; the list scrolls like results. */
+html body .wiki-mobile-search-sheet .wiki-language-sheet {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  touch-action: pan-y;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-@keyframes wiki-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+html body .wiki-mobile-search-sheet .wiki-language-sheet ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 16px; }
+html body .wiki-mobile-search-sheet .wiki-language-sheet li { break-inside: avoid; }
+html body .wiki-mobile-search-sheet .wiki-language-sheet li button {
+  display: block; width: 100%; padding: 10px 0; border: 0; background: none; text-align: left;
+  font: inherit; font-size: 16px; line-height: 1.3; color: var(--wiki-muted);
+}
+html body .wiki-mobile-search-sheet .wiki-language-sheet li button.is-current { color: var(--wiki-ink); }
+html body .wiki-mobile-search-sheet .wiki-language-sheet .wiki-language-reset { display: block; margin: 0 0 8px; padding: 10px 0; font-size: 16px; }
 
 /* Language icon: same box, icon, stroke and hover as the envelope and theme buttons. */
 html body .wiki-shell .wiki-language-icon { display: inline-flex; margin: 0; padding: 0; }
@@ -6611,3 +6607,24 @@ html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure .p
 /* Text line boxes run under floated images and their reveal transforms stack them above it,
    swallowing clicks; keep section images on top so they're always clickable. */
 html body .wiki-shell .wiki-article-body .career-feature > figure { position: relative; z-index: 2; }
+/* Sheets cover everything, the top bar included, so nothing behind can open a second one. */
+html body .wiki-mobile-search-sheet { z-index: 2500 !important; }
+/* Touch screens: sheets and header icons are tap only; no hover state can stick after a tap. */
+@media (hover: none) {
+  html body .wiki-mobile-search-sheet :is(button, a):hover,
+  html body .wiki-mobile-search-sheet .wiki-search-results button:hover { background: transparent !important; }
+  html body .wiki-mobile-search-sheet .wiki-language-sheet li button:hover { color: var(--wiki-muted) !important; }
+  html body .wiki-mobile-search-sheet .wiki-language-sheet li button.is-current:hover { color: var(--wiki-ink) !important; }
+  html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) > :is(a, button):hover,
+  html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) :is(.theme-toggle, .wiki-language-button):hover { background: transparent !important; color: var(--wiki-ink) !important; }
+}
+/* The last languages clear Safari's toolbar and the home indicator. */
+html body .wiki-mobile-search-sheet .wiki-language-sheet { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+/* Phone widths: icons and sheet rows have no hover state either (even where a pointer is present). */
+@media (max-width: 768px) {
+  html body .wiki-mobile-search-sheet :is(button, a):hover { background: transparent !important; }
+  html body .wiki-mobile-search-sheet .wiki-language-sheet li button:not(.is-current):hover { color: var(--wiki-muted) !important; }
+  html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) > :is(a, button):hover,
+  html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) :is(.theme-toggle, .wiki-language-button):hover,
+  html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .wiki-language.is-open .wiki-language-button { background: transparent !important; color: var(--wiki-ink) !important; }
+}
