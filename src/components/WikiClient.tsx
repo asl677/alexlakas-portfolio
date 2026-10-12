@@ -1252,7 +1252,7 @@ export function IntroSequence() {
         const y = window.scrollY;
         scrollHeight = document.documentElement.scrollHeight;
         scrubItems = [...targets, ...textLines].map(element => {
-          const item = scrubState.get(element) ?? { element, top: 0, hidden: false, media: element.matches("figure, .article-list-item, .article-list-image, .infobox"), wipe: element.classList.contains("wiki-wipe"), current: 0 };
+          const item = scrubState.get(element) ?? { element, top: 0, hidden: false, media: element.matches("figure, .article-list-item, .article-list-image, .infobox"), wipe: element.classList.contains("wiki-wipe-media"), current: 0 };
           scrubState.set(element, item);
           item.top = element.getBoundingClientRect().top + y;
           item.hidden = !!element.closest(".wiki-section-body[aria-hidden='true']");
@@ -1279,8 +1279,9 @@ export function IntroSequence() {
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
           // The sticky Contents rail and the top bar never scrub out once shown.
-          // Strip wipes (headings, images) spend their first half drawing the grey strip, so they
-          // start later than text: the strip then lands in step with the lines around it.
+          // Image strips spend their first half drawing the grey strip, so they start later than
+          // text and land in step with the lines around them. Heading strips stay in sync with
+          // their own text, which reveals as ordinary lines.
           const lag = item.wipe ? r * 0.45 : 0;
           const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
           // One-way: scrolling back up never fades content out again.
@@ -1465,12 +1466,22 @@ export function ArticleTabs() {
     previousViewRef.current = view;
     // Switching tabs opens the other view at its top (the article header sits just above it).
     if (isSwitch) {
-      const article = document.querySelector<HTMLElement>(".wiki-article");
-      const top = article ? Math.max(0, article.getBoundingClientRect().top + window.scrollY) : 0;
+      // 16px past the point where the article header sticks (the same point the header's
+      // hand-off uses): exactly at it, the top bar and the scrolled-header controls are both
+      // mid hand-off and fully faded; from here the scrolled header's search and icons show.
+      const header = document.querySelector<HTMLElement>(".wiki-article-header");
+      const article = header?.parentElement;
+      const stickyTop = header ? Number.parseFloat(getComputedStyle(header).top) || 0 : 0;
+      let top = article ? Math.max(0, article.getBoundingClientRect().top + window.scrollY - stickyTop + 16) : 0;
+      // A short view (Talk) can't scroll that far; it would stop in the faded gap between the
+      // top bar and the stuck header, so open it at the very top instead.
+      if (document.documentElement.scrollHeight - window.innerHeight < top) top = 0;
       if (window.scrollY > top) {
         window.scrollTo({ top, behavior: "instant" as ScrollBehavior });
         // Pin Lenis to the new position so its smooth scroll doesn't glide back.
         window.dispatchEvent(new Event("alexpedia-scroll-lock"));
+        // An instant jump fires no smooth-scroll update, so refresh the header hand-off now.
+        requestAnimationFrame(() => window.dispatchEvent(new Event("scroll")));
       }
     }
     const frame = requestAnimationFrame(() => {
@@ -1711,6 +1722,9 @@ export function HoverCards() {
   // Moving straight from one link to the next: the card switches over in place instead of
   // hiding and waiting for the new picture.
   const [switching, setSwitching] = useState(false);
+  const lastShown = useRef<ReactNode>(null);
+  // Re-measure the description's line budget once the picture has its real height.
+  const [, setImageLoads] = useState(0);
   const [media, setMedia] = useState<HoverMedia>({ key: 0, status: "none" });
   const [liveText, setLiveText] = useState<{ key: number; text: string } | null>(null);
   const [liveTitle, setLiveTitle] = useState<{ key: number; title: string } | null>(null);
@@ -1763,7 +1777,7 @@ export function HoverCards() {
 
     const place = (link: HTMLAnchorElement, data: Omit<HoverCardData, "key" | "left" | "top" | "below">) => {
       const box = link.getBoundingClientRect();
-      const width = Math.min(data.href ? 470 : 350, window.innerWidth - 32);
+      const width = Math.min(data.href ? 440 : 320, window.innerWidth - 32);
       const left = Math.max(16, Math.min(box.left, window.innerWidth - width - 16));
       const below = box.top < 220;
       counter.current += 1;
@@ -1893,10 +1907,30 @@ export function HoverCards() {
       titleLines = Math.min(2, Math.max(1, Math.round(title.scrollHeight / lineHeight)));
     }
     const site = element.querySelector(".wiki-hovercard-site") ? 1 : 0;
-    element.style.setProperty("--wiki-card-lines", String(Math.max(1, 5 - titleLines - site)));
+    let lines = Math.max(1, 5 - titleLines - site);
+    // Beside a tall picture, let the description run as many lines as fit its height.
+    const image = element.querySelector<HTMLImageElement>(".wiki-hovercard-thumb:not(.is-icon) img");
+    const description = element.querySelector<HTMLElement>(".wiki-hovercard-copy > .wiki-hovercard-text:not(.wiki-hovercard-site)");
+    const copy = element.querySelector<HTMLElement>(".wiki-hovercard-copy");
+    if (image && image.complete && image.offsetHeight && description && copy) {
+      const lineHeight = parseFloat(getComputedStyle(description).lineHeight) || 20;
+      // Space the rest of the copy needs (title, URL, padding); the column itself is stretched
+      // to the picture's height, so it can't be measured directly.
+      const copyBox = copy.getBoundingClientRect();
+      const descBox = description.getBoundingClientRect();
+      const last = copy.lastElementChild?.getBoundingClientRect() ?? descBox;
+      const padBottom = parseFloat(getComputedStyle(copy).paddingBottom) || 0;
+      const overhead = (descBox.top - copyBox.top) + (last.bottom - descBox.bottom) + padBottom;
+      lines = Math.max(lines, Math.floor((image.offsetHeight - overhead) / lineHeight));
+    }
+    element.style.setProperty("--wiki-card-lines", String(lines));
   });
 
   if (!card) return null;
+  const ready = !card.href || (media.key === card.key && media.status !== "loading");
+  // Switching links: keep showing the previous card until the new one is fully resolved, then
+  // swap in one step at its final width (no text-only frame that rewraps when the picture lands).
+  if (switching && visible && !ready && lastShown.current) return lastShown.current;
   // The card opens text-only; if a picture loads, the card widens to expose it (no placeholder).
   const hasMedia = !!card.href && media.key === card.key && media.status === "ready";
   const rawText = card.text ?? (liveText?.key === card.key ? liveText.text : undefined);
@@ -1908,14 +1942,14 @@ export function HoverCards() {
     const sentence = rawText.match(/^([\s\S]*[.!?])\s/)?.[1];
     text = sentence && sentence.length > 60 ? sentence : rawText.trim().replace(/(\s+(?:a|an|the|of|to|and|or|in|on|for|with|by|is|at))+$/i, "") + "…";
   }
-  return createPortal(
+  const node = createPortal(
     <div
       ref={cardRef}
       // Visible only once the picture question is settled, so the card never shows at one
       // width and then jumps to another.
       // Never indexed or quoted by search engines (people's details live here).
       data-nosnippet=""
-      className={`wiki-hovercard${visible && (switching || !card.href || (media.key === card.key && media.status !== "loading")) ? " is-visible" : ""}${card.below ? " is-below" : ""}${hasMedia ? " has-media" : ""}${!text && !card.bodyHtml ? " is-compact" : ""}`}
+      className={`wiki-hovercard${visible && ready ? " is-visible" : ""}${card.below ? " is-below" : ""}${hasMedia ? " has-media" : ""}${hasMedia && media.icon ? " has-icon" : ""}${!text && !card.bodyHtml ? " is-compact" : ""}`}
       style={{ left: card.left, ...(card.below ? { top: card.top } : { bottom: card.top }) }}
     >
       <div className="wiki-hovercard-copy">
@@ -1926,12 +1960,14 @@ export function HoverCards() {
       </div>
       {hasMedia && (
         <div className={`wiki-hovercard-thumb${media.icon ? " is-icon" : ""}`}>
-          <img src={media.src} alt="" referrerPolicy="no-referrer" />
+          <img src={media.src} alt="" referrerPolicy="no-referrer" onLoad={() => setImageLoads(count => count + 1)} />
         </div>
       )}
     </div>,
     document.body,
   );
+  lastShown.current = visible && ready ? node : null;
+  return node;
 }
 
 const translateLanguages: [string, string][] = [

@@ -6514,3 +6514,24 @@ html body .wiki-shell .wiki-article-header.is-scrolled .wiki-language-icon .wiki
 html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .references, .wiki-link-list, .wiki-contents) a:not(.article-list-image):not(.wiki-tab):is(:link, :visited, :hover, :focus-visible, :active) {
   color: var(--wiki-link) !important;
 }
+
+/* Hover cards appear and disappear instantly: no slide, fade or picture animation. */
+html body .wiki-hovercard,
+html body .wiki-hovercard.is-visible,
+html body .wiki-hovercard.is-below,
+html body .wiki-hovercard.is-below.is-visible { transform: none !important; transition: none !important; animation: none !important; }
+html body .wiki-hovercard-thumb,
+html body .wiki-hovercard-thumb img { animation: none !important; transition: none !important; }
+/* Cards 30px narrower: text column 320px, picture cards 440px. */
+html body .wiki-hovercard,
+html body .wiki-hovercard.is-compact { width: min(320px, calc(100vw - 32px)) !important; grid-template-columns: minmax(0, 1fr) !important; }
+html body .wiki-hovercard.has-media { width: min(440px, calc(100vw - 32px)) !important; grid-template-columns: minmax(0, 1fr) 120px !important; }
+html body .wiki-hovercard.is-compact.has-media { width: min(320px, calc(100vw - 32px)) !important; grid-template-columns: minmax(0, 1fr) 96px !important; }
+/* Icon/logo cards: a narrow 80px column for the inset icon instead of the 120px picture column. */
+html body .wiki-hovercard.has-media.has-icon { width: min(400px, calc(100vw - 32px)) !important; grid-template-columns: minmax(0, 1fr) 80px !important; }
+html body .wiki-hovercard.has-media.has-icon.is-compact { width: min(320px, calc(100vw - 32px)) !important; grid-template-columns: minmax(0, 1fr) 80px !important; }
+
+/* Talk page typography matches the article: body text in the article's grey, headings in its serif. */
+html body .wiki-shell .wiki-talk-page p { color: rgb(163, 163, 163); color: var(--wiki-muted); font-size: 16px; line-height: 25.28px; }
+html body .wiki-shell .wiki-talk-page p :is(strong, b, a) { color: var(--wiki-ink); }
+html body .wiki-shell .wiki-talk-page h2 { font-family: Georgia, "Times New Roman", serif !important; font-size: 24px !important; font-weight: 400 !important; line-height: 30px !important; color: var(--wiki-ink); }
