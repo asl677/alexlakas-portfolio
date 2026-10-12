@@ -5717,12 +5717,12 @@ html body .wiki-shell .wiki-contents.is-scrolled .contents-top { background: tra
 
 /* Glass tokens: translucent surface + backdrop blur (between Tailwind blur-2xl and blur-3xl). */
 :root {
-  --wiki-glass-bg: rgba(0, 0, 0, 0.52);
+  --wiki-glass-bg: rgba(0, 0, 0, 0.66);
   --wiki-glass-blur: blur(32px) saturate(1.2);
 }
-:root[data-theme="light"] { --wiki-glass-bg: rgba(255, 255, 255, 0.58); }
+:root[data-theme="light"] { --wiki-glass-bg: rgba(255, 255, 255, 0.71); }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --wiki-glass-bg: rgba(255, 255, 255, 0.58); }
+  :root:not([data-theme="dark"]) { --wiki-glass-bg: rgba(255, 255, 255, 0.71); }
 }
 
 /* Search results use the glass tokens. Backdrop blur can't nest (an ancestor with its own
@@ -6535,3 +6535,22 @@ html body .wiki-hovercard.has-media.has-icon.is-compact { width: min(320px, calc
 html body .wiki-shell .wiki-talk-page p { color: rgb(163, 163, 163); color: var(--wiki-muted); font-size: 16px; line-height: 25.28px; }
 html body .wiki-shell .wiki-talk-page p :is(strong, b, a) { color: var(--wiki-ink); }
 html body .wiki-shell .wiki-talk-page h2 { font-family: Georgia, "Times New Roman", serif !important; font-size: 24px !important; font-weight: 400 !important; line-height: 30px !important; color: var(--wiki-ink); }
+/* Card titles are never cut off. */
+html body .wiki-hovercard-title { display: block !important; -webkit-line-clamp: unset !important; overflow: visible !important; }
+/* Hover cards use the search results' surface: border, glass fill and blur, no shadow. */
+html body .wiki-hovercard {
+  border: 1px solid var(--wiki-border) !important;
+  background: var(--wiki-glass-bg) !important;
+  -webkit-backdrop-filter: var(--wiki-glass-blur) !important;
+  backdrop-filter: var(--wiki-glass-blur) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Images start fading and scaling a little before the strip turns to retract (at 35% of the
+   reveal) and keep moving right until the strip has fully cleared, so the two read as one. */
+.wiki-wipe-media > :not(figcaption) {
+  --wiki-media-t: clamp(0, calc((var(--wiki-wipe, 1) - 0.35) / 0.65), 1);
+  opacity: var(--wiki-media-t) !important;
+  scale: calc(1.1 - var(--wiki-media-t) * 0.1) !important;
+}

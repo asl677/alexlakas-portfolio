@@ -26,5 +26,12 @@
   "https://www.youtube.com/watch?v=0OScZ_93-_0": {
     "title": "Culprit Creative Reel",
     "description": "Culprit Studios reel. Clients include Beats by Dre, Starbucks, Facebook, Spotify and Coca-Cola."
+  },
+  "https://www.linkedin.com/": {
+    "title": "LinkedIn",
+    "description": "Manage your professional identity. Build and engage with your professional network."
+  },
+  "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html": {
+    "noImage": true
   }
 }

@@ -1702,6 +1702,14 @@ const cleanTitle = (title: string) => {
 };
 
 // Try to load an image for up to `ms`; resolves true only for a real picture (not a pixel).
+// Fetched titles and descriptions can arrive HTML-escaped (&amp;, &#39;); show the characters.
+const decodeEntities = (value?: string) => {
+  if (!value || !value.includes("&")) return value;
+  const area = document.createElement("textarea");
+  area.innerHTML = value;
+  return area.value;
+};
+
 const tryImage = (src: string, ms: number, min = 40) => new Promise<boolean>(resolve => {
   const image = new window.Image();
   const done = (ok: boolean) => { window.clearTimeout(timer); image.onload = image.onerror = null; resolve(ok); };
@@ -1851,11 +1859,15 @@ export function HoverCards() {
   useEffect(() => {
     if (!card) return;
     const key = card.key;
-    if (!card.href) { setMedia({ key, status: "none" }); setVisible(true); return; }
+    // Text-only: no link to preview, or a link marked to show no picture (noImage in the extras).
+    if (!card.href || (linkPreviews[card.href] as { noImage?: boolean } | undefined)?.noImage) { setMedia({ key, status: "none" }); setVisible(true); return; }
     const href = card.href;
     let settled = false;
     setMedia({ key, status: "loading" });
     const load = (url: string, min: number) => {
+      // A share image that is just a logo (named logo/icon, or an SVG) isn't a good preview:
+      // skip it so the card falls back to the site's favicon instead.
+      if (min > 32 && !card.person && /logo|icon|\.svg(\?|$)/i.test(decodeURIComponent(url))) return Promise.resolve(null);
       const list = url.startsWith("http:") ? [`/api/image?url=${encodeURIComponent(url)}`] : [url, `/api/image?url=${encodeURIComponent(url)}`];
       return Promise.all(list.map(src => tryImage(src, 1400, min))).then(ok => list.find((_, i) => ok[i]) ?? null);
     };
@@ -1879,11 +1891,8 @@ export function HoverCards() {
         if (results[i] === undefined && !force) return;
         if (results[i]) {
           settled = true;
-          // A share image that is a logo (named logo/icon, or an SVG) shows inset like a site
-          // icon; square cover art and photos keep the full picture column.
           const src = results[i] as string;
-          const logo = !card.person && /logo|icon|\.svg(\?|$)/i.test(decodeURIComponent(src));
-          setMedia({ key, status: "ready", src, icon: i === 2 || logo });
+          setMedia({ key, status: "ready", src, icon: i === 2 });
           setVisible(true);
           return;
         }
@@ -1904,7 +1913,7 @@ export function HoverCards() {
     let titleLines = 0;
     if (title) {
       const lineHeight = parseFloat(getComputedStyle(title).lineHeight) || 20;
-      titleLines = Math.min(2, Math.max(1, Math.round(title.scrollHeight / lineHeight)));
+      titleLines = Math.max(1, Math.round(title.scrollHeight / lineHeight));
     }
     const site = element.querySelector(".wiki-hovercard-site") ? 1 : 0;
     let lines = Math.max(1, 5 - titleLines - site);
@@ -1933,7 +1942,7 @@ export function HoverCards() {
   if (switching && visible && !ready && lastShown.current) return lastShown.current;
   // The card opens text-only; if a picture loads, the card widens to expose it (no placeholder).
   const hasMedia = !!card.href && media.key === card.key && media.status === "ready";
-  const rawText = card.text ?? (liveText?.key === card.key ? liveText.text : undefined);
+  const rawText = decodeEntities(card.text ?? (liveText?.key === card.key ? liveText.text : undefined));
   // Descriptions cut mid-sentence by the source get an ellipsis instead of ending abruptly.
   let text = rawText;
   if (rawText && !/[.!?…"”)]$/.test(rawText.trim())) {
@@ -1953,7 +1962,7 @@ export function HoverCards() {
       style={{ left: card.left, ...(card.below ? { top: card.top } : { bottom: card.top }) }}
     >
       <div className="wiki-hovercard-copy">
-        {card.title && <strong className="wiki-hovercard-title">{liveTitle?.key === card.key ? liveTitle.title : card.title}</strong>}
+        {card.title && <strong className="wiki-hovercard-title">{decodeEntities(liveTitle?.key === card.key ? liveTitle.title : card.title)}</strong>}
         {card.bodyHtml && <div className="wiki-hovercard-text" dangerouslySetInnerHTML={{ __html: card.bodyHtml }} />}
         {text && <div className="wiki-hovercard-text">{text}</div>}
         {card.site && <div className="wiki-hovercard-text wiki-hovercard-site">{card.site}</div>}
