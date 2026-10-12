@@ -495,35 +495,40 @@ export function MobileSearchSheet() {
   );
 }
 
-export function SeamlessVideo() {
+// Loops only the part of a video that has content: the near-black intro/outro frames (which
+// flashed between loops) are skipped. Checked every frame, not on the coarse timeupdate.
+export function SeamlessVideo({ src = "/agents.mp4", poster = "/agents.mp4.png", label = "AI agents data workflow animation", className = "agents-video", start = 2, end = 17.2 }: { src?: string; poster?: string; label?: string; className?: string; start?: number; end?: number }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    const restartBeforeEnd = () => {
-      if (!video.duration || video.currentTime < video.duration - 0.18) return;
-      video.currentTime = 0;
-      void video.play();
+    type FrameVideo = HTMLVideoElement & { requestVideoFrameCallback?: (callback: () => void) => number; cancelVideoFrameCallback?: (handle: number) => void };
+    const frameVideo = video as FrameVideo;
+    let handle = 0;
+    const loopEnd = () => Math.min(end, (video.duration || end) - 0.1);
+    const check = () => {
+      if (video.currentTime >= loopEnd() || video.currentTime < start - 0.05) video.currentTime = start;
+      if (frameVideo.requestVideoFrameCallback) handle = frameVideo.requestVideoFrameCallback(check);
     };
-
-    const restartAfterEnd = () => {
-      video.currentTime = 0;
-      void video.play();
-    };
-
-    video.addEventListener("timeupdate", restartBeforeEnd);
+    const toStart = () => { if (video.currentTime < start) video.currentTime = start; };
+    const restartAfterEnd = () => { video.currentTime = start; void video.play(); };
+    video.addEventListener("loadedmetadata", toStart);
+    if (video.readyState >= 1) toStart();
     video.addEventListener("ended", restartAfterEnd);
+    if (frameVideo.requestVideoFrameCallback) handle = frameVideo.requestVideoFrameCallback(check);
+    else video.addEventListener("timeupdate", check);
     return () => {
-      video.removeEventListener("timeupdate", restartBeforeEnd);
+      video.removeEventListener("loadedmetadata", toStart);
       video.removeEventListener("ended", restartAfterEnd);
+      video.removeEventListener("timeupdate", check);
+      if (handle) frameVideo.cancelVideoFrameCallback?.(handle);
     };
-  }, []);
+  }, [start, end]);
 
   return (
-    <video ref={videoRef} className="agents-video" poster="/agents.mp4.png" autoPlay muted playsInline preload="auto" controlsList="nodownload noplaybackrate noremoteplayback" disableRemotePlayback aria-label="AI agents data workflow animation" tabIndex={-1}>
-      <source src="/agents.mp4" type="video/mp4" />
+    <video ref={videoRef} className={className} poster={poster} autoPlay muted playsInline preload="auto" controlsList="nodownload noplaybackrate noremoteplayback" disableRemotePlayback aria-label={label} tabIndex={-1}>
+      <source src={src} type="video/mp4" />
     </video>
   );
 }
@@ -1085,13 +1090,16 @@ export function IntroSequence() {
         gluePunctuation(target);
         let previousLines: HTMLElement[] = [];
         return new SplitText(target, {
-        type: "lines",
+        type: "words,lines",
         tag: "span",
         aria: "none",
         ignore: ".reference",
         wordsClass: "wiki-reveal-word",
         linesClass: "wiki-reveal-line",
         autoSplit: true,
+        // A long link (e.g. "The Tonight Show Starring Jimmy Fallon") that crosses a line break is
+        // sliced into each line; unsliced, the whole rest of the sentence was jammed into one line.
+        deepSlice: true,
         onSplit(split) {
           // Preserve revealed text ranges, not the whole paragraph, across rewraps.
           const textLength = (line: HTMLElement) => (line.textContent ?? "").replace(/\s/g, "").length;
@@ -1368,23 +1376,45 @@ export function IntroSequence() {
       window.addEventListener("alexpedia-view-instant", revealViewInstantly);
       // Translating: put paragraphs back as plain text (split lines would each be translated
       // on their own and break the sentences), fully shown.
+      // Translation needs whole paragraphs, not split lines. Reverted exactly once, before
+      // Google translates: reverting again afterwards restored the original English HTML over
+      // the translated text (half-translated paragraphs). Paragraphs then reveal as blocks.
+      let unsplit = false;
       const unsplitForTranslation = () => {
+        if (unsplit) return;
+        unsplit = true;
+        const paragraphs = textSplits.flatMap(split => (split as unknown as { elements: HTMLElement[] }).elements ?? []);
         textSplits.forEach(split => split.revert());
         textLines = [];
         scrubItems = scrubItems.filter(item => !item.element.classList.contains("wiki-reveal-line"));
+        paragraphs.forEach(paragraph => {
+          paragraph.classList.add("wiki-reveal-block");
+          targets.push(paragraph);
+          const seen = paragraph.getBoundingClientRect().top < window.innerHeight;
+          if (seen) revealedTargets.add(paragraph);
+          applyReveal(paragraph, seen ? 1 : 0);
+        });
+        measure();
       };
       window.addEventListener("alexpedia-translate", unsplitForTranslation);
-      if (/googtrans=\/en\/(?!en)/.test(document.cookie) || window.location.hostname.endsWith("translate.goog")) unsplitForTranslation();
-      // Once Google has translated the page: show everything, stop the scroll reveal (Google's
-      // text rewrites made it re-measure constantly, which lagged), and let Lenis re-measure the
-      // new page height so the bottom is reachable.
+      // Google-hosted translated copies arrive already translated. A saved language on this
+      // site is re-applied by the language menu, which unsplits first (alexpedia-translate).
+      if (window.location.hostname.endsWith("translate.goog")) unsplitForTranslation();
+      // Once Google has translated the page, the scroll reveal keeps running (paragraphs as
+      // blocks). Google's text rewrites change the layout often, so re-measuring is throttled,
+      // and Lenis re-measures the new page height so the bottom is reachable.
+      let translated = false;
       const onTranslated = () => {
-        if (!document.documentElement.matches(".translated-ltr, .translated-rtl")) return;
+        if (translated || !document.documentElement.matches(".translated-ltr, .translated-rtl")) return;
+        translated = true;
         unsplitForTranslation();
-        [...targets].forEach(element => { revealedTargets.add(element); applyReveal(element, 1); });
-        gsap.ticker.remove(scrubTick);
         layoutObserver.disconnect();
-        [100, 800, 2000].forEach(delay => window.setTimeout(() => window.dispatchEvent(new Event("resize")), delay));
+        const slowObserver = new ResizeObserver(() => {
+          window.clearTimeout(measureFrame);
+          measureFrame = window.setTimeout(measure, 500);
+        });
+        slowObserver.observe(document.body);
+        [100, 800, 2000].forEach(delay => window.setTimeout(() => { measure(); window.dispatchEvent(new Event("resize")); }, delay));
       };
       const translationWatcher = new MutationObserver(onTranslated);
       translationWatcher.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
@@ -1861,6 +1891,8 @@ export function HoverCards() {
     const key = card.key;
     // Text-only: no link to preview, or a link marked to show no picture (noImage in the extras).
     if (!card.href || (linkPreviews[card.href] as { noImage?: boolean } | undefined)?.noImage) { setMedia({ key, status: "none" }); setVisible(true); return; }
+    // Links marked iconOnly (extras) skip their share images and show the site favicon.
+    const iconOnly = (linkPreviews[card.href] as { iconOnly?: boolean } | undefined)?.iconOnly;
     const href = card.href;
     let settled = false;
     setMedia({ key, status: "loading" });
@@ -1899,8 +1931,9 @@ export function HoverCards() {
       }
       if (force || results.every(r => r !== undefined)) { settled = true; setMedia({ key, status: "none" }); setVisible(true); }
     };
-    [saved, liveImage, icon].forEach((promise, i) => promise.then(found => { results[i] = found; decide(false); }));
-    const timer = window.setTimeout(() => decide(true), 600);
+    [iconOnly ? Promise.resolve(null) : saved, iconOnly ? Promise.resolve(null) : liveImage, icon].forEach((promise, i) => promise.then(found => { results[i] = found; decide(false); }));
+    // Favicon-only cards have nothing else to show, so give the icon a little longer.
+    const timer = window.setTimeout(() => decide(true), iconOnly ? 1500 : 600);
     return () => { settled = true; window.clearTimeout(timer); };
   }, [card?.key]);
 
@@ -1962,10 +1995,10 @@ export function HoverCards() {
       style={{ left: card.left, ...(card.below ? { top: card.top } : { bottom: card.top }) }}
     >
       <div className="wiki-hovercard-copy">
-        {card.title && <strong className="wiki-hovercard-title">{decodeEntities(liveTitle?.key === card.key ? liveTitle.title : card.title)}</strong>}
+        {card.title && <strong className={`wiki-hovercard-title${card.person ? " notranslate" : ""}`} translate={card.person ? "no" : undefined}>{decodeEntities(liveTitle?.key === card.key ? liveTitle.title : card.title)}</strong>}
         {card.bodyHtml && <div className="wiki-hovercard-text" dangerouslySetInnerHTML={{ __html: card.bodyHtml }} />}
         {text && <div className="wiki-hovercard-text">{text}</div>}
-        {card.site && <div className="wiki-hovercard-text wiki-hovercard-site">{card.site}</div>}
+        {card.site && <div className="wiki-hovercard-text wiki-hovercard-site notranslate" translate="no">{card.site}</div>}
       </div>
       {hasMedia && (
         <div className={`wiki-hovercard-thumb${media.icon ? " is-icon" : ""}`}>
@@ -2010,6 +2043,9 @@ const languageList = (display: string) => {
 
 // "So many languages": the title-row label (it keeps its scroll hand-off with the sticky
 // icons) opens a borderless card of languages; picking one opens this page translated.
+// Only one language menu re-applies a saved language.
+let languageResumed = false;
+
 export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
   const [open, setOpen] = useState(false);
   const [cardPos, setCardPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
@@ -2021,6 +2057,8 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
   const closeTimer = useRef(0);
   const openAt = (button: HTMLElement) => {
     window.clearTimeout(closeTimer.current);
+    // Read the language fresh: another menu instance may have applied one since mount.
+    setCurrent(document.cookie.match(/googtrans=\/en\/([\w-]+)/)?.[1] ?? "en");
     const box = button.getBoundingClientRect();
     setCardPos({ top: box.bottom + 10, right: Math.max(16, window.innerWidth - box.right) });
     // Only one menu open at a time: close the search list (it closes on blur) and other menus.
@@ -2099,6 +2137,17 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
     }
   };
 
+  // A language picked on an earlier visit (Google's cookie) is re-applied once the page has
+  // loaded and the intro has run, so the page doesn't sit in English with translation styles.
+  useEffect(() => {
+    const saved = document.cookie.match(/googtrans=\/en\/([\w-]+)/)?.[1];
+    if (!saved || saved === "en" || languageResumed) return;
+    languageResumed = true;
+    const timer = window.setTimeout(() => translate(saved), 2500);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div ref={rootRef} className={`wiki-language${icon ? " wiki-language-icon" : ""}${open ? " is-open" : ""}`}>
       <button type="button" className="wiki-language-button" aria-expanded={open} aria-label={icon ? "Languages" : undefined} title={icon ? "Languages" : undefined}
@@ -2143,8 +2192,36 @@ export function Lightbox() {
   // Closing plays the opening animations in reverse, then unmounts.
   const [closing, setClosing] = useState(false);
   const closeTimer = useRef(0);
+  const swiped = useRef(false);
+  const wheelRef = useRef({ total: 0, spent: false, idle: 0, last: 0 });
+  const itemsRef = useRef<LightboxItem[]>([]);
+  itemsRef.current = items;
+  const steppingRef = useRef(false);
+  // One transition for every way of stepping (keys, trackpad, drag, swipe): the current image
+  // slides 10px the way it's going while it fades and blurs out, then the next one blurs in
+  // from the other side.
+  const go = (direction: number) => {
+    if (steppingRef.current || !itemsRef.current.length) return;
+    steppingRef.current = true;
+    const element = document.querySelector<HTMLElement>(".wiki-lightbox-media");
+    // A gesture may already have scrubbed part of the way out: play only what's left.
+    const left = element ? Number.parseFloat(getComputedStyle(element).opacity) : 1;
+    const duration = Math.max(60, Math.round(200 * left));
+    if (element) {
+      const timing = `${duration}ms ease-in`;
+      element.style.transition = `transform ${timing}, opacity ${timing}, filter ${timing}`;
+      element.style.transform = `translateX(${-direction * 10}px)`;
+      element.style.opacity = "0";
+      element.style.filter = "blur(18px)";
+    }
+    window.setTimeout(() => {
+      setStep(direction);
+      setIndex(current => current === null ? current : (current + direction + itemsRef.current.length) % itemsRef.current.length);
+      steppingRef.current = false;
+    }, duration);
+  };
   const close = () => {
-    if (closeTimer.current) return;
+    if (closeTimer.current || swiped.current) return;
     setClosing(true);
     closeTimer.current = window.setTimeout(() => { closeTimer.current = 0; setClosing(false); setIndex(null); }, 450);
   };
@@ -2153,10 +2230,14 @@ export function Lightbox() {
     const figures = () => Array.from(document.querySelectorAll<HTMLElement>(".wiki-article-body .career-feature > figure"));
     const toItem = (figure: HTMLElement): LightboxItem | null => {
       const video = figure.querySelector<HTMLVideoElement>("video");
-      const width = figure.getBoundingClientRect().width * 3;
+      // 3x the on-page size, kept as a share of the window so it stays fluid on resize.
+      const width = (figure.getBoundingClientRect().width * 3) / window.innerWidth * 100;
       if (video) return { type: "video", src: video.currentSrc || video.src, poster: video.poster || undefined, alt: video.getAttribute("aria-label") ?? undefined, width };
       const image = figure.querySelector<HTMLImageElement>("img");
-      return image ? { type: "img", src: image.currentSrc || image.src, alt: image.alt, width } : null;
+      if (!image) return null;
+      // Thumbnails are small; the lightbox asks Medium for a large rendition instead.
+      const full = (image.currentSrc || image.src).replace(/resize:fit:\d+/, "resize:fit:1600");
+      return { type: "img", src: full, alt: image.alt, width };
     };
     const onClick = (event: MouseEvent) => {
       const figure = (event.target as HTMLElement).closest<HTMLElement>(".wiki-article-body .career-feature > figure");
@@ -2180,8 +2261,8 @@ export function Lightbox() {
     if (index === null) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
-      if (event.key === "ArrowRight") { event.preventDefault(); setStep(1); setIndex(current => current === null ? current : (current + 1) % items.length); }
-      if (event.key === "ArrowLeft") { event.preventDefault(); setStep(-1); setIndex(current => current === null ? current : (current - 1 + items.length) % items.length); }
+      if (event.key === "ArrowRight") { event.preventDefault(); go(1); }
+      if (event.key === "ArrowLeft") { event.preventDefault(); go(-1); }
     };
     // Block page scrolling while open without hiding the scrollbar (that shifted the layout).
     const block = (event: Event) => event.preventDefault();
@@ -2189,7 +2270,98 @@ export function Lightbox() {
     document.addEventListener("keydown", onKey);
     window.addEventListener("wheel", block, { passive: false, capture: true });
     window.addEventListener("touchmove", block, { passive: false, capture: true });
+    // Swipes, drags and trackpad gestures move the image with the gesture (it slides, fades and
+    // blurs as it goes); past the threshold it steps to the next image, otherwise it springs back.
+    const media = () => document.querySelector<HTMLElement>(".wiki-lightbox-media");
+    // Gestures don't move the image themselves: once one passes its threshold it plays the very
+    // same transition as the arrow keys, so every way of stepping looks identical.
+    const settle = () => {
+      const element = media();
+      if (!element) return;
+      element.style.transition = "transform 0.3s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1), filter 0.3s cubic-bezier(0.33, 1, 0.68, 1)";
+      element.style.transform = "";
+      element.style.opacity = "";
+      element.style.filter = "";
+    };
+    // Released past halfway: finish the same transition; otherwise spring back.
+    const finish = (dx: number) => {
+      if (Math.abs(dx) >= 60) stepBy(dx < 0 ? 1 : -1);
+      else settle();
+    };
+    // Phones: the image follows the finger; the tap that ends a swipe doesn't close.
+    let startX = 0;
+    let startY = 0;
+    let touchHorizontal: boolean | null = null;
+    const onTouchStart = (event: TouchEvent) => { startX = event.touches[0].clientX; startY = event.touches[0].clientY; touchHorizontal = null; };
+    const onTouchMove = (event: TouchEvent) => {
+      const dx = event.touches[0].clientX - startX;
+      const dy = event.touches[0].clientY - startY;
+      if (touchHorizontal === null && Math.abs(dx) + Math.abs(dy) > 8) touchHorizontal = Math.abs(dx) > Math.abs(dy);
+    };
+    const onTouchEnd = (event: TouchEvent) => {
+      if (!touchHorizontal) return;
+      event.preventDefault();
+      finish(event.changedTouches[0].clientX - startX);
+    };
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: false });
+    function stepBy(direction: number) {
+      swiped.current = true;
+      window.setTimeout(() => { swiped.current = false; }, 400);
+      go(direction);
+    }
+    // Trackpad: the image follows a horizontal two-finger swipe; when the gesture ends it steps
+    // (past the threshold) or springs back.
+    // Gesture state lives in a ref: this effect re-runs on every step, and momentum from the same
+    // trackpad gesture must not carry on into further steps.
+    const wheel = wheelRef.current;
+    const onWheel = (event: WheelEvent) => {
+      if (wheel.spent) {
+        // Momentum only ever slows down; a sudden jump in speed is a fresh swipe, so unlock.
+        const speed = Math.abs(event.deltaX);
+        const fresh = speed > 12 && speed > wheel.last * 2;
+        wheel.last = speed;
+        window.clearTimeout(wheel.idle);
+        if (!fresh) {
+          wheel.idle = window.setTimeout(() => { wheel.spent = false; wheel.last = 0; }, 250);
+          return;
+        }
+        wheel.spent = false;
+      }
+      wheel.last = Math.abs(event.deltaX);
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) && wheel.total === 0) return;
+      wheel.total -= event.deltaX;
+      window.clearTimeout(wheel.idle);
+      if (Math.abs(wheel.total) >= 180) {
+        const total = wheel.total;
+        wheel.total = 0;
+        wheel.spent = true;
+        finish(total);
+        wheel.idle = window.setTimeout(() => { wheel.spent = false; wheel.last = 0; }, 250);
+        return;
+      }
+      wheel.idle = window.setTimeout(() => { const total = wheel.total; wheel.total = 0; if (Math.abs(total) >= 120) { wheel.spent = true; finish(total); wheel.idle = window.setTimeout(() => { wheel.spent = false; wheel.last = 0; }, 250); } else settle(); }, 120);
+    };
+    // Mouse: the image follows a sideways drag (a plain click still closes).
+    let dragX: number | null = null;
+    const onPointerDown = (event: PointerEvent) => { if (event.pointerType === "mouse") dragX = event.clientX; };
+    const onPointerUp = (event: PointerEvent) => {
+      if (dragX === null) return;
+      const dx = event.clientX - dragX;
+      dragX = null;
+      if (Math.abs(dx) > 4) { swiped.current = true; window.setTimeout(() => { swiped.current = false; }, 400); finish(dx); }
+    };
+    window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointerup", onPointerUp);
     return () => {
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("keydown", onKey);
       window.removeEventListener("wheel", block, { capture: true });
       window.removeEventListener("touchmove", block, { capture: true });
@@ -2198,11 +2370,15 @@ export function Lightbox() {
 
   if (index === null || !items[index]) return null;
   const item = items[index];
+  // Neighbours load ahead so stepping never shows a blank frame.
+  [items[(index + 1) % items.length], items[(index - 1 + items.length) % items.length]].forEach(next => {
+    if (next?.type === "img") new window.Image().src = next.src;
+  });
   return createPortal(
     <div className={`wiki-lightbox${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-label="Image viewer" data-lenis-prevent onClick={close}>
       {item.type === "video"
-        ? <video key={index} className="wiki-lightbox-media" style={{ width: `min(92vw, ${Math.round(item.width)}px)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} poster={item.poster} autoPlay muted loop playsInline aria-label={item.alt} />
-        : <img key={index} className="wiki-lightbox-media" style={{ width: `min(92vw, ${Math.round(item.width)}px)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} alt={item.alt ?? ""} />}
+        ? <video key={index} className="wiki-lightbox-media" style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} poster={item.poster} autoPlay muted loop playsInline aria-label={item.alt} />
+        : <img key={index} draggable={false} className="wiki-lightbox-media" style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} alt={item.alt ?? ""} />}
     </div>,
     document.body,
   );
