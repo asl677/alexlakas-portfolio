@@ -3,7 +3,7 @@
 import { Languages, MailOpen, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
-import { ArticleTabs, ContentsScrollSpy, HoverCards, HoverPortrait, LanguageMenu, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
+import { ArticleTabs, ContentsScrollSpy, HoverCards, Lightbox, HoverPortrait, LanguageMenu, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
 
 const references = [
   { label: "16 Best UX Portfolio Examples That Stand Out to Recruiters", href: "https://www.uxpin.com/studio/blog/ux-portfolio-examples/", source: "UXPin" },
@@ -69,6 +69,7 @@ export default function Home() {
       <IntroSequence />
       <SmoothAnchorScroll />
       <HoverCards />
+      <Lightbox />
       <ContentsScrollSpy />
       <div className="wiki-page" id="top">
         <header className="wiki-topbar" data-lenis-prevent>

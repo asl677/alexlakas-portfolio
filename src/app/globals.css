@@ -6554,3 +6554,40 @@ html body .wiki-hovercard {
   opacity: var(--wiki-media-t) !important;
   scale: calc(1.1 - var(--wiki-media-t) * 0.1) !important;
 }
+
+/* Lightbox: section images open centered over a blurred, dimmed page; each image blurs in. */
+.wiki-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 4vh 4vw;
+  background: color-mix(in srgb, var(--wiki-page) 55%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.1);
+  backdrop-filter: blur(24px) saturate(1.1);
+  animation: wiki-lightbox-in 0.3s var(--wiki-ease) both;
+}
+.wiki-lightbox-media {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 1400px);
+  max-height: 88vh;
+  object-fit: contain;
+  animation: wiki-lightbox-media-in 0.45s var(--wiki-ease) both;
+}
+@keyframes wiki-lightbox-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes wiki-lightbox-media-in { from { opacity: 0; filter: blur(18px); transform: translateX(var(--lb-from, 0px)); } to { opacity: 1; filter: blur(0); transform: none; } }
+@media (prefers-reduced-motion: reduce) { .wiki-lightbox, .wiki-lightbox-media { animation: none; } }
+
+/* Section images invite a click: a subtle fade to 70% on hover. */
+@media (hover: hover) {
+  html body .wiki-shell .wiki-article-body .career-feature > figure { transition: opacity 0.5s cubic-bezier(0.33, 1, 0.68, 1) !important; }
+  html body .wiki-shell .wiki-article-body .career-feature > figure:hover { opacity: 0.7; }
+}
+/* Closing reverses the opening: the image blurs and fades out, then the backdrop clears. */
+.wiki-lightbox.is-closing { animation: wiki-lightbox-out 0.45s var(--wiki-ease) both; }
+.wiki-lightbox.is-closing .wiki-lightbox-media { animation: wiki-lightbox-media-out 0.35s var(--wiki-ease) both; }
+@keyframes wiki-lightbox-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes wiki-lightbox-media-out { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(18px); } }

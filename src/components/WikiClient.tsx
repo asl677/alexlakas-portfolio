@@ -2130,3 +2130,80 @@ export function LanguageMenu({ icon }: { icon?: ReactNode } = {}) {
     </div>
   );
 }
+
+type LightboxItem = { type: "img" | "video"; src: string; poster?: string; alt?: string; width: number };
+
+// Section images and videos open in a centered lightbox over a blurred page. Left/right arrows
+// step through every section image with a blur crossfade; a click anywhere or Escape closes it.
+export function Lightbox() {
+  const [items, setItems] = useState<LightboxItem[]>([]);
+  const [index, setIndex] = useState<number | null>(null);
+  // Direction of the last step: the incoming image slides 10px in from that side.
+  const [step, setStep] = useState(0);
+  // Closing plays the opening animations in reverse, then unmounts.
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef(0);
+  const close = () => {
+    if (closeTimer.current) return;
+    setClosing(true);
+    closeTimer.current = window.setTimeout(() => { closeTimer.current = 0; setClosing(false); setIndex(null); }, 450);
+  };
+
+  useEffect(() => {
+    const figures = () => Array.from(document.querySelectorAll<HTMLElement>(".wiki-article-body .career-feature > figure"));
+    const toItem = (figure: HTMLElement): LightboxItem | null => {
+      const video = figure.querySelector<HTMLVideoElement>("video");
+      const width = figure.getBoundingClientRect().width * 3;
+      if (video) return { type: "video", src: video.currentSrc || video.src, poster: video.poster || undefined, alt: video.getAttribute("aria-label") ?? undefined, width };
+      const image = figure.querySelector<HTMLImageElement>("img");
+      return image ? { type: "img", src: image.currentSrc || image.src, alt: image.alt, width } : null;
+    };
+    const onClick = (event: MouseEvent) => {
+      const figure = (event.target as HTMLElement).closest<HTMLElement>(".wiki-article-body .career-feature > figure");
+      if (!figure) return;
+      const all = figures();
+      const list = all.map(toItem);
+      const at = all.indexOf(figure);
+      if (at < 0 || !list[at]) return;
+      event.preventDefault();
+      const kept = list.filter((item): item is LightboxItem => !!item);
+      setItems(kept);
+      setStep(0);
+      setIndex(kept.indexOf(list[at] as LightboxItem));
+    };
+    // Capture phase, so nothing else on the page (hover cards, smooth scroll) can swallow it.
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
+
+  useEffect(() => {
+    if (index === null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+      if (event.key === "ArrowRight") { event.preventDefault(); setStep(1); setIndex(current => current === null ? current : (current + 1) % items.length); }
+      if (event.key === "ArrowLeft") { event.preventDefault(); setStep(-1); setIndex(current => current === null ? current : (current - 1 + items.length) % items.length); }
+    };
+    // Block page scrolling while open without hiding the scrollbar (that shifted the layout).
+    const block = (event: Event) => event.preventDefault();
+    window.dispatchEvent(new Event("alexpedia-scroll-lock"));
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("wheel", block, { passive: false, capture: true });
+    window.addEventListener("touchmove", block, { passive: false, capture: true });
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("wheel", block, { capture: true });
+      window.removeEventListener("touchmove", block, { capture: true });
+    };
+  }, [index, items.length]);
+
+  if (index === null || !items[index]) return null;
+  const item = items[index];
+  return createPortal(
+    <div className={`wiki-lightbox${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-label="Image viewer" data-lenis-prevent onClick={close}>
+      {item.type === "video"
+        ? <video key={index} className="wiki-lightbox-media" style={{ width: `min(92vw, ${Math.round(item.width)}px)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} poster={item.poster} autoPlay muted loop playsInline aria-label={item.alt} />
+        : <img key={index} className="wiki-lightbox-media" style={{ width: `min(92vw, ${Math.round(item.width)}px)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} alt={item.alt ?? ""} />}
+    </div>,
+    document.body,
+  );
+}
