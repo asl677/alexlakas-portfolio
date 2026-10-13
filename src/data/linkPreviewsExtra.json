@@ -36,5 +36,13 @@
   },
   "https://www.producthunt.com/products/peanut-for-chrome?launch=peanut-for-chrome": {
     "iconOnly": true
+  },
+  "https://en.wikipedia.org/wiki/Washington,_D.C.": {
+    "title": "Washington, D.C.",
+    "description": "The capital city and federal district of the United States."
+  },
+  "https://en.wikipedia.org/wiki/Los_Angeles": {
+    "title": "Los Angeles",
+    "description": "The most populous city in California and the second-most populous in the United States."
   }
 }

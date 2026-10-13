@@ -6635,3 +6635,17 @@ html body .wiki-mobile-search-sheet .wiki-language-sheet { padding-bottom: calc(
 /* Footnote numbers ([1], [2]…) in the body's muted grey, on hover and after a visit too. */
 html body .wiki-shell sup.reference,
 html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .references, .wiki-link-list, .wiki-contents) sup.reference a:not(.article-list-image):not(.wiki-tab):is(:link, :visited, :hover, :focus-visible, :active) { color: var(--wiki-muted) !important; }
+/* The selected tab's white underline sits above the row's grey divider line. */
+html body .wiki-shell .wiki-article-header .wiki-tab.is-selected,
+html body .wiki-shell .wiki-article-header .wiki-tab-actions > span:first-child { position: relative; z-index: 1; }
+/* Finished lines carry no filter/transform at all: a leftover blur(0) put each line on its own
+   layer, which can clip a link's 1px hover underline at the bottom of the line. */
+html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block):is([style*="--wiki-wipe: 1;"], :not([style*="--wiki-wipe"])) { filter: none !important; transform: none !important; translate: none !important; }
+/* The underline sits inside the link's own padding box, never at the clipped edge. */
+html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .references, .wiki-link-list, .wiki-contents) a:not(.article-list-image):not(.wiki-tab) { padding-bottom: 1px; }
+
+/* The site draws its own light and dark themes: "only" forbids the browser's forced dark mode
+   (Chrome Auto Dark Mode, which greyed light mode and the tab/link underlines) from repainting it. */
+:root[data-theme="light"] { color-scheme: only light; }
+:root[data-theme="dark"] { color-scheme: only dark; }
+:root:not([data-theme]) { color-scheme: only light dark; }

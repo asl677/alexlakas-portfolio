@@ -54,6 +54,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* The site has its own light and dark themes; tell Dark Reader-style extensions not to
+            recolor it (they grey the page and strip the background-drawn link underlines). */}
+        <meta name="darkreader-lock" />
         <script
           dangerouslySetInnerHTML={{
             // Creates the single theme-color tag Safari uses to tint its toolbars. Created here (not in

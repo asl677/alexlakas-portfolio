@@ -170,6 +170,22 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
     window.addEventListener("alexpedia-search-sync", onSync);
     return () => window.removeEventListener("alexpedia-search-sync", onSync);
   }, []);
+  // Related topics (bottom of the article) run a search in a specific box: fill it, show the
+  // results and focus it.
+  const setRef = useRef<(detail: { target: string; query: string }) => void>(() => undefined);
+  setRef.current = ({ target, query: value }) => {
+    if (target !== inputId) return;
+    setQuery(value);
+    setShowRecent(false);
+    updateResults(value);
+    broadcast({ query: value });
+    document.getElementById(inputId)?.focus({ preventScroll: true });
+  };
+  useEffect(() => {
+    const onSet = (event: Event) => setRef.current((event as CustomEvent<{ target: string; query: string }>).detail);
+    window.addEventListener("alexpedia-search-set", onSet);
+    return () => window.removeEventListener("alexpedia-search-set", onSet);
+  }, []);
 
   const updateResults = (value: string) => {
     const term = value.trim();
@@ -1259,15 +1275,6 @@ export function IntroSequence() {
       };
       let revealCancelled = false;
       loaderDone.then(() => { if (!revealCancelled) startInitialReveal(); });
-      // Scrubbed reveal: each element's target progress follows its distance from the viewport
-      // bottom (power3.out), and a time-based damper eases opacity + slide toward it every frame,
-      // so scroll/drag drives the cascade smoothly with one shared curve. Positions are cached
-      // (re-measured on resize/accordion changes) so the per-frame loop does no layout reads.
-      // Ease-out (cubic) for scroll-linked progress: an in-out curve here held content near
-      // invisible, then snapped it in mid-scroll. Out-curves track the scroll smoothly.
-      // Scroll progress follows the same curve as the load reveal, so a line's rise, fade and
-      // blur have the same shape whether it appears on load or while scrolling.
-      const scrubEase = revealEase;
       type ScrubItem = { element: HTMLElement; top: number; hidden: boolean; media: boolean; wipe: boolean; current: number };
       let scrubItems: ScrubItem[] = [];
       // Cached with positions: reading scrollHeight in the tick, right after the reveal tweens
@@ -1291,7 +1298,7 @@ export function IntroSequence() {
           return item;
         });
       };
-      const scrubTick = (_time: number, deltaTime: number) => {
+      const scrubTick = () => {
         if (!revealReady) return;
         const vh = window.innerHeight;
         const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac)) * pace;
@@ -1303,28 +1310,23 @@ export function IntroSequence() {
         const edgeInset = window.innerWidth <= 768 ? scrubConfig.edgeInset : 0;
         const widen = Math.max(0, mediaRange + edgeInset - remaining);
         const bottom = y + vh - edgeInset + widen;
-        const k = 1 - Math.exp(-deltaTime / 1000 * scrubConfig.damping / pace);
-        // Images catch up ~0.2s slower than text, so a fast scroll can't snap them in.
-        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / scrubConfig.damping + 0.2));
+        // Scrolled-in content plays the exact page-load reveal (same slide, duration, easing and
+        // stagger) the moment it enters view, instead of following the scroll position with a
+        // damped lag. Everything that enters in the same frame cascades top-down together.
+        const entering: HTMLElement[] = [];
         for (const item of scrubItems) {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
-          // The sticky Contents rail and the top bar never scrub out once shown.
-          // Image strips spend their first half drawing the grey strip, so they start later than
-          // text and land in step with the lines around them. Heading strips stay in sync with
-          // their own text, which reveals as ordinary lines.
+          // Image strips start a little later, so their grey strip lands with the nearby text.
           const lag = item.wipe ? r * 0.45 : 0;
-          const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : scrubEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
-          // One-way: scrolling back up never fades content out again.
-          if (target <= item.current) continue;
-          // Light time-based easing toward the scroll target gives the reveal its glide.
-          let next = item.current + (target - item.current) * (item.media ? kMedia : k);
-          if (Math.abs(target - next) < 0.002) next = target;
-          item.current = next;
-          applyReveal(element, next);
-          if (element === rail && next === 1) revealedTargets.add(rail);
+          const inView = element.closest(".wiki-contents, .wiki-topbar") || bottom - item.top - lag > 24;
+          if (!inView) continue;
+          item.current = 1;
+          (element.classList.contains("wiki-reveal-line") ? revealedLines : revealedTargets).add(element);
+          entering.push(element);
         }
+        if (entering.length) fadeIn(visualOrder(entering), 0, revealEase);
       };
       const reveal = () => { measure(); };
       // Opening a mobile accordion: its first screenful staggers in at once (short, no scroll lag).
@@ -2447,5 +2449,42 @@ export function Lightbox() {
         : <img key={index} draggable={false} className="wiki-lightbox-media" style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} alt={item.alt ?? ""} />}
     </div>,
     document.body,
+  );
+}
+
+const relatedTopics = ["Product design", "AI", "Google", "LinkedIn", "Peanut", "Prototyping"];
+
+// "Related" topics at the end of the article: each one runs that search in the top search bar
+// (phones: opens the search sheet with it).
+export function RelatedLinks() {
+  const run = (term: string) => {
+    const search = (target: string) => window.dispatchEvent(new CustomEvent("alexpedia-search-set", { detail: { target, query: term } }));
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      document.querySelector<HTMLButtonElement>(".wiki-topbar .wiki-nav-search")?.click();
+      window.setTimeout(() => search("mobile-sheet-search"), 80);
+      return;
+    }
+    // Use whichever search bar is on screen (top bar, or the scrolled header's): no scrolling.
+    const visible = (id: string) => {
+      const input = document.getElementById(id);
+      if (!input) return false;
+      const box = input.getBoundingClientRect();
+      let element: HTMLElement | null = input;
+      while (element) {
+        const style = getComputedStyle(element);
+        if (style.visibility === "hidden" || style.display === "none" || Number.parseFloat(style.opacity) < 0.5) return false;
+        element = element.parentElement;
+      }
+      return box.width > 0 && box.bottom > 0 && box.top < window.innerHeight;
+    };
+    search(visible("page-search") ? "page-search" : "sticky-page-search");
+  };
+  return (
+    <nav className="wiki-categories" aria-label="Related">
+      <span>Related:</span>
+      {relatedTopics.map(term => (
+        <a key={term} href={`#related-${term.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} onClick={event => { event.preventDefault(); run(term); }}>{term}</a>
+      ))}
+    </nav>
   );
 }

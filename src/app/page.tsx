@@ -3,20 +3,20 @@
 import { Languages, MailOpen, Search, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
-import { ArticleTabs, ContentsScrollSpy, HoverCards, Lightbox, HoverPortrait, LanguageMenu, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
+import { ArticleTabs, ContentsScrollSpy, HoverCards, Lightbox, RelatedLinks, HoverPortrait, LanguageMenu, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
 
 const references = [
-  { label: "16 Best UX Portfolio Examples That Stand Out to Recruiters", href: "https://www.uxpin.com/studio/blog/ux-portfolio-examples/", source: "UXPin" },
-  { label: "Fiveonefour Raises $17M to Redefine the Developer Experience by Connecting Data Infrastructure and AI Innovation", href: "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html", source: "PR Newswire" },
+  { label: "Best UX portfolio examples", href: "https://www.uxpin.com/studio/blog/ux-portfolio-examples/", source: "UXPin" },
+  { label: "Fiveonefour raises $17M", href: "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html", source: "PR Newswire" },
   { label: "Alex Lakas — Portfolio Website Design Inspiration", href: "https://craftwork.design/curated/website/alex-lakas", source: "Craftwork" },
-  { label: "Building a side hustle remotely while working a 9-to-5", href: "https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-", source: "As Told By Nomads podcast" },
+  { label: "Building Peanut remotely", href: "https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-", source: "As Told By Nomads" },
   { label: "Insured Nomads acquires Peanut", href: "https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension", source: "ITIJ" },
-  { label: "Designing a simpler, more inclusive LinkedIn Home & Sharing experience", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
-  { label: "Do I need a COVID test to travel? And other summer travel questions", href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/", source: "Forbes" },
+  { label: "Redesigning LinkedIn Home and Sharing", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
+  { label: "COVID testing and summer travel questions", href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/", source: "Forbes" },
   { label: "LinkedIn adds polls and live video-based events", href: "https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/", source: "TechCrunch" },
   { label: "U.S. design patents", links: [{ label: "D893,509", href: "https://uspto.report/patent/grant/D893%2C509" }, { label: "D892,816", href: "https://patentimages.storage.googleapis.com/94/19/e7/9f1b746a0a9912/USD892816.pdf" }, { label: "D869,501", href: "https://patents.justia.com/patent/D869501" }], source: "Patents" },
-  { label: "Google adds salon and spa bookings through Maps and Search", href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/", source: "TechCrunch" },
-  { label: "Google Live Popular Times featured on The Tonight Show Starring Jimmy Fallon", href: "https://www.youtube.com/watch?v=QIbPZgH1zRY", source: "YouTube" },
+  { label: "Google adds salon and spa bookings", href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/", source: "TechCrunch" },
+  { label: "Live Popular Times on The Tonight Show", href: "https://www.youtube.com/watch?v=QIbPZgH1zRY", source: "YouTube" },
   { label: "LinkedIn is gearing up for a redesign", href: "https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/", source: "TechCrunch" },
   { label: "UX design portfolio examples", href: "https://www.shutterstock.com/blog/ux-design-portfolios", source: "Shutterstock" },
   { label: "The 30 Best UX Designer Portfolio Examples", href: "https://www.founderjar.com/inspiration/ux-designer-portfolio-examples/", source: "FounderJar" },
@@ -24,21 +24,21 @@ const references = [
   { label: "Google Maps", href: "https://www.simonfungcreative.com/google-maps.html", source: "Simon Fung Creative" },
   { label: "Alex Lakas on Dribbble", href: "https://dribbble.com/alex2pt0", source: "Dribbble" },
   { label: "Alex Lakas – Product Designer", href: "https://www.behance.net/alexlakas?locale=en_US", source: "Behance" },
-  { label: "About popular times, wait times & visit duration data", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
+  { label: "About popular times and wait times", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
   { label: "Alex Lakas design portfolio", href: "https://thecreativefinder.com/export-portfolio.php?username=asl677", source: "The Creative Finder" },
 ];
 
 const articles = [
   { title: "Designing Area Code", date: "Fiveonefour", dek: "A starter kit for analytics.", href: "https://alexslakas.medium.com/designing-area-code-a-starter-kit-for-modern-analytics-apps-ed421767d667", image: "https://miro.medium.com/v2/1*Jju41LNCrQ95PzA6hxR1LA.jpeg" },
   { title: "Agentic UX is the new black", date: "Fiveonefour", dek: "Open your mind (to AI).", href: "https://alexslakas.medium.com/agentic-ux-is-the-new-black-2fbc62cdba91", image: "https://miro.medium.com/v2/resize:fit:1100/format:webp/1*L9l8mtSBtjG7wiWsTT_zEg.png" },
-  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "LinkedIn", dek: "Reimagining a professional social network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/1*2fUEA_2VQcdnZ6JBWo2D0Q.png" },
+  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "LinkedIn", dek: "Reimagining a professional network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/1*2fUEA_2VQcdnZ6JBWo2D0Q.png" },
   { title: "Know before you go with Google's Live Popular Times", date: "Google", dek: "Real-time crowds in Maps.", href: "https://alexslakas.medium.com/know-before-you-go-with-googles-live-popular-times-bcfc7320ecaa", image: "https://miro.medium.com/v2/resize:fit:720/format:webp/1*EWw-R4_n2YGAKue63JwDLw.png" },
   { title: "Search faster on Google Maps", date: "Google", dek: "Local discovery with less typing.", href: "https://alexslakas.medium.com/search-faster-on-google-maps-d6b8597c4a07", image: "https://miro.medium.com/v2/1*AMLLrIjOr9igNelp0fGGmg.jpeg" },
   { title: "Reservations made easy with Google", date: "Google", dek: "Booking local services in Search.", href: "https://alexslakas.medium.com/reservations-made-easy-with-google-7b7d35888ad9", image: "https://miro.medium.com/v2/1*GvbV2bdeQMN2a5rXXA34Fw.jpeg" },
   { title: "Why we built Peanut", date: "Peanut", dek: "Building a better travel tool.", href: "https://alexslakas.medium.com/why-we-built-peanut-6cac9182d1f8", image: "https://miro.medium.com/v2/1*_8brVFCI957xxa_Tc2BLlA.jpeg" },
   { title: "A Journey Into Type", date: "Dec 2023", dek: "Logo font in 72 hours.", href: "https://alexslakas.medium.com/a-journey-into-type-73d56899b172", image: "https://miro.medium.com/v2/1*7NKBidFv3IA6XTLrtFUwlA.png" },
   { title: "Data With Depth: Designing 514", date: "Dec 2023", dek: "Humanizing data-intensive apps.", href: "https://alexslakas.medium.com/data-with-depth-designing-514-44698c3e5390", image: "https://miro.medium.com/v2/1*hS--7nKr8dUW7yeKvlYzuQ.png" },
-  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "Jul 2021", dek: "Reimagining a professional social network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/1*J9oOQMv0N12QmSq7vbCiCQ.png" },
+  { title: "Designing a simpler, more inclusive LinkedIn Home & Sharing", date: "Jul 2021", dek: "Reimagining a professional network.", href: "https://alexslakas.medium.com/designing-a-simpler-more-inclusive-linked-in-home-sharing-315c81109177", image: "https://miro.medium.com/v2/1*J9oOQMv0N12QmSq7vbCiCQ.png" },
 ];
 
 function Ref({ n }: { n: number }) {
@@ -150,6 +150,7 @@ export default function Home() {
               <h2><span className="wiki-wipe"><span className="wiki-wipe-content">Alex</span></span></h2>
               <HoverPortrait />
               <dl>
+                <dt>Born</dt><dd>Alexander Lakas<br /><a href="https://en.wikipedia.org/wiki/Washington,_D.C." target="_blank" rel="noreferrer">Washington, D.C.</a>, U.S.</dd>
                 <dt>Based in</dt><dd>Los Angeles, CA</dd>
                 <dt>Occupation</dt><dd>Designer</dd>
                 <dt>Known for</dt><dd>&lsquo;talented&rsquo;, &lsquo;good people&rsquo;</dd>
@@ -176,7 +177,7 @@ export default function Home() {
 
             <WikiSection id="early-life" title="Early life">
               <div className="career-feature">
-                <p>Alex grew up on the East Coast and got into design through illustration, animation, and the web. He studied art and computer science at the University of Maryland, College Park, under <span data-nosnippet><a href="https://www.jamesthorpedesign.com/about" target="_blank" rel="nofollow noreferrer">James Thorpe</a></span>, <span data-nosnippet><a href="https://www.coplanar.org/" target="_blank" rel="nofollow noreferrer">Brandon Morse</a></span>, and <span data-nosnippet><a href="https://design.ncsu.edu/people/hsarmstr/" target="_blank" rel="nofollow noreferrer">Helen Armstrong</a></span>. Fueled by software and creativity, Alex has spent years understanding theory, trends and research sitting atop a background in studio work. He later moved to the Bay Area to join the tech movement, then to Los Angeles to freelance and live by the beach.<Ref n={1} /><Ref n={8} /></p>
+                <p>Born in <a href="https://en.wikipedia.org/wiki/Washington,_D.C." target="_blank" rel="noreferrer">Washington, D.C.</a>, Alex grew up on the East Coast and got into design through illustration, animation, and the web. He studied art and computer science at the University of Maryland, College Park, under <span data-nosnippet><a href="https://www.jamesthorpedesign.com/about" target="_blank" rel="nofollow noreferrer">James Thorpe</a></span>, <span data-nosnippet><a href="https://www.coplanar.org/" target="_blank" rel="nofollow noreferrer">Brandon Morse</a></span>, and <span data-nosnippet><a href="https://design.ncsu.edu/people/hsarmstr/" target="_blank" rel="nofollow noreferrer">Helen Armstrong</a></span>. Fueled by software and creativity, Alex has spent years understanding theory, trends and research sitting atop a background in studio work. He later moved to the Bay Area to join the tech movement, then to <a href="https://en.wikipedia.org/wiki/Los_Angeles" target="_blank" rel="noreferrer">Los Angeles</a> to freelance and live by the beach.<Ref n={1} /><Ref n={8} /></p>
               </div></WikiSection>
 
             <WikiSection id="career" title="Career">
@@ -184,7 +185,7 @@ export default function Home() {
                 <figure>
                   <img src="/career-on-set.webp" alt="A film crew setting up a shot" />
                 </figure>
-                <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work for 0-1 startups, etailers and FAANG companies, followed by roles at Google, LinkedIn, Peanut, Culprit, and Fiveonefour.<Ref n={1} /><Ref n={3} /></p>
+                <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work for 0-1 startups, etailers and FAANG companies, followed by roles at Google (2014–2018), LinkedIn (2018–2021), Peanut (2021–2022), Culprit, and Fiveonefour (2023–2026).<Ref n={1} /><Ref n={3} /></p>
               </div>
               <div id="social-games-and-ecommerce" className="career-feature">
                 <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Social games and ecommerce</span></span></h3>
@@ -223,7 +224,7 @@ export default function Home() {
                     <SeamlessVideo src="/peanut-launch.mp4" poster="/peanut-travel-on.png" label="Peanut: Travel on." className="" start={0} end={47.8} />
                   </div>
                 </figure>
-                <p>In 2020, during the peak of Covid, Alex and <span data-nosnippet><a href="https://www.linkedin.com/in/wbsimpson/" target="_blank" rel="nofollow noreferrer">Brady Simpson</a></span> co-founded <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Peanut</a>, a Chrome extension that surfaced travel info during online booking, later acquired by Insured Nomads. Peanut was featured in <a href="https://www.producthunt.com/products/peanut-for-chrome?launch=peanut-for-chrome" target="_blank" rel="noreferrer">Best of Product Hunt</a> in 2021. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a> on a stealth social media app spanning VFX, design, and product, working with <span data-nosnippet><a href="https://dinetz.com/" target="_blank" rel="nofollow noreferrer">David Dinetz</a></span>, <span data-nosnippet><a href="https://www.cabral.design/" target="_blank" rel="nofollow noreferrer">Andre Cabral</a></span>, <span data-nosnippet><a href="https://www.instagram.com/jomurayama/" target="_blank" rel="nofollow noreferrer">Jo Murayama</a></span>, and <a href="https://povio.com/" target="_blank" rel="noreferrer">Povio</a>.<Ref n={1} /><Ref n={11} /></p>
+                <p>In 2021, during the Covid pandemic, Alex and <span data-nosnippet><a href="https://www.linkedin.com/in/wbsimpson/" target="_blank" rel="nofollow noreferrer">Brady Simpson</a></span> co-founded <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Peanut</a>, a Chrome extension that surfaced travel info during online booking, later acquired by Insured Nomads. Peanut was featured in <a href="https://www.producthunt.com/products/peanut-for-chrome?launch=peanut-for-chrome" target="_blank" rel="noreferrer">Best of Product Hunt</a> in 2021. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a> on a stealth social media app spanning VFX, design, and product, working with <span data-nosnippet><a href="https://dinetz.com/" target="_blank" rel="nofollow noreferrer">David Dinetz</a></span>, <span data-nosnippet><a href="https://www.cabral.design/" target="_blank" rel="nofollow noreferrer">Andre Cabral</a></span>, <span data-nosnippet><a href="https://www.instagram.com/jomurayama/" target="_blank" rel="nofollow noreferrer">Jo Murayama</a></span>, and <a href="https://povio.com/" target="_blank" rel="noreferrer">Povio</a>.<Ref n={1} /><Ref n={11} /></p>
                 <figure className="career-video">
                   <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
                 </figure>
@@ -245,14 +246,13 @@ export default function Home() {
               <p>Alex&apos;s work has been covered across product, travel, and technology. <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Forbes</a> featured Peanut in its travel-planning reporting, <a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">TechCrunch</a> covered his LinkedIn work on polls, live video-based events, and the modernized homepage and sharing experience, and <a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">The Tonight Show Starring Jimmy Fallon</a> featured his Google Live Popular Times work.<Ref n={10} /><Ref n={12} /><Ref n={14} /> Publications also covered Fiveonefour&apos;s data-infrastructure practice and other independent creative projects.<Ref n={16} /></p>
               <p>In 2022, after Peanut was acquired, he and <span data-nosnippet>Brady Simpson</span> appeared on <span data-nosnippet>Tayo Rockson</span>&apos;s <a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">As Told By Nomads</a> podcast to discuss building it remotely as a side business while working full time.<Ref n={20} /></p>
               <ul className="wiki-link-list media-links">
-                <li><a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour announces its $17M raise</a>. <i>PR Newswire</i>.</li>
-                <li><a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">Building a side hustle remotely while working a 9-to-5</a>. <i>As Told By Nomads podcast</i>.</li>
+                <li><a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour raises $17M</a>. <i>PR Newswire</i>.</li>
+                <li><a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">Building Peanut remotely</a>. <i>As Told By Nomads</i>.</li>
                 <li><a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Insured Nomads acquires Peanut</a>. <i>ITIJ</i>.</li>
-                <li><a href="https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience" target="_blank" rel="noreferrer">Designing a simpler, more inclusive LinkedIn Home and Sharing experience</a>. <i>Case Study Club</i>.</li>
-                <li><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Do I need a COVID test to travel? And other summer travel questions</a>. <i>Forbes</i>.</li>
+                <li><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">COVID testing and summer travel questions</a>. <i>Forbes</i>.</li>
                 <li><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">LinkedIn adds polls and live video-based events</a>. <i>TechCrunch</i>.</li>
-                <li><a href="https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/" target="_blank" rel="noreferrer">Google adds salon and spa bookings through Maps and Search</a>. <i>TechCrunch</i>.</li>
-                <li><a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">Google Live Popular Times featured on The Tonight Show</a>. <i>YouTube</i>.</li>
+                <li><a href="https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/" target="_blank" rel="noreferrer">Google adds salon and spa bookings</a>. <i>TechCrunch</i>.</li>
+                <li><a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">Live Popular Times on The Tonight Show</a>. <i>YouTube</i>.</li>
                 <li><a href="https://techcrunch.com/2012/07/10/linkedin-is-gearing-up-for-a-redesign-bigger-pictures-anchored-menu-and-a-life-less-tweeted/" target="_blank" rel="noreferrer">LinkedIn is gearing up for a redesign</a>. <i>TechCrunch</i>.</li>
               </ul>
             </WikiSection>
@@ -279,15 +279,7 @@ export default function Home() {
               return <li id={"ref-" + (index + 1)} key={reference.label}><span className="reference-number">{index + 1}.</span><a className="reference-backlink" href={"#cite-" + (index + 1)} aria-label={`Back to citation ${index + 1}`}>^</a>{patentLinks.length ? <><span>{reference.label}: </span>{patentLinks.map((patent, patentIndex) => <span key={patent.href}><a href={patent.href}>{patent.label}</a>{patentIndex < patentLinks.length - 1 ? ", " : ""}</span>)}</> : <a href={reference.href ?? "#references"}>{reference.label}</a>}. <i data-nosnippet>{reference.source}</i>.</li>;
             })}</ol></WikiSection>
             <WikiSection id="external-links" title="External"><ul className="wiki-link-list"><li><a className="external-link" href="https://dribbble.com/alex2pt0" target="_blank" rel="noreferrer">Alex on Dribbble</a></li><li><a className="external-link" href="https://x.com/axlakas" target="_blank" rel="noreferrer">Alex on X</a></li><li><a className="external-link" href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">Alex on LinkedIn</a></li><li><a className="external-link" href="https://alexslakas.medium.com/" target="_blank" rel="noreferrer">Alex on Medium</a></li></ul></WikiSection>
-            <nav className="wiki-categories" aria-label="Categories">
-              <span>Categories:</span>
-              <a href="#top">American designers</a>
-              <a href="#career">Art directors</a>
-              <a href="#work">Product designers</a>
-              <a href="#google">Interaction designers</a>
-              <a href="#top">People from Los Angeles</a>
-              <a href="#top">Living people</a>
-            </nav>
+            <RelatedLinks />
             </div>
           </article>
         </div>
