@@ -1087,6 +1087,8 @@ export function IntroSequence() {
       ".wiki-tab-actions > *",
       ".wiki-mobile-tools > *",
       ".infobox-portrait",
+      // Section chevrons reveal with their heading instead of showing before everything else.
+      ".wiki-section-toggle .wiki-section-chevron",
       ".infobox .caption",
       ".infobox dt",
       ".infobox dd",
@@ -1402,7 +1404,7 @@ export function IntroSequence() {
           return item;
         });
       };
-      const scrubTick = () => {
+      const scrubTick = (_time: number, deltaTime: number) => {
         if (!revealReady) return;
         const vh = window.innerHeight;
         const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac)) * pace;
@@ -1411,12 +1413,14 @@ export function IntroSequence() {
         const y = frameScrollY;
         const remaining = Math.max(0, scrollHeight - vh - y);
         // The inset clears the mobile browser toolbar; desktop reveals right at the viewport bottom.
-        const edgeInset = window.innerWidth <= 768 ? scrubConfig.edgeInset : 0;
+        const phone = window.innerWidth <= 768;
+        const edgeInset = phone ? scrubConfig.edgeInset : 0;
         const widen = Math.max(0, mediaRange + edgeInset - remaining);
         const bottom = y + vh - edgeInset + widen;
-        // Scrolled-in content plays the exact page-load reveal (same slide, duration, easing and
-        // stagger) the moment it enters view, instead of following the scroll position with a
-        // damped lag. Everything that enters in the same frame cascades top-down together.
+        // Phones: the reveal is tied to the scroll/drag position (scrubbed, one-way), with a light
+        // damper so it glides. Desktop: content plays the page-load reveal the moment it enters.
+        const k = 1 - Math.exp(-deltaTime / 1000 * scrubConfig.damping / pace);
+        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / scrubConfig.damping + 0.2));
         const entering: HTMLElement[] = [];
         for (const item of scrubItems) {
           const { element } = item;
@@ -1424,6 +1428,15 @@ export function IntroSequence() {
           const r = item.media ? mediaRange : range;
           // Image strips start a little later, so their grey strip lands with the nearby text.
           const lag = item.wipe ? r * 0.45 : 0;
+          if (phone) {
+            const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : revealEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
+            if (target <= item.current) continue;
+            let next = item.current + (target - item.current) * (item.media ? kMedia : k);
+            if (Math.abs(target - next) < 0.002) next = target;
+            item.current = next;
+            applyReveal(element, next);
+            continue;
+          }
           const inView = element.closest(".wiki-contents, .wiki-topbar") || bottom - item.top - lag > 24;
           if (!inView) continue;
           item.current = 1;
@@ -1465,11 +1478,20 @@ export function IntroSequence() {
         const waiting = new Set(pending);
         pending.forEach(element => applyReveal(element, 0));
         const opened = performance.now();
+        // One steady top-down cadence: each item starts no sooner than 40ms after the previous one,
+        // however many the edge uncovers in a frame (per-frame batches used to land in chunks).
+        let nextSlot = 0;
         const sweep = () => {
+          const now = performance.now();
           const edge = body ? body.getBoundingClientRect().bottom : Infinity;
-          const late = performance.now() - opened > 900;
+          const late = now - opened > 900;
           const ready = visualOrder([...waiting]).filter(element => late || element.getBoundingClientRect().top < edge - 4);
-          ready.forEach((element, index) => { waiting.delete(element); fadeIn([element], index * 0.04, revealEase); });
+          ready.forEach(element => {
+            waiting.delete(element);
+            const start = Math.max(now, nextSlot);
+            nextSlot = start + 40 * textPace;
+            fadeIn([element], (start - now) / 1000, revealEase);
+          });
           if (waiting.size) requestAnimationFrame(sweep);
         };
         requestAnimationFrame(sweep);

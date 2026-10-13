@@ -186,7 +186,7 @@ export default function Home() {
                 <figure>
                   <video src="/career-landing.mp4" poster="/career-landing.png" autoPlay muted loop playsInline preload="metadata" aria-label="Landing page design" />
                 </figure>
-                <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work for 0-1 startups, etailers and FAANG companies, including roles at Cubix Labs (2009–2011), Virid (2011–2012), Darwin (2012–2013), Google (2013–2018), LinkedIn (2018–2021), Peanut (2021–2022), Culprit (2022–2023), and Fiveonefour (2023–2026).<Ref n={1} /></p>
+                <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work for 0-1 startups, etailers and FAANG companies, including roles at Cubix Labs (2 years), Virid (1 year), Darwin (1 year), Google (5+ years), LinkedIn (3+ years), Peanut (1 year), Culprit (1 year), and Fiveonefour (3 years).<Ref n={1} /></p>
               </div>
               <div id="social-games-and-ecommerce" className="career-feature">
                 <h3><span className="wiki-wipe"><span className="wiki-wipe-content">Social games and ecommerce</span></span></h3>

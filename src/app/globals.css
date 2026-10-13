@@ -6507,7 +6507,11 @@ html body .wiki-language-card {
 html body .wiki-shell .wiki-article-header.is-scrolled .wiki-language-icon,
 html body .wiki-shell .wiki-article-header.is-scrolled .wiki-language-icon .wiki-language-button { pointer-events: auto !important; }
 /* Text links keep their color on hover and after a visit; hover only draws the underline. */
-html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .references, .wiki-link-list, .wiki-contents) a:not(.article-list-image):not(.wiki-tab):is(:link, :visited, :hover, :focus-visible, :active) {
+html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .references, .wiki-link-list) a:not(.article-list-image):not(.wiki-tab):is(:link, :visited, :hover, :focus-visible, :active) {
+  /* A shade brighter than the muted body text (not full white/black). */
+  color: color-mix(in srgb, var(--wiki-muted) 62%, var(--wiki-ink)) !important;
+}
+html body .wiki-shell .wiki-contents a:is(:link, :visited, :hover, :focus-visible, :active) {
   color: var(--wiki-link) !important;
 }
 
@@ -6683,4 +6687,12 @@ html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure vi
    brings it to the top (same 600ms and curve), instead of snapping ahead in 160ms. */
 @media (max-width: 768px) {
   html body .wiki-shell .wiki-section-toggle :is(.wiki-section-chevron svg, svg, .icon) { transition: transform 600ms var(--wiki-ease) !important; }
+}
+
+/* Reveal blur: stronger and it lasts the whole reveal (clears as the line lands, not at 70%). */
+html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { --wiki-blur-t: max(0, calc(1 - var(--wiki-wipe, 1))); filter: blur(calc(var(--wiki-blur-t) * 10px)); }
+@media (max-width: 768px) { html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { filter: blur(calc(var(--wiki-blur-t) * 6px)); } }
+/* Phones: the profile portrait 20% smaller than its 288px (230px), centered. */
+@media (max-width: 768px) {
+  html body .wiki-shell .infobox .infobox-portrait { width: 230px !important; height: 230px !important; max-width: 100% !important; margin-left: auto !important; margin-right: auto !important; }
 }
