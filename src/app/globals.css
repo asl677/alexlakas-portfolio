@@ -6652,3 +6652,14 @@ html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-c
 /* Reveal blur strong enough to read during the stagger: 8px desktop, 4px phones, clearing by 70%. */
 html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { filter: blur(calc(var(--wiki-blur-t) * 8px)); }
 @media (max-width: 768px) { html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { filter: blur(calc(var(--wiki-blur-t) * 4px)); } }
+/* Reveal slide: 13px of rise (5px less than before). */
+html body .wiki-shell .wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 13px)); }
+
+/* Talk page project rows: a line icon in the same 24px slot as the rating badge, in the text color. */
+html body .wiki-shell .wiki-talk-status .wiki-talk-icon {
+  display: inline-grid; place-items: center; flex: none;
+  width: 1.5rem; height: 1.5rem; color: var(--wiki-ink);
+}
+html body .wiki-shell .wiki-talk-status .wiki-talk-icon svg { display: block; }
+/* Born's two lines sit as far apart as the profile rows do (row pitch = line + 6px). */
+html body .wiki-shell .infobox dd.infobox-born { display: flex; flex-direction: column; gap: 6px; }

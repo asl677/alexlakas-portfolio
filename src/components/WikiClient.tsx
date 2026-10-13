@@ -1103,6 +1103,17 @@ export function IntroSequence() {
       // Keep punctuation that follows a link or reference on the same line as it: otherwise
       // SplitText treats ", and" as its own word and can wrap the comma to the next line.
       const gluePunctuation = (root: HTMLElement) => {
+        // People's links come wrapped as <span data-nosnippet><a>…</a></span> in the served HTML
+        // (that's what search engines read). Two levels of nesting broke SplitText's lines: when
+        // the name crossed a line it sliced the <a> but not the span, whose box then spanned both
+        // lines and pushed the whole name onto a line of its own. In the browser, unwrap the span
+        // and keep the marker on the link itself.
+        root.querySelectorAll<HTMLElement>("span[data-nosnippet]").forEach(wrapper => {
+          const link = wrapper.firstElementChild;
+          if (wrapper.childNodes.length !== 1 || !link || link.tagName !== "A") return;
+          link.setAttribute("data-nosnippet", "");
+          wrapper.replaceWith(link);
+        });
         root.querySelectorAll<HTMLElement>("a, sup").forEach(link => {
           // A link wrapped in a data-nosnippet span: glue the punctuation to the wrapper.
           let element: HTMLElement = link;
@@ -1199,28 +1210,36 @@ export function IntroSequence() {
         }
       });
       });
-      // Text wraps around floated section images. When one changes height after the split (it
-      // loads, or its frame changes), the text reflows but the split lines didn't, leaving short
-      // or orphaned lines. Re-split the text beside it whenever a figure's height changes.
-      const figureHeights = new Map<Element, number>();
+      // Text wraps around floated section images. SplitText only re-splits when the paragraph's
+      // own width changes, but a figure beside it can change size on its own (it loads, or the
+      // window resizes and the figure narrows while the column stays the same), leaving stale
+      // lines that wrap badly. Re-split the text in a section whenever its figure's size differs
+      // from when the text was last split.
+      const sizeOf = (element: Element) => { const box = element.getBoundingClientRect(); return `${Math.round(box.width)}x${Math.round(box.height)}`; };
+      const figureSizes = new Map<Element, string>();
+      const figures = Array.from(document.querySelectorAll(".career-feature > figure"));
+      figures.forEach(figure => figureSizes.set(figure, sizeOf(figure)));
+      const resplit = (features?: Element[]) => {
+        textSplits.forEach(split => {
+          const element = (split as unknown as { elements: HTMLElement[] }).elements?.[0];
+          if (element && (!features || features.some(feature => feature.contains(element)))) (split as unknown as { split: () => void }).split();
+        });
+      };
       let resplitTimer = 0;
+      const pendingFeatures = new Set<Element>();
       const figureObserver = new ResizeObserver(entries => {
-        const changed = entries.filter(entry => {
-          const height = Math.round(entry.contentRect.height);
-          const before = figureHeights.get(entry.target);
-          figureHeights.set(entry.target, height);
-          return before !== undefined && before !== height;
-        }).map(entry => entry.target.closest(".career-feature")).filter(Boolean);
-        if (!changed.length) return;
+        entries.forEach(entry => {
+          const size = sizeOf(entry.target);
+          if (figureSizes.get(entry.target) === size) return;
+          figureSizes.set(entry.target, size);
+          const feature = entry.target.closest(".career-feature");
+          if (feature) pendingFeatures.add(feature);
+        });
+        if (!pendingFeatures.size) return;
         window.clearTimeout(resplitTimer);
-        resplitTimer = window.setTimeout(() => {
-          textSplits.forEach(split => {
-            const element = (split as unknown as { elements: HTMLElement[] }).elements?.[0];
-            if (element && changed.some(feature => feature?.contains(element))) (split as unknown as { split: () => void }).split();
-          });
-        }, 120);
+        resplitTimer = window.setTimeout(() => { resplit([...pendingFeatures]); pendingFeatures.clear(); }, 120);
       });
-      document.querySelectorAll(".career-feature > figure").forEach(figure => figureObserver.observe(figure));
+      figures.forEach(figure => figureObserver.observe(figure));
       const rail = document.querySelector<HTMLElement>(".infobox");
       if (rail) targets.push(rail);
       const dividers = new Set(Array.from(document.querySelectorAll<HTMLElement>(

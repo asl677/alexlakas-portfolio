@@ -1,6 +1,6 @@
 "use client";
 
-import { Languages, MailOpen, Search, Star } from "lucide-react";
+import { Flag, Languages, MailOpen, PenTool, Search, Star, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import ThemeSwitch from "../components/ThemeSwitch";
 import { ArticleTabs, ContentsScrollSpy, HoverCards, Lightbox, RelatedLinks, HoverPortrait, LanguageMenu, IntroSequence, MobileSearchSheet, PageSearch, SeamlessVideo, SmoothAnchorScroll, WikiSection } from "../components/WikiClient";
@@ -136,9 +136,9 @@ export default function Home() {
               </div>
               <div className="wiki-talk-status">
                 <div className="wiki-talk-rating"><span aria-hidden="true" className="wiki-talk-rating-mark">A</span><span>This article is rated <strong>A-class</strong> on this page&apos;s content assessment scale.</span></div>
-                <div><strong>Biography: Arts and Entertainment</strong></div>
-                <div><strong>Graphic design</strong><span className="wiki-talk-priority">Insane-importance</span></div>
-                <div><strong>United States</strong></div>
+                <div><span className="wiki-talk-icon" aria-hidden="true"><UserRound size={18} strokeWidth={1.75} /></span><strong>Biography: Arts and Entertainment</strong></div>
+                <div><span className="wiki-talk-icon" aria-hidden="true"><PenTool size={18} strokeWidth={1.75} /></span><strong>Graphic design</strong><span className="wiki-talk-priority">Insane-importance</span></div>
+                <div><span className="wiki-talk-icon" aria-hidden="true"><Flag size={18} strokeWidth={1.75} /></span><strong>United States</strong></div>
               </div>
               <section className="wiki-talk-thread" id="start-discussion">
                 <h2>Info on this page is verifiable by the author and public records</h2>
@@ -152,7 +152,7 @@ export default function Home() {
               <h2><span className="wiki-wipe"><span className="wiki-wipe-content">Alex</span></span></h2>
               <HoverPortrait />
               <dl>
-                <dt>Born</dt><dd>Alexander Lakas<br /><a href="https://en.wikipedia.org/wiki/Washington,_D.C." target="_blank" rel="noreferrer">Washington, D.C.</a>, U.S.</dd>
+                <dt>Born</dt><dd className="infobox-born"><span>Alexander Lakas</span><span><a href="https://en.wikipedia.org/wiki/Washington,_D.C." target="_blank" rel="noreferrer">Washington, D.C.</a>, U.S.</span></dd>
                 <dt>Based in</dt><dd>Los Angeles, CA</dd>
                 <dt>Occupation</dt><dd>Designer</dd>
                 <dt>Known for</dt><dd>&lsquo;talented&rsquo;, &lsquo;good people&rsquo;</dd>
