@@ -6649,3 +6649,6 @@ html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-c
 :root[data-theme="light"] { color-scheme: only light; }
 :root[data-theme="dark"] { color-scheme: only dark; }
 :root:not([data-theme]) { color-scheme: only light dark; }
+/* Reveal blur strong enough to read during the stagger: 8px desktop, 4px phones, clearing by 70%. */
+html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { filter: blur(calc(var(--wiki-blur-t) * 8px)); }
+@media (max-width: 768px) { html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { filter: blur(calc(var(--wiki-blur-t) * 4px)); } }

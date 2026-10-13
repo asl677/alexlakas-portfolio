@@ -26,6 +26,8 @@ const references = [
   { label: "Alex Lakas – Product Designer", href: "https://www.behance.net/alexlakas?locale=en_US", source: "Behance" },
   { label: "About popular times and wait times", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
   { label: "Alex Lakas design portfolio", href: "https://thecreativefinder.com/export-portfolio.php?username=asl677", source: "The Creative Finder" },
+  { label: "Air National Guard", href: "https://www.airforce.com/", source: "U.S. Air Force" },
+  { label: "Dash Ponce de Leon and UI8", href: "https://blog.adobe.com/en/publish/2017/08/29/meet-the-ux-designers-dash-ponce-de-leon-and-the-ui8-team", source: "Adobe" },
 ];
 
 const articles = [
@@ -42,7 +44,7 @@ const articles = [
 ];
 
 function Ref({ n }: { n: number }) {
-  const referenceNumber = ({ 1: 8, 2: 8, 3: 8, 4: 8, 5: 13, 6: 15, 7: 8, 8: 11, 9: 7, 10: 18, 11: 6, 12: 16, 13: 17, 14: 2, 15: 1, 16: 14, 17: 10, 18: 5, 20: 4 } as Record<number, number>)[n] ?? n;
+  const referenceNumber = ({ 1: 8, 2: 8, 3: 8, 4: 8, 5: 13, 6: 15, 7: 8, 8: 11, 9: 7, 10: 18, 11: 6, 12: 16, 13: 17, 14: 2, 15: 1, 16: 14, 17: 10, 18: 5, 20: 4, 24: 21, 25: 22 } as Record<number, number>)[n] ?? n;
   return (
     <sup id={"cite-" + n} className="reference">
       <a href={"#ref-" + referenceNumber}>[{referenceNumber}]</a>
@@ -197,7 +199,7 @@ export default function Home() {
                 <figure>
                   <img src="https://cdn.prod.website-files.com/63bce9e077c37c0d1b6de8f6/648e113182964bd201887b14_alex-lakas-pCibATCkQxo-unsplash%20(3).webp" alt="Alex Lakas" />
                 </figure>
-                <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. Around 2012, he joined <span data-nosnippet><a href="https://www.linkedin.com/in/vlokshin/" target="_blank" rel="nofollow noreferrer">Vlad Lokshin</a></span> and <span data-nosnippet><a href="https://www.linkedin.com/in/andytiffany/" target="_blank" rel="nofollow noreferrer">Andy Tiffany</a></span> to form a small 0-1 dev shop based in San Francisco, CA. This focused on agency style work that funded their own ideas. That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
+                <p>Before joining larger product teams, Alex worked across independent web, identity, and interactive projects. Around 2012, he joined <span data-nosnippet><a href="https://www.linkedin.com/in/vlokshin/" target="_blank" rel="nofollow noreferrer">Vlad Lokshin</a></span> and <span data-nosnippet><a href="https://www.linkedin.com/in/andytiffany/" target="_blank" rel="nofollow noreferrer">Andy Tiffany</a></span> to form a small 0-1 dev shop based in San Francisco, CA. This focused on agency style work that funded their own ideas. Clients included the <a href="https://www.airforce.com/" target="_blank" rel="noreferrer">Air National Guard</a><Ref n={24} /> and <a href="https://blog.adobe.com/en/publish/2017/08/29/meet-the-ux-designers-dash-ponce-de-leon-and-the-ui8-team" target="_blank" rel="noreferrer">Creative Dash</a>.<Ref n={25} /> That early practice established the editorial systems, motion studies, and direct visual language that later carried into product work.<Ref n={1} /></p>
                 <p>These projects treated websites and prototypes as complete experiences rather than static portfolios: each combined narrative, interface, and behavior. The work formed the foundation for Alex&apos;s later focus on clear systems and useful digital tools.</p>
               </div>
               <div id="local-search-for-merchants-and-consumers" className="career-feature career-feature--right career-feature--landscape career-feature--thumb">

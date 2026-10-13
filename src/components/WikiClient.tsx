@@ -1117,6 +1117,29 @@ export function IntroSequence() {
           glue.append(element, match[0]);
           next.textContent = (next.textContent ?? "").slice(match[0].length);
         });
+        // A footnote never starts a line on its own: glue it to the link or word right before it.
+        root.querySelectorAll<HTMLElement>("sup.reference").forEach(sup => {
+          if (sup.parentElement?.classList.contains("wiki-nowrap") && sup.parentElement.firstChild !== sup) return;
+          // Skip empty text left behind when punctuation was moved into a link's glue.
+          let previous = sup.previousSibling;
+          while (previous && previous.nodeType === Node.TEXT_NODE && !(previous.textContent ?? "")) previous = previous.previousSibling;
+          if (!previous) return;
+          const glue = document.createElement("span");
+          glue.className = "wiki-nowrap";
+          if (previous.nodeType === Node.TEXT_NODE) {
+            const text = previous.textContent ?? "";
+            const word = /\S+$/.exec(text)?.[0];
+            if (!word) return;
+            previous.textContent = text.slice(0, text.length - word.length);
+            sup.before(glue);
+            glue.append(word, sup);
+          } else if ((previous as Element).classList?.contains("wiki-nowrap")) {
+            (previous as Element).append(sup);
+          } else {
+            (previous as Element).before(glue);
+            glue.append(previous, sup);
+          }
+        });
       };
       const textSplits = Array.from(document.querySelectorAll<HTMLElement>([
         ".wiki-article-body > p",
@@ -1176,6 +1199,28 @@ export function IntroSequence() {
         }
       });
       });
+      // Text wraps around floated section images. When one changes height after the split (it
+      // loads, or its frame changes), the text reflows but the split lines didn't, leaving short
+      // or orphaned lines. Re-split the text beside it whenever a figure's height changes.
+      const figureHeights = new Map<Element, number>();
+      let resplitTimer = 0;
+      const figureObserver = new ResizeObserver(entries => {
+        const changed = entries.filter(entry => {
+          const height = Math.round(entry.contentRect.height);
+          const before = figureHeights.get(entry.target);
+          figureHeights.set(entry.target, height);
+          return before !== undefined && before !== height;
+        }).map(entry => entry.target.closest(".career-feature")).filter(Boolean);
+        if (!changed.length) return;
+        window.clearTimeout(resplitTimer);
+        resplitTimer = window.setTimeout(() => {
+          textSplits.forEach(split => {
+            const element = (split as unknown as { elements: HTMLElement[] }).elements?.[0];
+            if (element && changed.some(feature => feature?.contains(element))) (split as unknown as { split: () => void }).split();
+          });
+        }, 120);
+      });
+      document.querySelectorAll(".career-feature > figure").forEach(figure => figureObserver.observe(figure));
       const rail = document.querySelector<HTMLElement>(".infobox");
       if (rail) targets.push(rail);
       const dividers = new Set(Array.from(document.querySelectorAll<HTMLElement>(
