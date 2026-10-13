@@ -904,7 +904,9 @@ export function IntroSequence() {
       const article = articleHeader.parentElement;
       const naturalTop = article ? article.getBoundingClientRect().top + window.scrollY : headerTop + window.scrollY;
       const stickScroll = naturalTop - stickyTop;
-      const handoff = Math.min(1, Math.max(0, (window.scrollY - stickScroll + 16) / 32));
+      // Finishes exactly as the header sticks, so a view opened with its header at the top (tab
+      // switch) shows the header's search and icons, never the empty midpoint of the hand-off.
+      const handoff = Math.min(1, Math.max(0, (window.scrollY - stickScroll + 32) / 32));
       articleHeader.style.setProperty("--wiki-handoff", handoff.toFixed(3));
       // Section headings stick directly beneath the article header's real height.
       document.documentElement.style.setProperty("--wiki-article-header-height", `${articleHeader.getBoundingClientRect().height}px`);
@@ -1146,7 +1148,9 @@ export function IntroSequence() {
             glue.append(word, sup);
           } else if ((previous as Element).classList?.contains("wiki-nowrap")) {
             (previous as Element).append(sup);
-          } else {
+          } else if (!/\s/.test((previous.textContent ?? "").trim())) {
+            // Only short (one-word) links are glued: an unbreakable multi-word group can't fit at
+            // a line end and threw the line split off.
             (previous as Element).before(glue);
             glue.append(previous, sup);
           }
@@ -1598,18 +1602,13 @@ export function ArticleTabs() {
     // Switching tabs shows the other view instantly (no fade); skipped on the initial mount.
     const isSwitch = previousViewRef.current !== null && previousViewRef.current !== view;
     previousViewRef.current = view;
-    // Switching tabs opens the other view at its top (the article header sits just above it).
+    // Switching tabs opens the chosen view at its own top: the article header (title + tabs)
+    // sits at the top of the window, with the view's first lines right under it.
     if (isSwitch) {
-      // 16px past the point where the article header sticks (the same point the header's
-      // hand-off uses): exactly at it, the top bar and the scrolled-header controls are both
-      // mid hand-off and fully faded; from here the scrolled header's search and icons show.
       const header = document.querySelector<HTMLElement>(".wiki-article-header");
       const article = header?.parentElement;
       const stickyTop = header ? Number.parseFloat(getComputedStyle(header).top) || 0 : 0;
-      let top = article ? Math.max(0, article.getBoundingClientRect().top + window.scrollY - stickyTop + 16) : 0;
-      // A short view (Talk) can't scroll that far; it would stop in the faded gap between the
-      // top bar and the stuck header, so open it at the very top instead.
-      if (document.documentElement.scrollHeight - window.innerHeight < top) top = 0;
+      const top = article ? Math.max(0, article.getBoundingClientRect().top + window.scrollY - stickyTop) : 0;
       if (window.scrollY > top) {
         window.scrollTo({ top, behavior: "instant" as ScrollBehavior });
         // Pin Lenis to the new position so its smooth scroll doesn't glide back.
@@ -2508,9 +2507,18 @@ export function Lightbox() {
   });
   return createPortal(
     <div className={`wiki-lightbox${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-label="Image viewer" data-lenis-prevent onClick={close}>
+      <div className="wiki-lightbox-stage">
       {item.type === "video"
         ? <video key={index} className="wiki-lightbox-media" style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} poster={item.poster} autoPlay muted loop playsInline aria-label={item.alt} />
         : <img key={index} draggable={false} className="wiki-lightbox-media" style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} alt={item.alt ?? ""} />}
+      {/* Position dots: the current one is a pill that oozes between dots (SVG goo filter). */}
+      <div className="wiki-lightbox-dots" aria-hidden="true">
+        {items.map((_, dot) => <span key={dot} className={dot === index ? "is-current" : undefined} />)}
+      </div>
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+        <filter id="wiki-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="1.1" /><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 12 -4" /></filter>
+      </svg>
+      </div>
     </div>,
     document.body,
   );
