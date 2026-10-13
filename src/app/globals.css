@@ -6679,3 +6679,8 @@ html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure vi
 .wiki-lightbox-dots > span.is-current { width: 12px; background: #fff; }
 .wiki-lightbox.is-closing .wiki-lightbox-dots { opacity: 0; transition: opacity 0.25s ease-in; }
 @media (prefers-reduced-motion: reduce) { .wiki-lightbox-dots > span { transition: none; } }
+/* Phones: the accordion chevron turns in step with the section opening and the scroll that
+   brings it to the top (same 600ms and curve), instead of snapping ahead in 160ms. */
+@media (max-width: 768px) {
+  html body .wiki-shell .wiki-section-toggle :is(.wiki-section-chevron svg, svg, .icon) { transition: transform 600ms var(--wiki-ease) !important; }
+}

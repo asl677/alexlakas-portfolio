@@ -8,25 +8,25 @@ import { ArticleTabs, ContentsScrollSpy, HoverCards, Lightbox, Person, RelatedLi
 const references = [
   { label: "Best UX portfolio examples", href: "https://www.uxpin.com/studio/blog/ux-portfolio-examples/", source: "UXPin" },
   { label: "Fiveonefour raises $17M", href: "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html", source: "PR Newswire" },
-  { label: "Alex Lakas — Portfolio Website Design Inspiration", href: "https://craftwork.design/curated/website/alex-lakas", source: "Craftwork" },
-  { label: "Building Peanut remotely", href: "https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-", source: "As Told By Nomads" },
+  { label: "Portfolio inspiration", href: "https://craftwork.design/curated/website/alex-lakas", source: "Craftwork" },
+  { label: "Building Peanut", href: "https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-", source: "Nomads podcast" },
   { label: "Insured Nomads acquires Peanut", href: "https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension", source: "ITIJ" },
-  { label: "Redesigning LinkedIn Home and Sharing", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
-  { label: "COVID testing and summer travel questions", href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/", source: "Forbes" },
-  { label: "LinkedIn adds polls and live video-based events", href: "https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/", source: "TechCrunch" },
-  { label: "U.S. design patents", links: [{ label: "D893,509", href: "https://uspto.report/patent/grant/D893%2C509" }, { label: "D892,816", href: "https://patentimages.storage.googleapis.com/94/19/e7/9f1b746a0a9912/USD892816.pdf" }, { label: "D869,501", href: "https://patents.justia.com/patent/D869501" }], source: "Patents" },
-  { label: "Google adds salon and spa bookings", href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/", source: "TechCrunch" },
-  { label: "Live Popular Times on The Tonight Show", href: "https://www.youtube.com/watch?v=QIbPZgH1zRY", source: "YouTube" },
-  { label: "A new look for LinkedIn", href: "https://www.linkedin.com/blog/member/product/a-new-look-for-linkedin-from-the-inside-out", source: "LinkedIn" },
+  { label: "LinkedIn redesign", href: "https://www.casestudy.club/case-studies/designing-a-simpler-more-inclusive-linkedin-home-sharing-experience", source: "Case Study Club" },
+  { label: "Summer travel questions", href: "https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/", source: "Forbes" },
+  { label: "LinkedIn adds polls", href: "https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/", source: "TechCrunch" },
+  { label: "Patents", links: [{ label: "D893,509", href: "https://uspto.report/patent/grant/D893%2C509" }, { label: "D892,816", href: "https://patentimages.storage.googleapis.com/94/19/e7/9f1b746a0a9912/USD892816.pdf" }, { label: "D869,501", href: "https://patents.justia.com/patent/D869501" }] },
+  { label: "Google adds spa bookings", href: "https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/", source: "TechCrunch" },
+  { label: "Popular Times on Fallon", href: "https://www.youtube.com/watch?v=QIbPZgH1zRY", source: "YouTube" },
+  { label: "LinkedIn's new look", href: "https://www.linkedin.com/blog/member/product/a-new-look-for-linkedin-from-the-inside-out", source: "LinkedIn" },
   { label: "UX design portfolio examples", href: "https://www.shutterstock.com/blog/ux-design-portfolios", source: "Shutterstock" },
-  { label: "The 30 Best UX Designer Portfolio Examples", href: "https://www.founderjar.com/inspiration/ux-designer-portfolio-examples/", source: "FounderJar" },
+  { label: "Best UX portfolios", href: "https://www.founderjar.com/inspiration/ux-designer-portfolio-examples/", source: "FounderJar" },
   { label: "Product design portfolio examples", href: "https://blog.designpeeps.net/blog/product-design-portfolios/?p=403", source: "DesignPeeps" },
   { label: "Google Maps", href: "https://www.simonfungcreative.com/google-maps.html", source: "Portfolio" },
   { label: "Alex Lakas on Dribbble", href: "https://dribbble.com/alex2pt0", source: "Dribbble" },
-  { label: "Alex Lakas – Product Designer", href: "https://www.behance.net/alexlakas?locale=en_US", source: "Behance" },
-  { label: "About popular times and wait times", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
-  { label: "Air National Guard", href: "https://www.airforce.com/", source: "U.S. Air Force" },
-  { label: "Meet the UX Designers: UI8 Team", href: "https://blog.adobe.com/en/publish/2017/08/29/meet-the-ux-designers-dash-ponce-de-leon-and-the-ui8-team", source: "Adobe" },
+  { label: "Alex Lakas portfolio", href: "https://www.behance.net/alexlakas?locale=en_US", source: "Behance" },
+  { label: "About popular times", href: "https://support.google.com/business/answer/6263531?hl=en", source: "Google" },
+  { label: "Air National Guard", href: "https://www.airforce.com/", source: "Air Force" },
+  { label: "UI8 team profile", href: "https://blog.adobe.com/en/publish/2017/08/29/meet-the-ux-designers-dash-ponce-de-leon-and-the-ui8-team", source: "Adobe" },
 ];
 
 const articles = [
@@ -248,13 +248,13 @@ export default function Home() {
               <p>In 2022, after Peanut was acquired, he and <Person id="brady-simpson-2" /> appeared on <Person id="tayo-rockson" />&apos;s <a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">As Told By Nomads</a> podcast to discuss building it remotely as a side business while working full time.<Ref n={20} /></p>
               <ul className="wiki-link-list media-links">
                 <li><a href="https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html" target="_blank" rel="noreferrer">Fiveonefour raises $17M</a>. <i>PR Newswire</i>.</li>
-                <li><a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">Building Peanut remotely</a>. <i>As Told By Nomads</i>.</li>
+                <li><a href="https://shows.acast.com/astoldbynomads/episodes/building-a-side-hustle-business-remotely-while-working-your-" target="_blank" rel="noreferrer">Building Peanut</a>. <i>Nomads podcast</i>.</li>
                 <li><a href="https://www.itij.com/latest/news/insured-nomads-acquires-peanut-browser-extension" target="_blank" rel="noreferrer">Insured Nomads acquires Peanut</a>. <i>ITIJ</i>.</li>
-                <li><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">COVID testing and summer travel questions</a>. <i>Forbes</i>.</li>
-                <li><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">LinkedIn adds polls and live video-based events</a>. <i>TechCrunch</i>.</li>
-                <li><a href="https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/" target="_blank" rel="noreferrer">Google adds salon and spa bookings</a>. <i>TechCrunch</i>.</li>
-                <li><a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">Live Popular Times on The Tonight Show</a>. <i>YouTube</i>.</li>
-                <li><a href="https://www.linkedin.com/blog/member/product/a-new-look-for-linkedin-from-the-inside-out" target="_blank" rel="noreferrer">A new look for LinkedIn</a>. <i>LinkedIn</i>.</li>
+                <li><a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Summer travel questions</a>. <i>Forbes</i>.</li>
+                <li><a href="https://techcrunch.com/2020/05/12/linkedin-ads-polls-and-live-video-based-events-in-a-focus-on-more-virtual-engagement/" target="_blank" rel="noreferrer">LinkedIn adds polls</a>. <i>TechCrunch</i>.</li>
+                <li><a href="https://techcrunch.com/2017/07/13/google-adds-salon-and-spa-bookings-through-maps-and-search/" target="_blank" rel="noreferrer">Google adds spa bookings</a>. <i>TechCrunch</i>.</li>
+                <li><a href="https://www.youtube.com/watch?v=QIbPZgH1zRY" target="_blank" rel="noreferrer">Popular Times on Fallon</a>. <i>YouTube</i>.</li>
+                <li><a href="https://www.linkedin.com/blog/member/product/a-new-look-for-linkedin-from-the-inside-out" target="_blank" rel="noreferrer">LinkedIn&apos;s new look</a>. <i>LinkedIn</i>.</li>
               </ul>
             </WikiSection>
             <WikiSection id="publications" title="Cases">
@@ -277,7 +277,7 @@ export default function Home() {
             <WikiSection id="stack" title="Stack"><ul className="stack-tags"><li>Claude</li><li>Codex</li><li>Hermes</li><li>Vercel</li><li>GitHub</li><li>Linear</li><li>Figma</li><li>Midjourney</li><li>shadcn/ui</li><li>Tailwind</li><li>Three.js</li><li>WebGL</li><li>Webflow</li><li>React</li><li>GSAP</li><li>IXD</li><li>Visual design</li><li>UXD</li><li>Web</li><li>iOS</li><li>Android</li><li>Mixed Methods Research</li><li>Strategy</li><li>Leadership</li><li>Gen AI</li><li>Rapid prototyping</li><li>Brand</li><li>Presentations</li><li>Weird stuff</li><li>Grids</li><li>Minimalism</li></ul></WikiSection>
             <WikiSection id="references" title="References"><ol className="references" data-nosnippet>{references.map((reference, index) => {
               const patentLinks = reference.links ?? [];
-              return <li id={"ref-" + (index + 1)} key={reference.label}><span className="reference-number">{index + 1}.</span><a className="reference-backlink" href={"#cite-" + (index + 1)} aria-label={`Back to citation ${index + 1}`}>^</a>{patentLinks.length ? <><span>{reference.label}: </span>{patentLinks.map((patent, patentIndex) => <span key={patent.href}><a href={patent.href} target="_blank" rel="noreferrer">{patent.label}</a>{patentIndex < patentLinks.length - 1 ? ", " : ""}</span>)}</> : <a href={reference.href ?? "#references"} target={reference.href ? "_blank" : undefined} rel={reference.href ? "noreferrer" : undefined}>{reference.label}</a>}. <i data-nosnippet>{reference.source}</i>.</li>;
+              return <li id={"ref-" + (index + 1)} key={reference.label}><span className="reference-number">{index + 1}.</span><a className="reference-backlink" href={"#cite-" + (index + 1)} aria-label={`Back to citation ${index + 1}`}>^</a>{patentLinks.length ? <><span>{reference.label}: </span>{patentLinks.map((patent, patentIndex) => <span key={patent.href}><a href={patent.href} target="_blank" rel="noreferrer">{patent.label}</a>{patentIndex < patentLinks.length - 1 ? ", " : ""}</span>)}</> : <a href={reference.href ?? "#references"} target={reference.href ? "_blank" : undefined} rel={reference.href ? "noreferrer" : undefined}>{reference.label}</a>}{reference.source ? <>. <i data-nosnippet>{reference.source}</i></> : null}.</li>;
             })}</ol></WikiSection>
             <WikiSection id="external-links" title="External"><ul className="wiki-link-list"><li><a className="external-link" href="https://dribbble.com/alex2pt0" target="_blank" rel="noreferrer">Alex on Dribbble</a></li><li><a className="external-link" href="https://x.com/axlakas" target="_blank" rel="noreferrer">Alex on X</a></li><li><a className="external-link" href="https://www.linkedin.com/in/latenights" target="_blank" rel="noreferrer">Alex on LinkedIn</a></li><li><a className="external-link" href="https://alexslakas.medium.com/" target="_blank" rel="noreferrer">Alex on Medium</a></li></ul></WikiSection>
             <RelatedLinks />
