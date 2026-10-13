@@ -6718,3 +6718,17 @@ html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { opacity: var(
 /* Chevrons show with their heading text: hidden through the strip's draw-in, then fading in as
    the strip uncovers the heading. */
 html body .wiki-shell .wiki-section-toggle .wiki-section-chevron[style*="--wiki-wipe"] { opacity: clamp(0, calc(var(--wiki-wipe, 1) * 2 - 1), 1) !important; }
+
+/* Mobile: profile card sits directly below the tabs, before the lead. */
+@media (max-width: 56.25rem) {
+  .wiki-article-body > .infobox {
+    order: -3 !important;
+    margin: 0 0 1.25rem !important;
+  }
+}
+
+/* Mobile (no blur): shorter 8px rise for load and scroll reveals. */
+@media (max-width: 56.25rem) {
+  html body .wiki-shell .wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 8px)); }
+  html body .wiki-shell .wiki-reveal-block { translate: 0 calc((1 - var(--wiki-wipe, 1)) * 8px); }
+}
