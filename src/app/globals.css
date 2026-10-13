@@ -6738,3 +6738,13 @@ html body .wiki-shell .wiki-section-toggle .wiki-section-chevron[style*="--wiki-
   html body .wiki-shell .infobox :is(dt, dd) { line-height: 1.35 !important; }
   html body .wiki-shell .infobox .infobox-born { gap: 2px !important; }
 }
+
+/* Desktop: scroll reveals rise 20px (page load keeps 13px, phones 8px). */
+@media (min-width: 56.3125rem) {
+  html body .wiki-shell .wiki-reveal-line.wiki-scroll-reveal { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 20px)); }
+  html body .wiki-shell .wiki-reveal-block.wiki-scroll-reveal { translate: 0 calc((1 - var(--wiki-wipe, 1)) * 20px); }
+}
+
+/* GPU: finished reveals carry no filter/transform layer; only in-progress ones are promoted. */
+html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block).wiki-revealed { filter: none !important; transform: none !important; translate: none !important; }
+html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block).wiki-revealing { will-change: transform, opacity, filter; }

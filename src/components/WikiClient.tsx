@@ -1328,6 +1328,9 @@ export function IntroSequence() {
       // reads computed styles on init: hundreds of forced style recalcs per frame while
       // scrolling. Writing the same values straight to the inline style reads nothing.
       const applyReveal = (element: HTMLElement, value: number) => {
+        // Finished elements drop their filter/transform layers (see .wiki-revealed); in-progress ones get a GPU hint.
+        element.classList.toggle("wiki-revealed", value >= 1);
+        element.classList.toggle("wiki-revealing", value > 0 && value < 1);
         const props = revealProperties(element, value);
         if (element === rail || dividers.has(element) || "--wiki-reveal" in props || "--wiki-wipe" in props) {
           const name = Object.keys(props)[0];
@@ -1337,6 +1340,7 @@ export function IntroSequence() {
         element.style.opacity = String(value);
       };
       const stage = (elements: HTMLElement[]) => elements.forEach(element => {
+        element.classList.remove("wiki-revealed", "wiki-revealing");
         gsap.set(element, revealProperties(element, 0));
       });
       const fadeIn = (elements: HTMLElement[], delay = 0, ease: string | ((t: number) => number) = fade.ease) => {
@@ -1359,7 +1363,9 @@ export function IntroSequence() {
           timeline.fromTo(element, revealProperties(element, 0), {
             ...revealProperties(element, 1),
             duration: media ? 1.4 * pace : wipe ? 1.1 * pace : element.classList.contains("wiki-reveal-line") ? 0.55 * textPace : 0.4 * textPace,
-            ease: media ? "power2.inOut" : wipe ? "power3.inOut" : ease
+            ease: media ? "power2.inOut" : wipe ? "power3.inOut" : ease,
+            onStart: () => element.classList.add("wiki-revealing"),
+            onComplete: () => { element.classList.remove("wiki-revealing"); element.classList.add("wiki-revealed"); }
             // Strips trail their slot by 0.35s so the text has begun appearing first (the
             // headings are the topmost items, so in-slot they led the whole load).
           }, index * step);
@@ -1429,8 +1435,10 @@ export function IntroSequence() {
         const bottom = y + vh - edgeInset + widen;
         // Phones: the reveal is tied to the scroll/drag position (scrubbed, one-way), with a light
         // damper so it glides. Desktop: content plays the page-load reveal the moment it enters.
-        const k = 1 - Math.exp(-deltaTime / 1000 * (scrubConfig.damping * 0.5) / pace);
-        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / (scrubConfig.damping * 0.5) + 0.2));
+        // Scroll reveals are always tied to the scroll position (never timed); phones use a softer damper.
+        const damping = phone ? scrubConfig.damping * 0.5 : scrubConfig.damping;
+        const k = 1 - Math.exp(-deltaTime / 1000 * damping / pace);
+        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / damping + 0.2));
         const entering: HTMLElement[] = [];
         for (const item of scrubItems) {
           const { element } = item;
@@ -1438,11 +1446,13 @@ export function IntroSequence() {
           const r = item.media ? mediaRange : range;
           // Image strips start a little later, so their grey strip lands with the nearby text.
           const lag = item.wipe ? r * 0.45 : 0;
-          if (phone) {
+          {
             const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : revealEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
             if (target <= item.current) continue;
             let next = item.current + (target - item.current) * (item.media ? kMedia : k);
             if (Math.abs(target - next) < 0.002) next = target;
+            // Marks scroll-driven reveals so desktop can give them a longer rise than the load.
+            if (item.current === 0) element.classList.add("wiki-scroll-reveal");
             item.current = next;
             applyReveal(element, next);
             continue;
