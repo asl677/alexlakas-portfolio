@@ -6632,3 +6632,6 @@ html body .wiki-mobile-search-sheet .wiki-language-sheet { padding-bottom: calc(
 @media (max-width: 768px) {
   html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .theme-toggle { display: none !important; }
 }
+/* Footnote numbers ([1], [2]…) in the body's muted grey, on hover and after a visit too. */
+html body .wiki-shell sup.reference,
+html body .wiki-shell :is(.wiki-article-body, .wiki-talk-page, .infobox, .wiki-categories, .references, .wiki-link-list, .wiki-contents) sup.reference a:not(.article-list-image):not(.wiki-tab):is(:link, :visited, :hover, :focus-visible, :active) { color: var(--wiki-muted) !important; }
