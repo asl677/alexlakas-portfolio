@@ -6709,3 +6709,12 @@ html body .wiki-shell .wiki-reveal-block { translate: 0 calc((1 - var(--wiki-wip
 /* Reveals start fully invisible (no 10% ghost): filled items like the Stack tags showed a
    blurred box before their reveal. */
 html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { opacity: var(--wiki-wipe, 1); }
+
+/* Phones (incl. iPhone Safari): no blur on reveals. Blur filters on every line are re-rasterized
+   each frame and stutter on mobile GPUs; fade + slide (opacity/transform) stay smooth. */
+@media (max-width: 768px) {
+  html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { filter: none !important; }
+}
+/* Chevrons show with their heading text: hidden through the strip's draw-in, then fading in as
+   the strip uncovers the heading. */
+html body .wiki-shell .wiki-section-toggle .wiki-section-chevron[style*="--wiki-wipe"] { opacity: clamp(0, calc(var(--wiki-wipe, 1) * 2 - 1), 1) !important; }

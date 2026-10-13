@@ -1223,7 +1223,10 @@ export function IntroSequence() {
           const revealedRanges = previousLines.flatMap(line => {
             const start = previousOffset;
             previousOffset += textLength(line);
-            return revealedLines.has(line) ? [{ start, end: previousOffset }] : [];
+            // Only text that is actually fully shown carries over as revealed. Lines merely queued
+            // (e.g. an accordion opening for the first time) replay their reveal instead of snapping.
+            const shown = revealedLines.has(line) && Number.parseFloat(line.style.getPropertyValue("--wiki-wipe") || "1") >= 0.99;
+            return shown ? [{ start, end: previousOffset }] : [];
           });
           gsap.killTweensOf(previousLines);
           textLines = textLines.filter(line => !previousLines.includes(line));
@@ -1310,7 +1313,9 @@ export function IntroSequence() {
       });
       const revealProperties = (element: HTMLElement, opacity: number): gsap.TweenVars => {
         if (element === rail) return { "--rail-surface-opacity": opacity };
-        if (element.classList.contains("wiki-wipe")) return { "--wiki-wipe": opacity };
+        // Section chevrons ride their heading's strip wipe (same variable, timing and curve), so
+        // each appears as its heading text does, not ahead of it.
+        if (element.classList.contains("wiki-wipe") || element.classList.contains("wiki-section-chevron")) return { "--wiki-wipe": opacity };
         if (dividers.has(element)) return { "--wiki-divider-opacity": opacity };
         // Header controls whose opacity CSS also drives (scroll-linked hand-off): reveal through
         // a variable that CSS multiplies in, so the load fade and the hand-off combine.
@@ -1346,7 +1351,7 @@ export function IntroSequence() {
         visualOrder(elements).forEach((element, index) => {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
-          const wipe = element.classList.contains("wiki-wipe");
+          const wipe = element.classList.contains("wiki-wipe") || element.classList.contains("wiki-section-chevron");
           const media = element.classList.contains("wiki-wipe-media");
           // Every element starts in its own top-down slot. Lines rise/fade/un-blur via CSS from
           // --wiki-wipe; strips (headings 1.6s, images 1.8s) cover then uncover on a symmetric
@@ -1409,7 +1414,7 @@ export function IntroSequence() {
           return item;
         });
       };
-      const scrubTick = (_time: number, deltaTime: number) => {
+      const scrubTick = () => {
         if (!revealReady) return;
         const vh = window.innerHeight;
         const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac)) * pace;
@@ -1422,11 +1427,8 @@ export function IntroSequence() {
         const edgeInset = phone ? scrubConfig.edgeInset : 0;
         const widen = Math.max(0, mediaRange + edgeInset - remaining);
         const bottom = y + vh - edgeInset + widen;
-        // Phones: the reveal is tied to the scroll/drag position (scrubbed, one-way), with a light
-        // damper so it glides. Desktop: content plays the page-load reveal the moment it enters.
-        // Phones glide toward the scroll target (a softer damper than before) instead of snapping.
-        const k = 1 - Math.exp(-deltaTime / 1000 * (scrubConfig.damping * 0.5) / pace);
-        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / (scrubConfig.damping * 0.5) + 0.2));
+        // Content plays the page-load reveal (timed, same slide/fade/cadence) the moment it enters
+        // view, on phones and desktop alike: no scroll-scrubbed text.
         const entering: HTMLElement[] = [];
         for (const item of scrubItems) {
           const { element } = item;
@@ -1434,15 +1436,6 @@ export function IntroSequence() {
           const r = item.media ? mediaRange : range;
           // Image strips start a little later, so their grey strip lands with the nearby text.
           const lag = item.wipe ? r * 0.45 : 0;
-          if (phone) {
-            const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : revealEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
-            if (target <= item.current) continue;
-            let next = item.current + (target - item.current) * (item.media ? kMedia : k);
-            if (Math.abs(target - next) < 0.002) next = target;
-            item.current = next;
-            applyReveal(element, next);
-            continue;
-          }
           const inView = element.closest(".wiki-contents, .wiki-topbar") || bottom - item.top - lag > 24;
           if (!inView) continue;
           item.current = 1;
