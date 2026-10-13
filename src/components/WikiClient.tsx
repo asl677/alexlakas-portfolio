@@ -2398,7 +2398,7 @@ export function Lightbox() {
   const [index, setIndex] = useState<number | null>(null);
   // Direction of the last step: the incoming image slides 10px in from that side.
   const [step, setStep] = useState(0);
-  // Closing plays the opening animations in reverse, then unmounts.
+  // Closing plays the opening animations in reverse with no initial delay (0.8s, see globals.css), then unmounts.
   const [closing, setClosing] = useState(false);
   const closeTimer = useRef(0);
   const swiped = useRef(false);
@@ -2432,7 +2432,7 @@ export function Lightbox() {
   const close = () => {
     if (closeTimer.current || swiped.current) return;
     setClosing(true);
-    closeTimer.current = window.setTimeout(() => { closeTimer.current = 0; setClosing(false); setIndex(null); }, 450);
+    closeTimer.current = window.setTimeout(() => { closeTimer.current = 0; setClosing(false); setIndex(null); }, 800);
   };
 
   useEffect(() => {
@@ -2587,11 +2587,14 @@ export function Lightbox() {
     <div className={`wiki-lightbox${closing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-label="Image viewer" data-lenis-prevent onClick={close}>
       <div className="wiki-lightbox-stage">
       {item.type === "video"
-        ? <video key={index} className="wiki-lightbox-media" style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} poster={item.poster} autoPlay muted loop playsInline aria-label={item.alt} />
-        : <img key={index} draggable={false} className="wiki-lightbox-media" style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} alt={item.alt ?? ""} />}
+        ? <video key={index} className={`wiki-lightbox-media${step ? " is-step" : ""}`} style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} poster={item.poster} autoPlay muted loop playsInline aria-label={item.alt} />
+        : <img key={index} draggable={false} className={`wiki-lightbox-media${step ? " is-step" : ""}`} style={{ width: `min(92vw, 800px, ${item.width.toFixed(2)}vw)`, ["--lb-from" as string]: `${step * 10}px` }} src={item.src} alt={item.alt ?? ""} />}
       {/* Position dots: the current one is a pill that oozes between dots (SVG goo filter). */}
-      <div className="wiki-lightbox-dots" aria-hidden="true">
-        {items.map((_, dot) => <span key={dot} className={dot === index ? "is-current" : undefined} />)}
+      {/* The wrapper fades and un-blurs the dots in after the image has settled. */}
+      <div className="wiki-lightbox-dots-wrap" aria-hidden="true">
+        <div className="wiki-lightbox-dots">
+          {items.map((_, dot) => <span key={dot} className={dot === index ? "is-current" : undefined} />)}
+        </div>
       </div>
       <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
         <filter id="wiki-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="1.1" /><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 12 -4" /></filter>

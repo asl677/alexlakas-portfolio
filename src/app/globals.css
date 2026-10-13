@@ -6,6 +6,7 @@
   /* Site-wide motion curve for transitions and accordions. */
   /* easeInOutQuart (easings.net): the one curve used across the site. */
   --wiki-ease: cubic-bezier(0.76, 0, 0.24, 1);
+  --wiki-ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --wiki-page: #fff;
   --wiki-ink: #171717;
   --wiki-muted: #737373;
@@ -6566,7 +6567,7 @@ html body .wiki-hovercard {
   background: color-mix(in srgb, var(--wiki-page) 55%, transparent);
   -webkit-backdrop-filter: blur(24px) saturate(1.1);
   backdrop-filter: blur(24px) saturate(1.1);
-  animation: wiki-lightbox-in 0.3s var(--wiki-ease) both;
+  animation: wiki-lightbox-in 0.5s var(--wiki-ease) both;
 }
 .wiki-lightbox-media {
   display: block;
@@ -6575,7 +6576,7 @@ html body .wiki-hovercard {
   max-width: min(92vw, 1400px);
   max-height: 88vh;
   object-fit: contain;
-  animation: wiki-lightbox-media-in 0.45s var(--wiki-ease) backwards;
+  animation: wiki-lightbox-media-in 0.8s var(--wiki-ease) backwards;
 }
 @keyframes wiki-lightbox-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes wiki-lightbox-media-in { from { opacity: 0; filter: blur(18px); transform: translateX(var(--lb-from, 0px)); } to { opacity: 1; filter: none; transform: none; } }
@@ -6587,10 +6588,6 @@ html body .wiki-hovercard {
   html body .wiki-shell .wiki-article-body .career-feature > figure:hover { opacity: 0.7; }
 }
 /* Closing reverses the opening: the image blurs and fades out, then the backdrop clears. */
-.wiki-lightbox.is-closing { animation: wiki-lightbox-out 0.45s var(--wiki-ease) both; }
-.wiki-lightbox.is-closing .wiki-lightbox-media { animation: wiki-lightbox-media-out 0.35s var(--wiki-ease) both; }
-@keyframes wiki-lightbox-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes wiki-lightbox-media-out { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(18px); } }
 
 /* Small screens where images still sit beside the text: keep the same gap as desktop. */
 @media (min-width: 35.0625rem) and (max-width: 767px) {
@@ -6748,3 +6745,24 @@ html body .wiki-shell .wiki-section-toggle .wiki-section-chevron[style*="--wiki-
 /* GPU: finished reveals carry no filter/transform layer; only in-progress ones are promoted. */
 html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block).wiki-revealed { filter: none !important; transform: none !important; translate: none !important; }
 html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block).wiki-revealing { will-change: transform, opacity, filter; }
+
+/* Lightbox dots fade and un-blur in a moment after the lightbox has opened. */
+.wiki-lightbox-dots-wrap { --lb-dots-delay: 0.5s; --lb-fade: 0.8s; position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); animation: wiki-lightbox-dots-in var(--lb-fade) var(--wiki-ease-out) var(--lb-dots-delay) both; }
+.wiki-lightbox-dots-wrap > .wiki-lightbox-dots { position: static; transform: none; }
+.wiki-lightbox.is-closing .wiki-lightbox-dots { opacity: 1; transition: none; }
+@keyframes wiki-lightbox-dots-in { from { opacity: 0; filter: blur(6px); } to { opacity: 1; filter: blur(0); } }
+@media (prefers-reduced-motion: reduce) { .wiki-lightbox-dots-wrap { animation: none; } }
+
+/* Stepping between lightbox images keeps the quick 0.45s blur fade; only opening is slower. */
+.wiki-lightbox .wiki-lightbox-media.is-step { animation-duration: 0.45s; }
+
+/* Lightbox close is the open run backwards, 1:1: same keyframes, durations and easing, with
+   no initial delay: dots and image start at once (0-0.8s), backdrop clears last (0.3-0.8s). */
+html body .wiki-lightbox.is-closing { animation: wiki-lightbox-in-r 0.5s var(--wiki-ease-out) 0.3s both; }
+html body .wiki-lightbox.is-closing .wiki-lightbox-media { --lb-from: 0px !important; animation: wiki-lightbox-media-in-r 0.8s var(--wiki-ease-out) 0s both; }
+html body .wiki-lightbox.is-closing .wiki-lightbox-dots-wrap { animation: wiki-lightbox-dots-in-r 0.8s var(--wiki-ease-out) 0s both; }
+/* Exit keyframes: the open's values backwards, played forward with the same ease-out so the
+   close responds at once (a reversed ease-out starts slowly). */
+@keyframes wiki-lightbox-in-r { from { opacity: 1; } to { opacity: 0; } }
+@keyframes wiki-lightbox-media-in-r { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(18px); } }
+@keyframes wiki-lightbox-dots-in-r { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(6px); } }

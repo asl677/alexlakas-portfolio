@@ -18,7 +18,8 @@ export async function GET(request: Request) {
   if (BLOCKED_HOST.test(url.hostname)) return NextResponse.json({}, { status: 400 });
   try {
     const res = await fetch(url, {
-      headers: { "user-agent": "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/124 Safari/537.36" },
+      // LinkedIn only serves real profile photos to link-preview crawlers.
+      headers: { "user-agent": /(^|\.)linkedin\.com$/.test(url.hostname) ? "facebookexternalhit/1.1" : "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/124 Safari/537.36" },
       redirect: "follow",
       signal: AbortSignal.timeout(6000),
       next: { revalidate: 86400 },
