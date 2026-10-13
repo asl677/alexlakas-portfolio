@@ -8,7 +8,6 @@ import Lenis from "lenis";
 import { scrubConfig } from "./scrubConfig";
 import fetchedPreviews from "../data/linkPreviews.json";
 import extraPreviews from "../data/linkPreviewsExtra.json";
-import personBlurbs from "../data/personBlurbs.json";
 // Fetched Open Graph previews, plus hand-written fallbacks for sites that block the fetch.
 const linkPreviews: Record<string, { image?: string; description?: string; title?: string }> = Object.fromEntries(
   [...new Set([...Object.keys(extraPreviews), ...Object.keys(fetchedPreviews)])].map(url => [url, { ...(fetchedPreviews as Record<string, object>)[url], ...(extraPreviews as Record<string, object>)[url] }]),
@@ -775,7 +774,9 @@ export function WikiSection({
   }, [isMobile, open]);
 
   return (
-    <section id={id} className={("wiki-section " + (open ? "is-open " : "") + className).trim()}>
+    // Section text never appears in search snippets (only the name, "Designer" and the Related
+    // keywords should): data-nosnippet on every section.
+    <section id={id} className={("wiki-section " + (open ? "is-open " : "") + className).trim()} data-nosnippet>
       <button
         type="button"
         className="wiki-section-toggle"
@@ -822,7 +823,40 @@ export function WikiSection({
   );
 }
 
+// People's names (and their hover blurbs) are not in the page HTML or the bundle: they're
+// fetched from /api/people, which robots.txt keeps crawlers out of, and filled in for visitors.
+type PersonEntry = { name: string; href?: string };
+let personBlurbs: Record<string, string> = {};
+let peopleRequest: Promise<Record<string, PersonEntry>> | null = null;
+export const loadPeople = () => peopleRequest ??= fetch("/api/people")
+  .then(response => response.json() as Promise<{ people: Record<string, PersonEntry>; blurbs: Record<string, string> }>)
+  .then(data => { personBlurbs = data.blurbs ?? {}; return data.people ?? {}; })
+  .catch(() => ({} as Record<string, PersonEntry>));
+
+export function Person({ id }: { id: string }) {
+  const [entry, setEntry] = useState<PersonEntry | null>(null);
+  useEffect(() => {
+    let live = true;
+    loadPeople().then(people => { if (live) setEntry(people[id] ?? null); });
+    return () => { live = false; };
+  }, [id]);
+  if (!entry) return null;
+  return (
+    <span data-nosnippet>
+      {entry.href ? <a href={entry.href} target="_blank" rel="nofollow noreferrer">{entry.name}</a> : entry.name}
+    </span>
+  );
+}
+
 export function IntroSequence() {
+  // The reveal splits text into lines, so it waits until people's names are in the page.
+  const [peopleReady, setPeopleReady] = useState(false);
+  useEffect(() => {
+    let live = true;
+    loadPeople().then(() => requestAnimationFrame(() => { if (live) setPeopleReady(true); }));
+    return () => { live = false; };
+  }, []);
+
   useEffect(() => {
     const topbar = document.querySelector<HTMLElement>(".wiki-topbar");
     const articleHeader = document.querySelector<HTMLElement>(".wiki-article-header");
@@ -941,6 +975,7 @@ export function IntroSequence() {
   }, []);
 
   useLayoutEffect(() => {
+    if (!peopleReady) return;
     // Every load starts fresh at the top: section hashes are dropped (#talk is kept because
     // it selects the Talk tab) and the scroll position is reset before the reveal is staged.
     if (window.location.hash && window.location.hash !== "#talk") {
@@ -1116,7 +1151,8 @@ export function IntroSequence() {
           link.setAttribute("data-nosnippet", "");
           wrapper.replaceWith(link);
         });
-        root.querySelectorAll<HTMLElement>("a, sup").forEach(link => {
+        // Links, footnotes and plain no-snippet names (filled in for visitors) keep their punctuation.
+        root.querySelectorAll<HTMLElement>("a, sup, span[data-nosnippet]").forEach(link => {
           // A link wrapped in a data-nosnippet span: glue the punctuation to the wrapper.
           let element: HTMLElement = link;
           while (!element.nextSibling && element.parentElement?.hasAttribute("data-nosnippet")) element = element.parentElement;
@@ -1566,7 +1602,7 @@ export function IntroSequence() {
       gsap.ticker.remove(tickCounter);
       context.revert();
     };
-  }, []);
+  }, [peopleReady]);
 
   return null;
 }
@@ -1906,7 +1942,7 @@ export function HoverCards() {
         return {
           // Article/page title when known (link text is often just the site name).
           title: (!person && saved.title && cleanTitle(saved.title)) || (link.textContent ?? "").trim(),
-          text: person ? (personBlurbs as Record<string, string>)[href] ?? saved.description : saved.description,
+          text: person ? personBlurbs[href] ?? saved.description : saved.description,
           site: shown,
           person,
           href,

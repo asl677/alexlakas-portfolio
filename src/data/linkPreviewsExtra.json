@@ -8,7 +8,8 @@
     "title": "Insured Nomads acquires Peanut browser extension"
   },
   "https://www.514.ax/": {
-    "description": "Fiveonefour: data infrastructure and AI tooling for developers."
+    "description": "Fiveonefour: data infrastructure and AI tooling for developers.",
+    "title": "Fiveonefour"
   },
   "https://www.morrowed.com/": {},
   "https://www.simonfungcreative.com/": {},
@@ -35,7 +36,8 @@
     "noImage": true
   },
   "https://www.producthunt.com/products/peanut-for-chrome?launch=peanut-for-chrome": {
-    "iconOnly": true
+    "iconOnly": true,
+    "title": "Peanut for Chrome"
   },
   "https://en.wikipedia.org/wiki/Washington,_D.C.": {
     "title": "Washington, D.C.",
@@ -58,5 +60,32 @@
   "https://www.airforce.com/": {
     "title": "U.S. Air Force",
     "description": "Official site of the U.S. Air Force, including the Air National Guard."
+  },
+  "https://f45training.com/": {
+    "title": "F45 Training",
+    "description": "High-intensity, functional group fitness across 1,500 gyms worldwide.",
+    "image": "https://cdn.f45training.com/web-v2/uploads/2025/08/01053235/f45-video-thumb.jpg"
+  },
+  "https://districtcannabis.us/": {
+    "title": "District Cannabis",
+    "description": "Cannabis dispensary in Hagerstown and Union Square, in the DMV."
+  },
+  "https://virid.com/": {
+    "title": "Virid"
+  },
+  "https://www.cubix.co/": {
+    "title": "Cubix"
+  },
+  "https://www.method.com/": {
+    "title": "Method"
+  },
+  "https://povio.com/": {
+    "title": "Povio"
+  },
+  "https://www.ueno.co/": {
+    "title": "Ueno"
+  },
+  "https://about.google/": {
+    "title": "Google"
   }
 }
