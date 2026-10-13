@@ -44,5 +44,10 @@
   "https://en.wikipedia.org/wiki/Los_Angeles": {
     "title": "Los Angeles",
     "description": "The most populous city in California and the second-most populous in the United States."
+  },
+  "https://www.linkedin.com/blog/member/product/a-new-look-for-linkedin-from-the-inside-out": {
+    "title": "A New Look for LinkedIn (from the Inside Out)",
+    "description": "LinkedIn on the redesign of its homepage and sharing experience.",
+    "image": "https://media.licdn.com/dms/image/v2/D4D08AQEnm5lUcXm1zg/croft-frontend-shrinkToFit1024/croft-frontend-shrinkToFit1024/0/1697739077815?e=2147483647&v=beta&t=2as-mP_MrbM9UvGE8yyAkjWSe28PT8xQ_UM2-3rfNZ4"
   }
 }
