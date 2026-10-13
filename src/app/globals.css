@@ -6628,3 +6628,7 @@ html body .wiki-mobile-search-sheet .wiki-language-sheet { padding-bottom: calc(
   html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) :is(.theme-toggle, .wiki-language-button):hover,
   html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .wiki-language.is-open .wiki-language-button { background: transparent !important; color: var(--wiki-ink) !important; }
 }
+/* Phones: no light/dark toggle (the theme follows the system). */
+@media (max-width: 768px) {
+  html body .wiki-shell :is(.wiki-topbar nav, .wiki-sticky-actions) .theme-toggle { display: none !important; }
+}
