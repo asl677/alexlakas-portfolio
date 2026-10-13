@@ -6732,3 +6732,9 @@ html body .wiki-shell .wiki-section-toggle .wiki-section-chevron[style*="--wiki-
   html body .wiki-shell .wiki-reveal-line { transform: translateY(calc((1 - var(--wiki-wipe, 1)) * 8px)); }
   html body .wiki-shell .wiki-reveal-block { translate: 0 calc((1 - var(--wiki-wipe, 1)) * 8px); }
 }
+
+/* Mobile: tighter profile rows. */
+@media (max-width: 56.25rem) {
+  html body .wiki-shell .infobox :is(dt, dd) { line-height: 1.35 !important; }
+  html body .wiki-shell .infobox .infobox-born { gap: 2px !important; }
+}

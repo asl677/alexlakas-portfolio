@@ -1414,7 +1414,7 @@ export function IntroSequence() {
           return item;
         });
       };
-      const scrubTick = () => {
+      const scrubTick = (_time: number, deltaTime: number) => {
         if (!revealReady) return;
         const vh = window.innerHeight;
         const clampRange = (c: { frac: number; min: number; max: number }) => Math.min(c.max, Math.max(c.min, vh * c.frac)) * pace;
@@ -1427,8 +1427,10 @@ export function IntroSequence() {
         const edgeInset = phone ? scrubConfig.edgeInset : 0;
         const widen = Math.max(0, mediaRange + edgeInset - remaining);
         const bottom = y + vh - edgeInset + widen;
-        // Content plays the page-load reveal (timed, same slide/fade/cadence) the moment it enters
-        // view, on phones and desktop alike: no scroll-scrubbed text.
+        // Phones: the reveal is tied to the scroll/drag position (scrubbed, one-way), with a light
+        // damper so it glides. Desktop: content plays the page-load reveal the moment it enters.
+        const k = 1 - Math.exp(-deltaTime / 1000 * (scrubConfig.damping * 0.5) / pace);
+        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / (scrubConfig.damping * 0.5) + 0.2));
         const entering: HTMLElement[] = [];
         for (const item of scrubItems) {
           const { element } = item;
@@ -1436,6 +1438,15 @@ export function IntroSequence() {
           const r = item.media ? mediaRange : range;
           // Image strips start a little later, so their grey strip lands with the nearby text.
           const lag = item.wipe ? r * 0.45 : 0;
+          if (phone) {
+            const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : revealEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
+            if (target <= item.current) continue;
+            let next = item.current + (target - item.current) * (item.media ? kMedia : k);
+            if (Math.abs(target - next) < 0.002) next = target;
+            item.current = next;
+            applyReveal(element, next);
+            continue;
+          }
           const inView = element.closest(".wiki-contents, .wiki-topbar") || bottom - item.top - lag > 24;
           if (!inView) continue;
           item.current = 1;
