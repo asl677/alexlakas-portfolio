@@ -536,7 +536,7 @@ export function MobileSearchSheet() {
 
 // Loops only the part of a video that has content: the near-black intro/outro frames (which
 // flashed between loops) are skipped. Checked every frame, not on the coarse timeupdate.
-export function SeamlessVideo({ src = "/agents.mp4", poster = "/agents.mp4.png", label = "AI agents data workflow animation", className = "agents-video", start = 2, end = 17.2 }: { src?: string; poster?: string; label?: string; className?: string; start?: number; end?: number }) {
+export function SeamlessVideo({ src = "/agents.mp4", poster = "/agents.mp4.png", label = "AI agents data workflow animation", className = "agents-video", start = 2, end = 17.2, width = 660, height = 418 }: { src?: string; poster?: string; label?: string; className?: string; start?: number; end?: number; width?: number; height?: number }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -566,7 +566,7 @@ export function SeamlessVideo({ src = "/agents.mp4", poster = "/agents.mp4.png",
   }, [start, end]);
 
   return (
-    <video ref={videoRef} className={className} poster={poster} autoPlay muted playsInline preload="auto" controlsList="nodownload noplaybackrate noremoteplayback" disableRemotePlayback aria-label={label} tabIndex={-1}>
+    <video ref={videoRef} className={className} width={width} height={height} poster={poster} autoPlay muted playsInline preload="auto" controlsList="nodownload noplaybackrate noremoteplayback" disableRemotePlayback aria-label={label} tabIndex={-1}>
       <source src={src} type="video/mp4" />
     </video>
   );
@@ -1242,11 +1242,16 @@ export function IntroSequence() {
           // Rewraps must not replay: lines already on or above screen start fully shown.
           if (revealReady) {
             const limit = window.innerHeight;
+            // Lines on screen that weren't revealed yet (e.g. a section mid-opening when a figure
+            // beside it resized) play the normal reveal instead of snapping straight in.
+            const entering: HTMLElement[] = [];
             previousLines.forEach(line => {
               if (revealedLines.has(line) || line.getBoundingClientRect().top > limit) return;
               scrubState.set(line, { element: line, top: 0, hidden: false, media: false, wipe: false, current: 1 });
-              gsap.set(line, revealProperties(line, 1));
+              revealedLines.add(line);
+              entering.push(line);
             });
+            if (entering.length) fadeIn(entering, 0, revealEase);
           }
           queueReveal();
         }
@@ -1419,8 +1424,9 @@ export function IntroSequence() {
         const bottom = y + vh - edgeInset + widen;
         // Phones: the reveal is tied to the scroll/drag position (scrubbed, one-way), with a light
         // damper so it glides. Desktop: content plays the page-load reveal the moment it enters.
-        const k = 1 - Math.exp(-deltaTime / 1000 * scrubConfig.damping / pace);
-        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / scrubConfig.damping + 0.2));
+        // Phones glide toward the scroll target (a softer damper than before) instead of snapping.
+        const k = 1 - Math.exp(-deltaTime / 1000 * (scrubConfig.damping * 0.5) / pace);
+        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / (scrubConfig.damping * 0.5) + 0.2));
         const entering: HTMLElement[] = [];
         for (const item of scrubItems) {
           const { element } = item;

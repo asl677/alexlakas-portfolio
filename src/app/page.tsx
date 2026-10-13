@@ -184,7 +184,7 @@ export default function Home() {
             <WikiSection id="career" title="Career">
               <div className="career-feature career-feature--right career-feature--thumb">
                 <figure>
-                  <video src="/career-landing.mp4" poster="/career-landing.png" autoPlay muted loop playsInline preload="metadata" aria-label="Landing page design" />
+                  <video src="/career-landing.mp4" width={1074} height={813} poster="/career-landing.png" autoPlay muted loop playsInline preload="metadata" aria-label="Landing page design" />
                 </figure>
                 <p>Alex has held design roles across agency, startup, and large technology company contexts. Public profile summaries list early agency and ecommerce work for 0-1 startups, etailers and FAANG companies, including roles at Cubix Labs (2 years), Virid (1 year), Darwin (1 year), Google (5+ years), LinkedIn (3+ years), Peanut (1 year), Culprit (1 year), and Fiveonefour (3 years).<Ref n={1} /></p>
               </div>
@@ -222,12 +222,12 @@ export default function Home() {
                 <figure>
                   <div className="peanut-still">
                     {/* Peanut's Product Hunt launch video (saved locally: no YouTube player controls). */}
-                    <SeamlessVideo src="/peanut-launch.mp4" poster="/peanut-travel-on.png" label="Peanut: Travel on." className="" start={0} end={47.8} />
+                    <SeamlessVideo src="/peanut-launch.mp4" width={1920} height={1080} poster="/peanut-travel-on.png" label="Peanut: Travel on." className="" start={0} end={47.8} />
                   </div>
                 </figure>
                 <p>In 2021, during the Covid pandemic, Alex and <Person id="brady-simpson" /> co-founded <a href="https://www.forbes.com/sites/christopherelliott/2021/05/22/do-i-need-a-covid-test-to-travel-and-other-summer-travel-questions/" target="_blank" rel="noreferrer">Peanut</a>, a Chrome extension that surfaced travel info during online booking, later acquired by Insured Nomads. Peanut was featured in <a href="https://www.producthunt.com/products/peanut-for-chrome?launch=peanut-for-chrome" target="_blank" rel="noreferrer">Best of Product Hunt</a> in 2021. He then served as Design Director at <a href="https://www.youtube.com/watch?v=0OScZ_93-_0" target="_blank" rel="noreferrer">Culprit</a> on a stealth social media app spanning VFX, design, and product, working with <Person id="david-dinetz" />, <Person id="andre-cabral" />, <Person id="jo-murayama" />, and <a href="https://povio.com/" target="_blank" rel="noreferrer">Povio</a>.<Ref n={1} /><Ref n={11} /></p>
                 <figure className="career-video">
-                  <video src="/out-of-touch.mp4" poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
+                  <video src="/out-of-touch.mp4" width={1038} height={720} poster="/out-of-touch.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="AI video gen" />
                 </figure>
                 <p>Peanut delivered booking-time travel intelligence for thousands of destinations across Expedia, Booking.com, and Google Flights. At Culprit, Alex carried the same product thinking into creative direction.<Ref n={7} /></p>
                 <p className="career-ai-note">This later led to conceptual and public work using AI, video and motion to explore new mediums, including Midjourney, Claude and MCPs.</p>

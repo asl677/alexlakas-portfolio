@@ -6691,8 +6691,21 @@ html body .wiki-shell :is(#career, #early-life) .career-feature--thumb figure vi
 
 /* Reveal blur: stronger and it lasts the whole reveal (clears as the line lands, not at 70%). */
 html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { --wiki-blur-t: max(0, calc(1 - var(--wiki-wipe, 1))); filter: blur(calc(var(--wiki-blur-t) * 10px)); }
-@media (max-width: 768px) { html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { filter: blur(calc(var(--wiki-blur-t) * 6px)); } }
+/* Phones: a light blur that clears early. A heavy, long blur is redrawn on every line every
+   frame of a scroll-tied reveal and stutters on real devices. */
+@media (max-width: 768px) {
+  html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { --wiki-blur-t: max(0, calc(1 - var(--wiki-wipe, 1) / 0.7)); filter: blur(calc(var(--wiki-blur-t) * 3px)); }
+}
 /* Phones: the profile portrait 20% smaller than its 288px (230px), centered. */
 @media (max-width: 768px) {
   html body .wiki-shell .infobox .infobox-portrait { width: 230px !important; height: 230px !important; max-width: 100% !important; margin-left: auto !important; margin-right: auto !important; }
 }
+/* Every reveal (lines, list items, profile rows, Talk) rises the same 13px. */
+html body .wiki-shell .wiki-reveal-block { translate: 0 calc((1 - var(--wiki-wipe, 1)) * 13px); }
+/* Phones: the space below the profile panel matches the space above it (45px of visible gap). */
+@media (max-width: 768px) {
+  html body .wiki-shell .wiki-article-body > .infobox { margin-bottom: 30px !important; }
+}
+/* Reveals start fully invisible (no 10% ghost): filled items like the Stack tags showed a
+   blurred box before their reveal. */
+html body .wiki-shell :is(.wiki-reveal-line, .wiki-reveal-block) { opacity: var(--wiki-wipe, 1); }
