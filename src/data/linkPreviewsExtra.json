@@ -9,7 +9,8 @@
   },
   "https://www.514.ax/": {
     "description": "Fiveonefour: data infrastructure and AI tooling for developers.",
-    "title": "Fiveonefour"
+    "title": "Fiveonefour",
+    "iconOnly": true
   },
   "https://www.morrowed.com/": {},
   "https://www.simonfungcreative.com/": {},
@@ -30,7 +31,8 @@
   },
   "https://www.linkedin.com/": {
     "title": "LinkedIn",
-    "description": "Manage your professional identity. Build and engage with your professional network."
+    "description": "Manage your professional identity. Build and engage with your professional network.",
+    "iconOnly": true
   },
   "https://www.prnewswire.com/news-releases/fiveonefour-raises-17m-to-redefine-the-developer-experience-by-connecting-data-infrastructure-and-ai-innovation-302546414.html": {
     "noImage": true
@@ -71,10 +73,12 @@
     "description": "Cannabis dispensary in Hagerstown and Union Square, in the DMV."
   },
   "https://virid.com/": {
-    "title": "Virid"
+    "title": "Virid",
+    "iconOnly": true
   },
   "https://www.cubix.co/": {
-    "title": "Cubix"
+    "title": "Cubix",
+    "iconOnly": true
   },
   "https://www.method.com/": {
     "title": "Method"
@@ -86,6 +90,7 @@
     "title": "Ueno"
   },
   "https://about.google/": {
-    "title": "Google"
+    "title": "Google",
+    "iconOnly": true
   }
 }
