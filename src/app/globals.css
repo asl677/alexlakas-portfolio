@@ -6548,10 +6548,11 @@ html body .wiki-hovercard {
   border-radius: 0 !important;
 }
 
-/* Images start fading and scaling a little before the strip turns to retract (at 35% of the
-   reveal) and keep moving right until the strip has fully cleared, so the two read as one. */
+/* Images fade and scale on a curve that starts at 35% of the reveal, but stay fully hidden until
+   the strip has completely covered them (halfway): the jump to that fade level happens under
+   solid grey, so nothing shows beside the strip and no clipping is needed. */
 .wiki-wipe-media > :not(figcaption) {
-  --wiki-media-t: clamp(0, calc((var(--wiki-wipe, 1) - 0.35) / 0.65), 1);
+  --wiki-media-t: calc(clamp(0, calc((var(--wiki-wipe, 1) - 0.35) / 0.65), 1) * clamp(0, calc((var(--wiki-wipe, 1) - 0.5) * 1000), 1));
   opacity: var(--wiki-media-t) !important;
   scale: calc(1.1 - var(--wiki-media-t) * 0.1) !important;
 }
@@ -6815,3 +6816,15 @@ html body .wiki-shell .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel 
 html body .wiki-shell .wiki-mobile-search-sheet .wiki-language-sheet { padding-bottom: 8px !important; overflow-y: auto; }
 /* Sheet rows sit flush with the search field: no extra side inset on the row buttons. */
 html body .wiki-shell .wiki-mobile-search-sheet .wiki-search-results button { padding-left: 0 !important; padding-right: 0 !important; }
+
+/* Grey strips ease in and out of each half (smoothstep) instead of moving at a constant rate,
+   so they start, turn and stop without a jolt. */
+html body .wiki-shell .wiki-wipe {
+  --wiki-wipe-grow-s: calc(var(--wiki-wipe-grow) * var(--wiki-wipe-grow) * (3 - 2 * var(--wiki-wipe-grow)));
+  --wiki-wipe-shrink-s: calc(var(--wiki-wipe-shrink) * var(--wiki-wipe-shrink) * (3 - 2 * var(--wiki-wipe-shrink)));
+}
+html body .wiki-shell .wiki-wipe::after {
+  clip-path: inset(0 calc((1 - var(--wiki-wipe-grow-s)) * 100%) 0 calc(var(--wiki-wipe-shrink-s) * 100%));
+}
+/* The strip overlaps the frame edges by 1px so no sliver of the image shows above or below it. */
+html body .wiki-shell .wiki-wipe-media::after { inset: -1px; }

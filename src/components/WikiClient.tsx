@@ -1479,14 +1479,15 @@ export function IntroSequence() {
         // Scroll reveals are always tied to the scroll position (never timed); phones use a softer damper.
         const damping = phone ? scrubConfig.damping * 0.5 : scrubConfig.damping;
         const k = 1 - Math.exp(-deltaTime / 1000 * damping / pace);
-        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / damping + 0.2));
+        // Images (strip + fade) glide ~0.4s slower than text, which reads as one smooth motion.
+        const kMedia = 1 - Math.exp(-deltaTime / 1000 / (pace / damping + 0.4));
         const entering: HTMLElement[] = [];
         for (const item of scrubItems) {
           const { element } = item;
           if (item.hidden || revealedTargets.has(element) || revealedLines.has(element)) continue;
           const r = item.media ? mediaRange : range;
-          // Image strips start a little later, so their grey strip lands with the nearby text.
-          const lag = item.wipe ? r * 0.45 : 0;
+          // Image strips start just behind the nearby text (small lag) so they move with the gesture.
+          const lag = item.wipe ? r * 0.15 : 0;
           {
             const target = element.closest(".wiki-contents, .wiki-topbar") ? 1 : revealEase(Math.min(1, Math.max(0, (bottom - item.top - lag) / r)));
             if (target <= item.current) continue;
