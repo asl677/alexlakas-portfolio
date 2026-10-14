@@ -404,6 +404,8 @@ export function PageSearch({ inputId = "page-search", autoFocus = false, recentO
 // to close, and the page locked underneath. Content marked [data-sheet-scroll] may scroll.
 function BottomSheet({ open, onClose, label, children }: { open: boolean; onClose: () => void; label: string; children: ReactNode }) {
   const [dragOffset, setDragOffset] = useState(0);
+  // Where a drag-dismissed card fades out from, so it keeps moving down instead of springing back.
+  const [exitOffset, setExitOffset] = useState(0);
   const dragRef = useRef<{ startY: number; startTime: number } | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
@@ -423,6 +425,7 @@ function BottomSheet({ open, onClose, label, children }: { open: boolean; onClos
 
   useEffect(() => {
     if (!open) return;
+    setExitOffset(0);
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") closeRef.current(); };
     document.addEventListener("keydown", closeOnEscape);
     // Lock page scrolling while the sheet is open. The sheet covers the viewport, so a
@@ -440,12 +443,31 @@ function BottomSheet({ open, onClose, label, children }: { open: boolean; onClos
     // Only the sheet's scrolling content may scroll, and only while it has room to scroll.
     const sheet = sheetRef.current;
     let lastY = 0;
-    const onTouchStart = (event: TouchEvent) => { lastY = event.touches[0]?.clientY ?? 0; };
+    // Swipe-to-dismiss from anywhere on the card: a downward swipe drags the card once its list
+    // (if any) is scrolled to the top; otherwise the list scrolls as usual.
+    let touchDrag: { startY: number; startTime: number; active: boolean } | null = null;
+    const onTouchStart = (event: TouchEvent) => {
+      lastY = event.touches[0]?.clientY ?? 0;
+      const onPanel = (event.target as HTMLElement).closest(".wiki-mobile-search-sheet-panel");
+      touchDrag = onPanel && event.touches.length === 1 ? { startY: lastY, startTime: performance.now(), active: false } : null;
+    };
     const onTouchMove = (event: TouchEvent) => {
-      const list = (event.target as HTMLElement).closest<HTMLElement>(".wiki-search-results, [data-sheet-scroll]");
+      const list = (event.target as HTMLElement).closest<HTMLElement>(".wiki-search-results, [data-sheet-scroll], .wiki-language-sheet");
       const y = event.touches[0]?.clientY ?? 0;
       const deltaY = y - lastY;
       lastY = y;
+      if (touchDrag) {
+        // Not dragging yet while the list scrolls: keep the start pinned to the finger, so the
+        // card only moves by what is swiped after the list reaches its top (no jump).
+        if (!touchDrag.active && list && list.scrollTop > 0) touchDrag.startY = y;
+        const total = y - touchDrag.startY;
+        if (!touchDrag.active && total > 6 && (!list || list.scrollTop <= 0)) touchDrag.active = true;
+        if (touchDrag.active) {
+          event.preventDefault();
+          setDragOffset(Math.max(0, total));
+          return;
+        }
+      }
       if (list) {
         const atTop = list.scrollTop <= 0 && deltaY > 0;
         const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 1 && deltaY < 0;
@@ -453,11 +475,24 @@ function BottomSheet({ open, onClose, label, children }: { open: boolean; onClos
       }
       event.preventDefault();
     };
+    const onTouchEnd = (event: TouchEvent) => {
+      const drag = touchDrag;
+      touchDrag = null;
+      if (!drag?.active) return;
+      const distance = Math.max(0, (event.changedTouches[0]?.clientY ?? drag.startY) - drag.startY);
+      const velocity = distance / Math.max(1, performance.now() - drag.startTime);
+      setDragOffset(0);
+      if (distance > 60 || velocity > 0.5) { setExitOffset(distance); closeRef.current(); }
+    };
     sheet?.addEventListener("touchstart", onTouchStart, { passive: true });
     sheet?.addEventListener("touchmove", onTouchMove, { passive: false });
+    sheet?.addEventListener("touchend", onTouchEnd);
+    sheet?.addEventListener("touchcancel", onTouchEnd);
     return () => {
       sheet?.removeEventListener("touchstart", onTouchStart);
       sheet?.removeEventListener("touchmove", onTouchMove);
+      sheet?.removeEventListener("touchend", onTouchEnd);
+      sheet?.removeEventListener("touchcancel", onTouchEnd);
       Object.assign(body.style, previousBody);
       window.scrollTo(0, lockedY);
       document.documentElement.classList.remove("wiki-sheet-open");
@@ -468,9 +503,11 @@ function BottomSheet({ open, onClose, label, children }: { open: boolean; onClos
     };
   }, [open]);
 
-  // Drag the handle down to dismiss: past 80px, or a quick downward flick, closes the sheet.
+  // Mouse/pen: drag the handle down to dismiss (past 60px, or a quick flick). Touch swipes anywhere on the card.
   const onHandlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     event.stopPropagation();
+    // Touch drags are handled by the card-wide swipe (touch listeners in the effect above).
+    if (event.pointerType === "touch") return;
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { startY: event.clientY, startTime: performance.now() };
   };
@@ -484,7 +521,7 @@ function BottomSheet({ open, onClose, label, children }: { open: boolean; onClos
     const velocity = distance / Math.max(1, performance.now() - dragRef.current.startTime);
     dragRef.current = null;
     setDragOffset(0);
-    if (distance > 80 || velocity > 0.6) closeRef.current();
+    if (distance > 60 || velocity > 0.5) { setExitOffset(distance); closeRef.current(); }
   };
 
   // Rendered at the page root (not inside the top bar) so no header transform, filter or
@@ -496,7 +533,7 @@ function BottomSheet({ open, onClose, label, children }: { open: boolean; onClos
         role="dialog"
         aria-modal="true"
         aria-label={label}
-        style={dragOffset ? { transform: `translateY(${dragOffset}px)` } : undefined}
+        style={dragOffset ? { ["--sheet-drag" as string]: `translateY(${dragOffset}px)` } : exitOffset && !open ? { ["--sheet-exit-y" as string]: `${exitOffset}px` } : undefined}
         onPointerDown={(event) => event.stopPropagation()}
       >
         <div

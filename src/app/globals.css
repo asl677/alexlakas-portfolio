@@ -6766,3 +6766,52 @@ html body .wiki-lightbox.is-closing .wiki-lightbox-dots-wrap { animation: wiki-l
 @keyframes wiki-lightbox-in-r { from { opacity: 1; } to { opacity: 0; } }
 @keyframes wiki-lightbox-media-in-r { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(18px); } }
 @keyframes wiki-lightbox-dots-in-r { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(6px); } }
+
+/* Mobile search and languages: a centered glass card styled like the desktop search dropdown.
+   It rises 10px while fading and un-blurring; closing plays that back, and a drag slides it away. */
+html body .wiki-shell .wiki-mobile-search-sheet {
+  --sheet-dur: 0.3s;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  background: rgb(0 0 0 / 0%) !important;
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  transition: background-color var(--sheet-dur) var(--wiki-ease-out), backdrop-filter var(--sheet-dur) var(--wiki-ease-out), -webkit-backdrop-filter var(--sheet-dur) var(--wiki-ease-out), visibility 0s linear var(--sheet-dur) !important;
+}
+html body .wiki-shell .wiki-mobile-search-sheet.is-open {
+  /* Darker, blurred overlay under the card. */
+  background: rgb(0 0 0 / 60%) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background-color var(--sheet-dur) var(--wiki-ease-out), backdrop-filter var(--sheet-dur) var(--wiki-ease-out), -webkit-backdrop-filter var(--sheet-dur) var(--wiki-ease-out), visibility 0s linear 0s !important;
+}
+html body .wiki-shell .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel {
+  width: 100% !important;
+  /* Search and languages share one short height (fits the three recent searches); lists scroll inside. */
+  height: min(52svh, 290px) !important;
+  max-height: min(52svh, 290px) !important;
+  border: 1px solid var(--wiki-border) !important;
+  background: var(--wiki-glass-bg) !important;
+  -webkit-backdrop-filter: var(--wiki-glass-blur) !important;
+  backdrop-filter: var(--wiki-glass-blur) !important;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(var(--sheet-exit-y, 10px)) !important;
+  transition: opacity var(--sheet-dur) var(--wiki-ease-out), filter var(--sheet-dur) var(--wiki-ease-out), transform var(--sheet-dur) var(--wiki-ease-out) !important;
+}
+html body .wiki-shell .wiki-mobile-search-sheet.is-open .wiki-mobile-search-sheet-panel {
+  opacity: 1;
+  filter: none;
+  transform: translateY(0) !important;
+}
+/* Dragging follows the finger (inline transform); no transition while held. */
+html body .wiki-shell .wiki-mobile-search-sheet.is-open .wiki-mobile-search-sheet-panel.is-dragging {
+  transform: var(--sheet-drag, translateY(0)) !important;
+  transition: none !important;
+}
+html body .wiki-shell .wiki-mobile-search-sheet .wiki-mobile-search-sheet-panel .wiki-search-results { flex: 1 1 auto; min-height: 0; overflow-y: auto !important; }
+html body .wiki-shell .wiki-mobile-search-sheet .wiki-language-sheet { padding-bottom: 8px !important; overflow-y: auto; }
+/* Sheet rows sit flush with the search field: no extra side inset on the row buttons. */
+html body .wiki-shell .wiki-mobile-search-sheet .wiki-search-results button { padding-left: 0 !important; padding-right: 0 !important; }
