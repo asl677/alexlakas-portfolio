@@ -1013,7 +1013,9 @@ export function IntroSequence() {
     document.fonts.addEventListener("loadingdone", alignCounter);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // The counter reports real loading: fonts, every image and video, then window load.
-    const REVEAL_AFTER_HANDOFF_MS = 0;
+    // The loader layer fades for 400ms; start the reveal as it clears so the header and dividers
+    // fade in visibly instead of finishing underneath it.
+    const REVEAL_AFTER_HANDOFF_MS = 300;
     const LOADER_FAILSAFE_MS = 12000;
     const assets: Promise<unknown>[] = [
       document.fonts.ready,
@@ -1352,6 +1354,8 @@ export function IntroSequence() {
         // Line-by-line cadence: 50ms apart, the whole cascade capped at 1.5s so a full screen of
         // text never drags.
         const step = Math.min(0.04 * textPace, (1.2 * textPace) / Math.max(1, elements.length));
+        // Header controls, tabs and divider rules fade over a full second: at 0.4s they read as snapping in.
+        const isHeaderPiece = (element: HTMLElement) => dividers.has(element) || !!element.closest(".wiki-topbar, .wiki-article-header");
         visualOrder(elements).forEach((element, index) => {
           // fromTo with explicit start values: a plain `to` reads computed styles when each
           // staggered tween first renders, forcing a synchronous style recalc on most frames.
@@ -1362,7 +1366,7 @@ export function IntroSequence() {
           // curve, so they never run ahead of the text around them.
           timeline.fromTo(element, revealProperties(element, 0), {
             ...revealProperties(element, 1),
-            duration: media ? 1.4 * pace : wipe ? 1.1 * pace : element.classList.contains("wiki-reveal-line") ? 0.55 * textPace : 0.4 * textPace,
+            duration: media ? 1.4 * pace : wipe ? 1.1 * pace : element.classList.contains("wiki-reveal-line") ? 0.55 * textPace : isHeaderPiece(element) ? 1 : 0.4 * textPace,
             ease: media ? "power2.inOut" : wipe ? "power3.inOut" : ease,
             onStart: () => element.classList.add("wiki-revealing"),
             onComplete: () => { element.classList.remove("wiki-revealing"); element.classList.add("wiki-revealed"); }
