@@ -6828,3 +6828,13 @@ html body .wiki-shell .wiki-wipe::after {
 }
 /* The strip overlaps the frame edges by 1px so no sliver of the image shows above or below it. */
 html body .wiki-shell .wiki-wipe-media::after { inset: -1px; }
+
+/* Large viewports: cap the page (top bar + layout) at 1440px and center it, so lines stay readable. */
+:root { --wiki-max-width: 1440px; }
+html body .wiki-shell .wiki-topbar,
+html body .wiki-shell .wiki-layout {
+  max-width: var(--wiki-max-width) !important;
+  margin-inline: auto !important;
+}
+/* The fixed logo keeps its 40px inset from the capped page edge, not the screen edge. */
+html body .wiki-shell .wiki-brand { left: max(40px, calc((100% - var(--wiki-max-width)) / 2 + 40px)) !important; }
